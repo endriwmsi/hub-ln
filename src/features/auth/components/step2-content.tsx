@@ -1,0 +1,102 @@
+import type { Control } from "react-hook-form";
+import { formatCNPJ, formatCPF } from "@/shared";
+import {
+  FormControl,
+  FormField,
+  FormMessage,
+} from "@/shared/components/ui/form";
+import { Input } from "@/shared/components/ui/input";
+import type { RegisterFormData } from "../schemas/register-schemas";
+
+interface Step2ContentProps {
+  control: Control<RegisterFormData>;
+}
+
+export function Step2Content({ control }: Step2ContentProps) {
+  return (
+    <div className="space-y-4">
+      <FormField
+        control={control}
+        name="cpf"
+        render={({ field }) => (
+          <div className="grid gap-2">
+            {/* <FormLabel className="text-white">CPF</FormLabel> */}
+            <FormControl>
+              <Input
+                {...field}
+                type="text"
+                placeholder="CPF"
+                className="w-full border-0 bg-primary/10 px-4 py-5"
+                maxLength={14}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, "");
+                  if (value.length <= 11) {
+                    field.onChange(formatCPF(value));
+                  }
+                }}
+              />
+            </FormControl>
+            <FormMessage />
+          </div>
+        )}
+      />
+
+      <FormField
+        control={control}
+        name="cnpj"
+        render={({ field }) => (
+          <div className="grid gap-2">
+            {/* <FormLabel className="text-white">CNPJ</FormLabel> */}
+            <FormControl>
+              <Input
+                {...field}
+                type="text"
+                placeholder="CNPJ"
+                className="w-full border-0 bg-primary/10 px-4 py-5"
+                maxLength={18}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, "");
+                  if (value.length <= 14) {
+                    field.onChange(formatCNPJ(value));
+                  }
+                }}
+              />
+            </FormControl>
+            <FormMessage />
+          </div>
+        )}
+      />
+
+      <FormField
+        control={control}
+        name="phone"
+        render={({ field }) => (
+          <div className="grid gap-2">
+            {/* <FormLabel className="text-white">Telefone</FormLabel> */}
+            <FormControl>
+              <Input
+                {...field}
+                type="tel"
+                placeholder="Telefone"
+                className="w-full border-0 bg-primary/10 px-4 py-5"
+                maxLength={15}
+                onChange={(e) => {
+                  // Simple phone mask
+                  let value = e.target.value.replace(/\D/g, "");
+                  if (value.length <= 11) {
+                    value = value.replace(
+                      /(\d{2})(\d{5})(\d{4})/,
+                      "($1) $2-$3",
+                    );
+                    field.onChange(value);
+                  }
+                }}
+              />
+            </FormControl>
+            <FormMessage />
+          </div>
+        )}
+      />
+    </div>
+  );
+}
