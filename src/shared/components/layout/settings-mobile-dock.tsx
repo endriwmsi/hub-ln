@@ -24,7 +24,7 @@ export function SettingsMobileDock() {
               key={item.href}
               href={item.href}
               className={cn(
-                "relative flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-1.5 transition-colors min-w-[3.5rem]",
+                "relative flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-1.5 transition-colors min-w-14",
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground hover:text-primary",
