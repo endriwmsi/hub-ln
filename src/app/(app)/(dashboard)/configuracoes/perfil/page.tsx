@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { verifySession } from "@/core/auth/dal";
 import { db } from "@/core/db";
 import { user } from "@/core/db/schema";
+import { AvatarUpload } from "@/features/settings/components/avatar-upload";
 import { UpdateProfileForm } from "@/features/settings/components/update-profile-form";
 
 const ProfilePage = async () => {
@@ -24,6 +25,8 @@ const ProfilePage = async () => {
         </p>
       </div>
 
+      <AvatarUpload currentImage={userData.image} userName={userData.name} />
+
       <UpdateProfileForm
         defaultValues={{
           name: userData.name,
@@ -31,18 +34,6 @@ const ProfilePage = async () => {
           phone: userData.phone || "",
         }}
       />
-
-      {/* <UpdateEmailForm
-        defaultValues={{
-          email: userData.email,
-        }}
-      />
-
-      <UpdatePhoneForm
-        defaultValues={{
-          phone: userData.phone || "",
-        }}
-      /> */}
     </div>
   );
 };
