@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   boolean,
+  pgEnum,
   pgTable,
   text,
   timestamp,
@@ -8,6 +9,8 @@ import {
 } from "drizzle-orm/pg-core";
 import { uuidv7 } from "uuidv7";
 import { subscription } from "./subscription.schema";
+
+export const userRoleEnum = pgEnum("user_role", ["user", "admin"]);
 
 export const user = pgTable("user", {
   id: text("id")
@@ -25,6 +28,9 @@ export const user = pgTable("user", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
 
+  // Papel do usuário
+  role: userRoleEnum("role").default("user").notNull(),
+
   // Campos personalizados
   phone: varchar("phone", { length: 20 }),
   cpf: varchar("cpf", { length: 11 }).notNull().unique(),
@@ -39,12 +45,14 @@ export const user = pgTable("user", {
   uf: varchar("uf", { length: 2 }),
   cep: varchar("cep", { length: 8 }),
 
+  // Admin
+
   // Sistema de afiliados
-  referralCode: varchar("referralCode", { length: 4 }).notNull().unique(),
-  referredBy: varchar("referredBy", { length: 4 }),
+  referralCode: varchar("referral_code", { length: 4 }).notNull().unique(),
+  referredBy: varchar("referred_by", { length: 4 }),
 
   // Integração com AbacatePay
-  abacatePayCustomerId: text("abacatePayCustomerId"),
+  abacatePayCustomerId: text("abacate_pay_customer_id"),
 });
 
 export const userRelations = relations(user, ({ one }) => ({

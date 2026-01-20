@@ -9,20 +9,20 @@ export const session = pgTable(
     id: text("id")
       .primaryKey()
       .$defaultFn(() => uuidv7()),
-    expiresAt: timestamp("expiresAt", { mode: "date" }).notNull(),
+    expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
     token: text("token").notNull().unique(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
-    ipAddress: text("ipAddress"),
-    userAgent: text("userAgent"),
-    userId: text("userId")
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
   },
-  (table) => [index("session_userId_idx").on(table.userId)],
+  (table) => [index("session_user_id_idx").on(table.userId)],
 );
 
 export const sessionRelations = relations(session, ({ one }) => ({
