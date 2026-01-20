@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
+import { admin } from "better-auth/plugins";
 import { db } from "@/core/db";
 import * as schema from "@/core/db/schema";
 import { sendPasswordResetEmailAction } from "@/features/auth/actions/send-password-reset-email";
@@ -103,6 +104,10 @@ export const auth = betterAuth({
         type: "string",
         required: false,
       },
+      role: {
+        type: "string",
+        required: false,
+      },
     },
   },
 
@@ -112,7 +117,7 @@ export const auth = betterAuth({
     },
   },
 
-  plugins: [nextCookies()],
+  plugins: [nextCookies(), admin()],
 
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",

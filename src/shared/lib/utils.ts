@@ -145,3 +145,12 @@ export function generateReferralCode(): string {
   }
   return code;
 }
+
+export const getUserInitials = (name: string) => {
+  const nameParts = name.trim().split(/\s+/);
+  const firstInitial = nameParts[0] ? nameParts[0][0].toUpperCase() : "";
+  const lastInitial = nameParts[nameParts.length - 1]
+    ? nameParts[nameParts.length - 1][0].toUpperCase()
+    : "";
+  return nameParts.length > 1 ? `${firstInitial}${lastInitial}` : firstInitial;
+};

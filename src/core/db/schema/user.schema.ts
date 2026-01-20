@@ -30,6 +30,9 @@ export const user = pgTable("user", {
 
   // Papel do usuário
   role: userRoleEnum("role").default("user").notNull(),
+  banned: boolean("banned").default(false),
+  banReason: text("ban_reason"),
+  banExpires: timestamp("ban_expires"),
 
   // Campos personalizados
   phone: varchar("phone", { length: 20 }),

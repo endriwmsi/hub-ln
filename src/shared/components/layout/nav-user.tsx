@@ -7,7 +7,12 @@ import {
   IconNotification,
   IconUserCircle,
 } from "@tabler/icons-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { authClient, useSession } from "@/core";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/shared/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,20 +21,18 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/shared/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar";
-import { authClient, useSession } from "@/lib/auth-client";
-import { getUserInitials } from "@/lib/utils";
+} from "@/shared/components/ui/sidebar";
+import { getUserInitials } from "@/shared/lib/utils";
 import { Button } from "../ui/button";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
-
   const { data: session } = useSession();
 
   return (
