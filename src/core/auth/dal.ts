@@ -41,7 +41,6 @@ export const getSession = cache(async () => {
 export const requireAdmin = cache(async () => {
   const { user } = await verifySession();
 
-  // @ts-expect-error - role field will be added to schema
   if (user.role !== "admin") {
     redirect("/dashboard");
   }

@@ -54,7 +54,7 @@ export const auth = betterAuth({
     additionalFields: {
       phone: {
         type: "string",
-        required: false,
+        required: true,
       },
       cpf: {
         type: "string",

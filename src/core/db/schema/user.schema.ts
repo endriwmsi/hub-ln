@@ -34,6 +34,9 @@ export const user = pgTable("user", {
   banReason: text("ban_reason"),
   banExpires: timestamp("ban_expires"),
 
+  // Status de aprovação
+  approved: boolean("approved").default(false).notNull(),
+
   // Campos personalizados
   phone: varchar("phone", { length: 20 }),
   cpf: varchar("cpf", { length: 11 }).notNull().unique(),
