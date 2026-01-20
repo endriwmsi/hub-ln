@@ -26,7 +26,7 @@ import { Skeleton } from "../ui/skeleton";
 import { ModeToggle } from "./mode-toggle";
 
 const mockNotifications = [
-  { id: 1, title: "Bem vindo a plataforma", time: "1 min ago", unread: true },
+  { id: 1, title: "Bem vindo a plataforma", time: "1 min atrás", unread: true },
 ];
 
 export function SiteHeader() {
