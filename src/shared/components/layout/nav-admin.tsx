@@ -3,8 +3,10 @@
 import type { Icon } from "@tabler/icons-react";
 import { motion, type Variants } from "framer-motion";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   SidebarGroup,
+  SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
@@ -59,37 +61,61 @@ interface NavAdminProps {
 }
 
 const NavAdmin = ({ items }: NavAdminProps) => {
-  // const { isMobile } = useSidebar();
+  const pathname = usePathname();
+
+  // const [openItems, setOpenItems] = useState<string[]>([]);
+
+  // const toggleItem = (title: string) => {
+  //   setOpenItems((prev) =>
+  //     prev.includes(title)
+  //       ? prev.filter((item) => item !== title)
+  //       : [...prev, title],
+  //   );
+  // };
+
+  const isActive = (url: string) => {
+    return pathname === url || pathname.startsWith(`${url}/`);
+  };
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <SidebarGroupLabel>Admin</SidebarGroupLabel>
-        <SidebarMenu>
-          {items.map((item, index) => (
-            <motion.div key={item.name} variants={itemVariants} custom={index}>
-              <SidebarMenuItem>
-                <motion.div
-                  variants={hoverVariants}
-                  initial="initial"
-                  whileHover="hover"
-                >
-                  <SidebarMenuButton asChild>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.name}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </motion.div>
-              </SidebarMenuItem>
-            </motion.div>
-          ))}
-        </SidebarMenu>
-      </motion.div>
+      <SidebarGroupContent className="flex flex-col gap-2">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <SidebarGroupLabel>Admin</SidebarGroupLabel>
+          <SidebarMenu>
+            {items.map((item, index) => (
+              <motion.div
+                key={item.name}
+                variants={itemVariants}
+                custom={index}
+              >
+                <SidebarMenuItem>
+                  <motion.div
+                    variants={hoverVariants}
+                    initial="initial"
+                    whileHover="hover"
+                  >
+                    <SidebarMenuButton
+                      asChild
+                      tooltip={item.name}
+                      isActive={isActive(item.url)}
+                    >
+                      <Link href={item.url}>
+                        <item.icon />
+                        <span>{item.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </motion.div>
+                </SidebarMenuItem>
+              </motion.div>
+            ))}
+          </SidebarMenu>
+        </motion.div>
+      </SidebarGroupContent>
     </SidebarGroup>
   );
 };

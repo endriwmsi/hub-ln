@@ -178,16 +178,6 @@ const data = {
       url: "/configuracoes",
       icon: IconSettings,
     },
-    // {
-    //   title: "Get Help",
-    //   url: "#",
-    //   icon: IconHelp,
-    // },
-    // {
-    //   title: "Search",
-    //   url: "#",
-    //   icon: IconSearch,
-    // },
   ],
   admin: [
     {
@@ -205,11 +195,6 @@ const data = {
       url: "/acoes-limpa-nome",
       icon: IconTicket,
     },
-    // {
-    //   name: "Word Assistant",
-    //   url: "#",
-    //   icon: IconFileWord,
-    // },
   ],
 };
 

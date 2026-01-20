@@ -1,10 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useSession } from "@/core";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -34,8 +34,8 @@ interface UpdateProfileFormProps {
 }
 
 export function UpdateProfileForm({ defaultValues }: UpdateProfileFormProps) {
+  const { refetch } = useSession();
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
 
   const form = useForm<UpdateProfileSchema>({
     resolver: zodResolver(updateProfileSchema),
@@ -47,7 +47,7 @@ export function UpdateProfileForm({ defaultValues }: UpdateProfileFormProps) {
       const result = await updateProfile(data);
       if (result.success) {
         toast.success(result.message);
-        router.refresh();
+        await refetch();
       } else {
         toast.error(result.message);
       }
