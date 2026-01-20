@@ -4,8 +4,8 @@ import { motion, type Variants } from "framer-motion";
 import { CreditCard, FileText, MapPin, Shield, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SidebarMenu, SidebarMenuButton } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { SidebarMenu, SidebarMenuButton } from "@/shared/components/ui/sidebar";
 
 export const sidebarNavItems = [
   {
@@ -24,14 +24,14 @@ export const sidebarNavItems = [
     icon: FileText,
   },
   {
-    title: "Assinatura",
-    href: "/configuracoes/assinatura",
-    icon: CreditCard,
-  },
-  {
     title: "Segurança",
     href: "/configuracoes/seguranca",
     icon: Shield,
+  },
+  {
+    title: "Assinatura",
+    href: "/configuracoes/assinatura",
+    icon: CreditCard,
   },
 ];
 
