@@ -68,8 +68,8 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Produtos",
-      url: "/produtos",
+      title: "Serviços",
+      url: "/servicos",
       icon: IconPackage,
     },
     {
@@ -182,18 +182,23 @@ const data = {
   admin: [
     {
       name: "Gerenciar Ações",
-      url: "/acoes",
+      url: "/gerenciar-acoes",
       icon: IconTicket,
     },
     {
       name: "Gerenciar Usuários",
-      url: "/usuarios",
+      url: "/gerenciar-usuarios",
       icon: IconUsers,
     },
     {
       name: "Gerenciar Avisos",
-      url: "/avisos",
+      url: "/gerenciar-avisos",
       icon: IconAlertCircle,
+    },
+    {
+      name: "Gerenciar Serviços",
+      url: "/gerenciar-servicos",
+      icon: IconPackage,
     },
   ],
 };
