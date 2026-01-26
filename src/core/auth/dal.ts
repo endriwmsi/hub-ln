@@ -23,7 +23,7 @@ export const verifySession = cache(async () => {
 });
 
 /**
- * Obtém a sessão atual (pode ser null)
+ * Obtém o usuário atual (pode ser null)
  * Não faz redirect
  */
 export const getSession = cache(async () => {
@@ -32,6 +32,15 @@ export const getSession = cache(async () => {
   });
 
   return session;
+});
+
+/**
+ * Obtém o usuário atual ou null
+ * Não faz redirect - apenas retorna o usuário se existir sessão
+ */
+export const getUser = cache(async () => {
+  const session = await getSession();
+  return session?.user || null;
 });
 
 /**

@@ -5,6 +5,7 @@ import { user } from "./user.schema";
 
 export const subscriptionStatus = pgEnum("subscription_status", [
   "trial",
+  "pending",
   "active",
   "past_due",
   "canceled",
@@ -20,7 +21,8 @@ export const subscription = pgTable("subscription", {
     .references(() => user.id, { onDelete: "cascade" }),
 
   // Integração com AbacatePay
-  abacatePayBillingId: text("abacate_pay_billing_id").notNull(),
+  pixId: text("pix_id"),
+  pixQrCodeCreatedAt: timestamp("pix_qr_code_created_at"),
 
   // Status da assinatura
   status: subscriptionStatus("status").notNull().default("trial"),
