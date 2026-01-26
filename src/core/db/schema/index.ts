@@ -1,5 +1,6 @@
 // Export all schemas here
 
+export * from "./acao.schema";
 export * from "./account.schema";
 export * from "./session.schema";
 export * from "./subscription.schema";

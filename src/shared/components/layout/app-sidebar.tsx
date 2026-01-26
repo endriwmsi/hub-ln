@@ -181,19 +181,19 @@ const data = {
   ],
   admin: [
     {
-      name: "Usuários",
+      name: "Gerenciar Ações",
+      url: "/acoes",
+      icon: IconTicket,
+    },
+    {
+      name: "Gerenciar Usuários",
       url: "/usuarios",
       icon: IconUsers,
     },
     {
-      name: "Avisos",
+      name: "Gerenciar Avisos",
       url: "/avisos",
       icon: IconAlertCircle,
-    },
-    {
-      name: "Ações Limpa Nome",
-      url: "/acoes-limpa-nome",
-      icon: IconTicket,
     },
   ],
 };
