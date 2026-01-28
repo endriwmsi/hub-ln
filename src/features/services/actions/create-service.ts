@@ -23,11 +23,14 @@ export async function createService(input: CreateServiceInput) {
       description: validated.data.description,
       basePrice: validated.data.basePrice,
       isActive: validated.data.isActive,
+      type: validated.data.type || "simple",
+      requiresDocument: validated.data.requiresDocument || false,
     })
     .returning();
 
   revalidatePath("/servicos");
   revalidatePath("/admin/servicos");
+  revalidatePath("/gerenciar-servicos");
 
   return { success: true, data: service };
 }

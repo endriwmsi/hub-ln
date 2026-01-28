@@ -1,6 +1,5 @@
 export {
   updateAddress,
-  updateName,
   updatePassword,
-  updatePhone,
+  updateProfile,
 } from "./update-profile";

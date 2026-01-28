@@ -1,4 +1,11 @@
 import { notFound } from "next/navigation";
+import { getAcoesAtivas } from "@/features/acoes/actions";
+import { getFormFieldsByServiceId } from "@/features/form-fields";
+import {
+  DynamicFormRenderer,
+  ExcelUploadForm,
+} from "@/features/service-requests";
+import { AcaoSelector } from "@/features/service-requests/components";
 import { getServiceBySlug } from "@/features/services";
 import { SubscriptionGuard } from "@/features/subscriptions";
 
@@ -6,21 +13,42 @@ type SolicitarServicoPageProps = {
   params: Promise<{
     slug: string;
   }>;
+  searchParams: Promise<{
+    acao?: string;
+  }>;
 };
 
 export default async function SolicitarServicoPage({
   params,
+  searchParams,
 }: SolicitarServicoPageProps) {
   const { slug } = await params;
+  const { acao: acaoId } = await searchParams;
   const service = await getServiceBySlug(slug);
 
   if (!service) {
     notFound();
   }
 
+  // Buscar campos do formulário
+  const formFields = await getFormFieldsByServiceId(service.id);
+
+  // Determinar qual tipo de formulário exibir
+  const isSimpleService = service.type === "simple";
+  const hasFormFields = formFields.length > 0;
+
+  // Buscar ações ativas apenas para serviços do tipo "simple" (limpa nome)
+  const acoesAtivas = isSimpleService ? await getAcoesAtivas() : [];
+
+  // Verificar se tem ação selecionada (apenas para serviços simple)
+  const selectedAcao = acoesAtivas.find((a) => a.id === acaoId);
+
+  // Para serviços "simple", precisa de ação. Para outros, não precisa.
+  const needsAcao = isSimpleService;
+
   return (
     <SubscriptionGuard>
-      <div className="container py-6 space-y-6">
+      <div className="container py-6 space-y-6 max-w-3xl">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
             Solicitar Serviço
@@ -32,33 +60,66 @@ export default async function SolicitarServicoPage({
 
         <div className="rounded-lg border p-6 space-y-4">
           <div>
-            <h2 className="text-xl font-semibold">Serviço Selecionado</h2>
-            <p className="text-muted-foreground">{service.title}</p>
+            <h2 className="text-xl font-semibold">{service.title}</h2>
+            {service.description && (
+              <p className="text-muted-foreground mt-1">
+                {service.description}
+              </p>
+            )}
           </div>
 
-          {service.description && (
+          <div className="flex items-center gap-4 pt-2 border-t">
             <div>
-              <h3 className="font-medium">Descrição</h3>
-              <p className="text-muted-foreground">{service.description}</p>
+              <p className="text-sm text-muted-foreground">Valor por unidade</p>
+              <p className="text-2xl font-bold text-primary">
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(Number(service.basePrice))}
+              </p>
             </div>
-          )}
-
-          <div>
-            <h3 className="font-medium">Valor Base</h3>
-            <p className="text-2xl font-bold text-primary">
-              {new Intl.NumberFormat("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              }).format(Number(service.basePrice))}
-            </p>
-          </div>
-
-          <div className="pt-4 border-t">
-            <p className="text-sm text-muted-foreground">
-              Formulário de solicitação será implementado em breve...
-            </p>
           </div>
         </div>
+
+        {/* Seletor de Ação - apenas para serviços do tipo "simple" (limpa nome) */}
+        {isSimpleService && (
+          <AcaoSelector
+            acoes={acoesAtivas}
+            selectedAcaoId={acaoId}
+            serviceSlug={slug}
+          />
+        )}
+
+        {/* Renderizar formulário */}
+        {needsAcao && !acaoId ? (
+          <div className="rounded-lg border p-6 text-center bg-muted/50">
+            <p className="text-muted-foreground">
+              Selecione uma ação acima para continuar com o envio.
+            </p>
+          </div>
+        ) : needsAcao && !selectedAcao ? (
+          <div className="rounded-lg border p-6 text-center bg-destructive/10">
+            <p className="text-destructive">
+              A ação selecionada não está mais disponível.
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Por favor, selecione outra ação.
+            </p>
+          </div>
+        ) : isSimpleService ? (
+          <ExcelUploadForm service={service} acaoId={acaoId} />
+        ) : hasFormFields ? (
+          <DynamicFormRenderer service={service} fields={formFields} />
+        ) : (
+          <div className="rounded-lg border p-6 text-center">
+            <p className="text-muted-foreground">
+              Este serviço ainda não possui um formulário configurado.
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Entre em contato com o suporte para mais informações.
+            </p>
+          </div>
+        )}
       </div>
     </SubscriptionGuard>
   );

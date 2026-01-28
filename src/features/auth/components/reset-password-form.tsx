@@ -1,12 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { resetPassword } from "better-auth/api";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type z from "zod";
+import { resetPassword } from "@/core";
 import { Button } from "@/shared/components/ui/button";
 import {
   Form,

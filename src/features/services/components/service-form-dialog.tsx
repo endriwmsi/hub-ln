@@ -24,11 +24,22 @@ import {
   FormMessage,
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
 import { Switch } from "@/shared/components/ui/switch";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { useCreateService } from "../hooks/use-create-service";
 import { useUpdateService } from "../hooks/use-update-service";
-import { type ServiceFormData, serviceFormSchema } from "../schemas";
+import {
+  type ServiceFormData,
+  serviceFormSchema,
+  serviceTypeLabels,
+} from "../schemas";
 
 function generateSlug(text: string): string {
   return text
@@ -70,6 +81,8 @@ export function ServiceFormDialog({
       description: "",
       basePrice: "",
       isActive: true,
+      type: "simple",
+      requiresDocument: false,
     },
   });
 
@@ -91,6 +104,8 @@ export function ServiceFormDialog({
         description: service.description || "",
         basePrice: service.basePrice,
         isActive: service.isActive,
+        type: service.type || "simple",
+        requiresDocument: service.requiresDocument || false,
       });
       setSlugManuallyEdited(true); // Ao editar, considera que o slug já existe
     } else {
@@ -100,6 +115,8 @@ export function ServiceFormDialog({
         description: "",
         basePrice: "",
         isActive: true,
+        type: "simple",
+        requiresDocument: false,
       });
       setSlugManuallyEdited(false);
     }
@@ -236,6 +253,63 @@ export function ServiceFormDialog({
                     <FormLabel className="text-base">Ativo</FormLabel>
                     <FormDescription>
                       Serviços inativos não aparecem para os usuários
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de Serviço</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    value={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="simple">
+                        {serviceTypeLabels.simple}
+                      </SelectItem>
+                      <SelectItem value="form">
+                        {serviceTypeLabels.form}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Simples: permite upload de planilha. Formulário: campos
+                    personalizados.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="requiresDocument"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">
+                      Requer Documento
+                    </FormLabel>
+                    <FormDescription>
+                      Solicita upload de documento (RG, CNH, etc.)
                     </FormDescription>
                   </div>
                   <FormControl>

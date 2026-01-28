@@ -3,6 +3,7 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import type { Service } from "@/core/db/schema";
+import { formatCurrency } from "@/shared";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -16,14 +17,6 @@ import {
 type ServiceCardProps = {
   service: Service;
 };
-
-function formatCurrency(value: string | number) {
-  const numValue = typeof value === "string" ? parseFloat(value) : value;
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(numValue);
-}
 
 export function ServiceCard({ service }: ServiceCardProps) {
   return (

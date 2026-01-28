@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
@@ -10,7 +9,7 @@ import { Spinner } from "@/shared/components/ui/spinner";
 
 const EmailVerificationForm = () => {
   const [isPending, setIsPending] = useState(false);
-  const router = useRouter();
+  // const router = useRouter();
 
   const handleSubmit = async (evt: React.FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
@@ -20,25 +19,25 @@ const EmailVerificationForm = () => {
 
     if (!email) return toast.error("E-mail é obrigatório");
 
-    await sendVerificationEmail({
-      email,
-      callbackURL: "/verify",
-      fetchOptions: {
-        onRequest: () => {
-          setIsPending(true);
-        },
-        onResponse: () => {
-          setIsPending(false);
-        },
-        onError: (ctx) => {
-          toast.error(ctx.error.message);
-        },
-        onSuccess: () => {
-          toast.success("E-mail de verificação enviado com sucesso");
-          router.push("/verify/success");
-        },
-      },
-    });
+    // await sendVerificationEmail({
+    //   email,
+    //   callbackURL: "/verify",
+    //   fetchOptions: {
+    //     onRequest: () => {
+    //       setIsPending(true);
+    //     },
+    //     onResponse: () => {
+    //       setIsPending(false);
+    //     },
+    //     onError: (ctx) => {
+    //       toast.error(ctx.error.message);
+    //     },
+    //     onSuccess: () => {
+    //       toast.success("E-mail de verificação enviado com sucesso");
+    //       router.push("/verify/success");
+    //     },
+    //   },
+    // });
 
     setIsPending(false);
   };
