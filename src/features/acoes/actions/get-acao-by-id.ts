@@ -7,7 +7,6 @@ import { acao } from "@/core/db/schema";
 
 export async function getAcaoById(id: string) {
   try {
-    // Verifica se o usuário é admin
     await requireAdmin();
 
     if (!id) {

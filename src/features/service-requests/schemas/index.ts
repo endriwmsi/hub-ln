@@ -100,3 +100,62 @@ export const bulkUploadSchema = z.object({
 });
 
 export type BulkUploadInput = z.infer<typeof bulkUploadSchema>;
+
+// Status de pagamento
+export const paymentStatuses = [
+  "pending",
+  "confirmed",
+  "overdue",
+  "refunded",
+  "failed",
+] as const;
+
+export type PaymentStatus = (typeof paymentStatuses)[number];
+
+export const paymentStatusLabels: Record<PaymentStatus, string> = {
+  pending: "Pendente",
+  confirmed: "Confirmado",
+  overdue: "Vencido",
+  refunded: "Estornado",
+  failed: "Falhou",
+};
+
+export const paymentStatusColors: Record<PaymentStatus, string> = {
+  pending: "bg-yellow-100 text-yellow-800",
+  confirmed: "bg-green-100 text-green-800",
+  overdue: "bg-red-100 text-red-800",
+  refunded: "bg-purple-100 text-purple-800",
+  failed: "bg-red-100 text-red-800",
+};
+
+// Status de item individual (para envios em lote)
+export const itemStatuses = [
+  "aguardando",
+  "baixas_completas",
+  "baixas_negadas",
+] as const;
+
+export type ItemStatus = (typeof itemStatuses)[number];
+
+export const itemStatusLabels: Record<ItemStatus, string> = {
+  aguardando: "Aguardando",
+  baixas_completas: "Baixas Completas",
+  baixas_negadas: "Baixas Negadas",
+};
+
+export const itemStatusColors: Record<ItemStatus, string> = {
+  aguardando: "bg-yellow-100 text-yellow-800",
+  baixas_completas: "bg-green-100 text-green-800",
+  baixas_negadas: "bg-red-100 text-red-800",
+};
+
+// Schema para item de envio
+export const serviceRequestItemSchema = z.object({
+  nome: z.string(),
+  documento: z.string(),
+  status: z.enum(itemStatuses),
+  observacao: z.string().optional(),
+  processedAt: z.string().optional(),
+});
+
+export type ServiceRequestItem = z.infer<typeof serviceRequestItemSchema>;

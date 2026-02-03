@@ -23,6 +23,22 @@ export const serviceRequestStatusEnum = pgEnum("service_request_status", [
   "rejected", // Rejeitado
 ]);
 
+// Status de pagamento (Asaas)
+export const paymentStatusEnum = pgEnum("payment_status", [
+  "pending", // Aguardando pagamento
+  "confirmed", // Pagamento confirmado
+  "overdue", // Vencido
+  "refunded", // Estornado
+  "failed", // Falhou
+]);
+
+// Status individual de cada item/nome no envio
+export const itemStatusEnum = pgEnum("item_status", [
+  "aguardando", // Aguardando processamento (padrão)
+  "baixas_completas", // Baixas completas
+  "baixas_negadas", // Baixas negadas
+]);
+
 // Tabela de solicitações de serviço
 export const serviceRequest = pgTable("service_request", {
   id: text("id")
@@ -70,6 +86,25 @@ export const serviceRequest = pgTable("service_request", {
   paid: boolean("paid").default(false).notNull(),
   paidAt: timestamp("paid_at"),
 
+  // Integração Asaas
+  asaasPaymentId: text("asaas_payment_id"), // ID da cobrança no Asaas
+  asaasCustomerId: text("asaas_customer_id"), // ID do cliente no Asaas
+  paymentStatus: paymentStatusEnum("payment_status").default("pending"),
+
+  // Status individual dos itens (para envios em lote)
+  // Array de objetos com: { nome, documento, status }
+  itemsStatus: jsonb("items_status")
+    .$type<
+      Array<{
+        nome: string;
+        documento: string;
+        status: "aguardando" | "baixas_completas" | "baixas_negadas";
+        observacao?: string;
+        processedAt?: string;
+      }>
+    >()
+    .default([]),
+
   // Metadados
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
@@ -106,3 +141,20 @@ export type ServiceRequestStatus =
   | "completed"
   | "cancelled"
   | "rejected";
+
+export type PaymentStatus =
+  | "pending"
+  | "confirmed"
+  | "overdue"
+  | "refunded"
+  | "failed";
+
+export type ItemStatus = "aguardando" | "baixas_completas" | "baixas_negadas";
+
+export type ServiceRequestItem = {
+  nome: string;
+  documento: string;
+  status: ItemStatus;
+  observacao?: string;
+  processedAt?: string;
+};

@@ -1,9 +1,16 @@
 "use client";
 
-import { CreditCard } from "lucide-react";
-import { useState } from "react";
+import { CreditCard, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { ServiceRequestsTable } from "@/features/service-requests";
 import { Button } from "@/shared/components/ui/button";
+import {
+  type CreatePixPaymentResult,
+  createPixPaymentForRequests,
+} from "../actions";
+import { PaymentModal } from "./payment-modal";
 
 type ServiceRequestTableItem = {
   id: string;
@@ -38,7 +45,13 @@ export function EnviosTableWrapper({
   requests,
   showUser = false,
 }: EnviosTableWrapperProps) {
+  const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isPending, startTransition] = useTransition();
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [paymentData, setPaymentData] = useState<CreatePixPaymentResult | null>(
+    null,
+  );
 
   // Calcular total selecionado
   const selectedRequests = requests.filter((r) => selectedIds.includes(r.id));
@@ -46,6 +59,43 @@ export function EnviosTableWrapper({
     (acc, r) => acc + parseFloat(r.totalPrice),
     0,
   );
+
+  // Criar pagamento Pix
+  const handleCreatePayment = () => {
+    if (selectedIds.length === 0) {
+      toast.error("Selecione pelo menos um envio para pagar");
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await createPixPaymentForRequests(selectedIds);
+
+      if (!result.success) {
+        toast.error(result.error || "Erro ao criar pagamento");
+        return;
+      }
+
+      if (result.data) {
+        setPaymentData(result.data);
+        setIsPaymentModalOpen(true);
+      }
+    });
+  };
+
+  // Callback quando pagamento é confirmado
+  const handlePaymentConfirmed = () => {
+    // Limpar seleção
+    setSelectedIds([]);
+
+    // Atualizar a página para refletir o novo status
+    router.refresh();
+  };
+
+  // Fechar modal
+  const handleCloseModal = () => {
+    setIsPaymentModalOpen(false);
+    setPaymentData(null);
+  };
 
   return (
     <div className="space-y-4">
@@ -66,9 +116,18 @@ export function EnviosTableWrapper({
               </span>
             </span>
           </div>
-          <Button size="sm">
-            <CreditCard className="mr-2 h-4 w-4" />
-            Ir para Pagamento
+          <Button size="sm" onClick={handleCreatePayment} disabled={isPending}>
+            {isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Processando...
+              </>
+            ) : (
+              <>
+                <CreditCard className="mr-2 h-4 w-4" />
+                Realizar Pagamento
+              </>
+            )}
           </Button>
         </div>
       )}
@@ -79,6 +138,14 @@ export function EnviosTableWrapper({
         showCheckbox={true}
         selectedIds={selectedIds}
         onSelectionChange={setSelectedIds}
+      />
+
+      {/* Modal de Pagamento */}
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={handleCloseModal}
+        paymentData={paymentData}
+        onPaymentConfirmed={handlePaymentConfirmed}
       />
     </div>
   );

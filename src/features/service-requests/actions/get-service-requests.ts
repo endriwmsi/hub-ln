@@ -177,6 +177,7 @@ export async function getServiceRequestById(id: string) {
       paidAt: serviceRequest.paidAt,
       processedAt: serviceRequest.processedAt,
       processedById: serviceRequest.processedById,
+      itemsStatus: serviceRequest.itemsStatus,
       createdAt: serviceRequest.createdAt,
       updatedAt: serviceRequest.updatedAt,
       user: {

@@ -1,3 +1,4 @@
+export { AcaoClientsTable } from "./acao-clients-table";
 export { AcaoFormDialog } from "./acao-form-dialog";
 export { AcoesTableContainer } from "./acoes-table-container";
 export { AcoesTableFilters } from "./acoes-table-filters";

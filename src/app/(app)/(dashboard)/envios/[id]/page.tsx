@@ -1,6 +1,15 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ArrowLeft, Clock, Download, FileText, User } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Clock,
+  Download,
+  FileText,
+  Hourglass,
+  User,
+  XCircle,
+} from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { verifySession } from "@/core/auth/dal";
@@ -58,6 +67,57 @@ export default async function EnvioDetalhesPage({
   const isBulkUpload = formData?.uploadType === "bulk";
   const bulkItems =
     (formData?.items as Array<{ nome: string; documento: string }>) || [];
+
+  // Status dos itens (se houver)
+  const itemsStatus = (request.itemsStatus || []) as Array<{
+    nome: string;
+    documento: string;
+    status: "aguardando" | "baixas_completas" | "baixas_negadas";
+    observacao?: string;
+    processedAt?: string;
+  }>;
+
+  // Função para obter o status de um item
+  const getItemStatus = (documento: string) => {
+    return itemsStatus.find((item) => item.documento === documento);
+  };
+
+  // Componente de badge de status
+  const StatusBadge = ({
+    status,
+  }: {
+    status: "aguardando" | "baixas_completas" | "baixas_negadas";
+  }) => {
+    const config = {
+      aguardando: {
+        label: "Aguardando",
+        className:
+          "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+        icon: Hourglass,
+      },
+      baixas_completas: {
+        label: "Baixas Completas",
+        className:
+          "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+        icon: CheckCircle2,
+      },
+      baixas_negadas: {
+        label: "Baixas Negadas",
+        className:
+          "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+        icon: XCircle,
+      },
+    };
+
+    const { label, className, icon: Icon } = config[status];
+
+    return (
+      <Badge variant="secondary" className={`gap-1 ${className}`}>
+        <Icon className="h-3 w-3" />
+        {label}
+      </Badge>
+    );
+  };
 
   return (
     <div className="container py-6 space-y-6 max-w-4xl">
@@ -181,11 +241,11 @@ export default async function EnvioDetalhesPage({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="max-h-80 overflow-auto">
+            <div className="max-h-100 overflow-auto">
               <table className="w-full">
-                <thead>
+                <thead className="sticky top-0 bg-background">
                   <tr className="border-b">
-                    <th className="text-left py-2 text-sm font-medium text-muted-foreground">
+                    <th className="text-left py-2 text-sm font-medium text-muted-foreground w-12">
                       #
                     </th>
                     <th className="text-left py-2 text-sm font-medium text-muted-foreground">
@@ -194,20 +254,36 @@ export default async function EnvioDetalhesPage({
                     <th className="text-left py-2 text-sm font-medium text-muted-foreground">
                       Documento
                     </th>
+                    <th className="text-left py-2 text-sm font-medium text-muted-foreground">
+                      Status
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {bulkItems.map((item, index) => (
-                    <tr key={`${item.documento}-${index}`} className="border-b">
-                      <td className="py-2 text-sm text-muted-foreground">
-                        {index + 1}
-                      </td>
-                      <td className="py-2 text-sm">{item.nome}</td>
-                      <td className="py-2 text-sm font-mono">
-                        {item.documento}
-                      </td>
-                    </tr>
-                  ))}
+                  {bulkItems.map((item, index) => {
+                    const itemStatus = getItemStatus(item.documento);
+                    const status = itemStatus?.status || "aguardando";
+
+                    return (
+                      <tr
+                        key={`${item.documento}-${index}`}
+                        className="border-b hover:bg-muted/50 transition-colors"
+                      >
+                        <td className="py-3 text-sm text-muted-foreground">
+                          {index + 1}
+                        </td>
+                        <td className="py-3 text-sm font-medium">
+                          {item.nome}
+                        </td>
+                        <td className="py-3 text-sm font-mono text-muted-foreground">
+                          {item.documento}
+                        </td>
+                        <td className="py-3">
+                          <StatusBadge status={status} />
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

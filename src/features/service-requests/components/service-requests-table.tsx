@@ -5,7 +5,6 @@ import { ptBR } from "date-fns/locale";
 import { Check, Eye, MoreHorizontal, X } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency } from "@/shared";
-import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import {
@@ -22,11 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/components/ui/table";
-import {
-  type ServiceRequestStatus,
-  serviceRequestStatusColors,
-  serviceRequestStatusLabels,
-} from "../schemas";
+import { type ServiceRequestStatus } from "../schemas";
 
 type ServiceRequestTableItem = {
   id: string;
@@ -117,7 +112,7 @@ export function ServiceRequestsTable({
             {showUser && <TableHead>Usuário</TableHead>}
             <TableHead>Quantidade</TableHead>
             <TableHead>Valor Total</TableHead>
-            <TableHead>Status</TableHead>
+            {/* <TableHead>Status</TableHead> */}
             <TableHead>Pagamento</TableHead>
             <TableHead>Data</TableHead>
             <TableHead className="w-17.5">Ações</TableHead>
@@ -177,14 +172,14 @@ export function ServiceRequestsTable({
                 )}
                 <TableCell>{request.quantity}</TableCell>
                 <TableCell>{formatCurrency(request.totalPrice)}</TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <Badge
                     className={serviceRequestStatusColors[request.status]}
                     variant="secondary"
                   >
                     {serviceRequestStatusLabels[request.status]}
                   </Badge>
-                </TableCell>
+                </TableCell> */}
                 <TableCell>
                   {request.paid ? (
                     <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
