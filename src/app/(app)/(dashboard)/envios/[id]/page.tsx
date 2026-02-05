@@ -151,13 +151,30 @@ export default async function EnvioDetalhesPage({
               Serviço
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             <p className="font-semibold">{request.service.title}</p>
-            <div className="mt-2 flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
-                {request.quantity}x unidade(s)
+
+            {/* Preço por unidade (preço de revenda) */}
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Preço por unidade:</span>
+              <span className="font-medium">
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(Number(request.totalPrice) / request.quantity)}
               </span>
-              <span className="text-lg font-bold">
+            </div>
+
+            {/* Quantidade */}
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Quantidade:</span>
+              <span className="font-medium">{request.quantity} unidade(s)</span>
+            </div>
+
+            {/* Total */}
+            <div className="flex items-center justify-between pt-2 border-t">
+              <span className="font-medium">Total:</span>
+              <span className="text-lg font-bold text-primary">
                 {new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",

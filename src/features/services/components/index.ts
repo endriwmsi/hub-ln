@@ -1,6 +1,9 @@
 export { DeleteServiceDialog } from "./delete-service-dialog";
+export { ResalePriceDialog } from "./resale-price-dialog";
 export { ServiceCard } from "./service-card";
+export { ServiceCardWithPrice } from "./service-card-with-price";
 export { ServiceFormDialog } from "./service-form-dialog";
 export { ServicesGrid } from "./services-grid";
+export { ServicesGridWithPrice } from "./services-grid-with-price";
 export { ServicesTable } from "./services-table";
 export { ServicesTableContainer } from "./services-table-container";

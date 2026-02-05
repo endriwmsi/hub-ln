@@ -6,8 +6,9 @@ import {
   ExcelUploadForm,
 } from "@/features/service-requests";
 import { AcaoSelector } from "@/features/service-requests/components";
-import { getServiceBySlug } from "@/features/services";
+import { getServiceBySlug, getUserServicePrices } from "@/features/services";
 import { SubscriptionGuard } from "@/features/subscriptions";
+import { formatCurrency } from "@/shared";
 
 type SolicitarServicoPageProps = {
   params: Promise<{
@@ -32,6 +33,19 @@ export default async function SolicitarServicoPage({
 
   // Buscar campos do formulário
   const formFields = await getFormFieldsByServiceId(service.id);
+
+  // Buscar preço de revenda do usuário
+  const pricesResult = await getUserServicePrices();
+  const userPrice = pricesResult.success
+    ? pricesResult.data?.find((p) => p.id === service.id)
+    : null;
+
+  // Preço a exibir: resalePrice > costPrice > basePrice
+  const displayPrice =
+    userPrice?.resalePrice || userPrice?.costPrice || service.basePrice;
+  const hasResalePrice =
+    userPrice?.resalePrice !== null && userPrice?.resalePrice !== undefined;
+  const commission = userPrice?.commissionPerItem || "0.00";
 
   // Determinar qual tipo de formulário exibir
   const isSimpleService = service.type === "simple";
@@ -68,16 +82,21 @@ export default async function SolicitarServicoPage({
             )}
           </div>
 
-          <div className="flex items-center gap-4 pt-2 border-t">
+          <div className="flex items-center justify-between pt-2 border-t">
             <div>
               <p className="text-sm text-muted-foreground">Valor por unidade</p>
               <p className="text-2xl font-bold text-primary">
-                {new Intl.NumberFormat("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                }).format(Number(service.basePrice))}
+                {formatCurrency(displayPrice)}
               </p>
             </div>
+            {hasResalePrice && Number(commission) > 0 && (
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">Sua comissão</p>
+                <p className="text-lg font-semibold text-green-600 dark:text-green-400">
+                  +{formatCurrency(commission)}/nome
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -107,7 +126,11 @@ export default async function SolicitarServicoPage({
             </p>
           </div>
         ) : isSimpleService ? (
-          <ExcelUploadForm service={service} acaoId={acaoId} />
+          <ExcelUploadForm
+            service={service}
+            acaoId={acaoId}
+            resalePrice={displayPrice}
+          />
         ) : hasFormFields ? (
           <DynamicFormRenderer service={service} fields={formFields} />
         ) : (

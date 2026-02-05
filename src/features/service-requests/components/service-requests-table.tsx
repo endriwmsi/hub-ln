@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/components/ui/table";
-import { type ServiceRequestStatus } from "../schemas";
+import type { ServiceRequestStatus } from "../schemas";
 
 type ServiceRequestTableItem = {
   id: string;

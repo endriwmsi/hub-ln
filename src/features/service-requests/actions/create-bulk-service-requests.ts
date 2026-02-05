@@ -1,10 +1,15 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { verifySession } from "@/core/auth/dal";
 import { db } from "@/core/db";
-import { serviceRequest, services } from "@/core/db/schema";
+import {
+  serviceRequest,
+  services,
+  user,
+  userServicePrice,
+} from "@/core/db/schema";
 import type { ActionResponse } from "@/shared/lib/server-actions";
 import { type BulkUploadInput, bulkUploadSchema } from "../schemas";
 
@@ -31,8 +36,49 @@ export async function createBulkServiceRequests(
       return { success: false, error: "Serviço não encontrado" };
     }
 
+    // Buscar usuário atual para obter o indicador
+    const currentUser = await db.query.user.findFirst({
+      where: eq(user.id, session.userId),
+    });
+
+    // Determinar preço a usar: preço de revenda do usuário > preço do indicador > preço base
+    let unitPrice = Number(service[0].basePrice);
+
+    if (currentUser) {
+      // Primeiro, tentar buscar preço de revenda do próprio usuário
+      const userPrice = await db.query.userServicePrice.findFirst({
+        where: and(
+          eq(userServicePrice.userId, session.userId),
+          eq(userServicePrice.serviceId, validatedInput.serviceId),
+        ),
+      });
+
+      if (userPrice) {
+        // Usuário tem preço de revenda definido
+        unitPrice = Number(userPrice.resalePrice);
+      } else if (currentUser.referredBy) {
+        // Buscar preço do indicador
+        const referrer = await db.query.user.findFirst({
+          where: eq(user.referralCode, currentUser.referredBy),
+        });
+
+        if (referrer) {
+          const referrerPrice = await db.query.userServicePrice.findFirst({
+            where: and(
+              eq(userServicePrice.userId, referrer.id),
+              eq(userServicePrice.serviceId, validatedInput.serviceId),
+            ),
+          });
+
+          if (referrerPrice) {
+            unitPrice = Number(referrerPrice.resalePrice);
+          }
+        }
+      }
+    }
+
     const quantity = validatedInput.items.length;
-    const totalPrice = Number(service[0].basePrice) * quantity;
+    const totalPrice = unitPrice * quantity;
 
     // Criar uma solicitação única com todos os itens
     const formData = {

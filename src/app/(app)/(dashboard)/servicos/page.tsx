@@ -1,4 +1,4 @@
-import { ServicesGrid } from "@/features/services";
+import { ServicesGridWithPrice } from "@/features/services";
 import { SubscriptionGuard } from "@/features/subscriptions";
 
 export default function ServicosPage() {
@@ -8,11 +8,11 @@ export default function ServicosPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Serviços</h1>
           <p className="text-muted-foreground">
-            Escolha um serviço para solicitar
+            Escolha um serviço e defina seu preço de revenda
           </p>
         </div>
 
-        <ServicesGrid />
+        <ServicesGridWithPrice />
       </div>
     </SubscriptionGuard>
   );
