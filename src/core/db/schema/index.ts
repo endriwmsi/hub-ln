@@ -10,3 +10,4 @@ export * from "./session.schema";
 export * from "./subscription.schema";
 export * from "./user.schema";
 export * from "./verification.schema";
+export * from "./withdrawal.schema";
