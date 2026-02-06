@@ -93,18 +93,33 @@ export async function getTransactions(
 
     // Buscar saques
     if (type === "all" || type === "withdrawal") {
+      // Se for admin, busca saques de todos os usuários
+      // Se for usuário, busca apenas os seus em user.id
+      const isAdmin = session.user.role === "admin";
+
       const withdrawals = await db.query.withdrawal.findMany({
-        where: eq(withdrawal.userId, session.userId),
+        where: isAdmin ? undefined : eq(withdrawal.userId, session.userId),
+        with: {
+          user: {
+            columns: { name: true },
+          },
+        },
         orderBy: [desc(withdrawal.createdAt)],
       });
 
       for (const wd of withdrawals) {
+        const isMyWithdrawal = wd.userId === session.userId;
+        const description =
+          isAdmin && !isMyWithdrawal
+            ? `Solicitação de saque (${wd.user.name})`
+            : `Saque solicitado`;
+
         transactions.push({
           id: wd.id,
           type: "withdrawal",
           amount: `-${wd.amount}`, // Negativo pois é saída
           status: wd.status,
-          description: `Saque solicitado`,
+          description: description,
           createdAt: wd.createdAt,
           relatedId: wd.id,
         });

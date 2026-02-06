@@ -3,7 +3,7 @@
 import { and, eq, gte, lt, sql, sum } from "drizzle-orm";
 import { verifySession } from "@/core/auth/dal";
 import { db } from "@/core/db";
-import { commission, userBalance } from "@/core/db/schema";
+import { commission, userBalance, withdrawal } from "@/core/db/schema";
 import type { ActionResponse } from "@/shared/lib/server-actions";
 import type { BalanceSummary } from "../types";
 
@@ -97,7 +97,6 @@ export async function getBalanceSummary(): Promise<
         ),
       );
 
-    // Calcular total ganho (soma de todas as comissões não canceladas)
     const totalEarnedResult = await db
       .select({
         total: sum(commission.amount),
@@ -110,7 +109,30 @@ export async function getBalanceSummary(): Promise<
         ),
       );
 
-    const availableBalance = availableResult[0]?.total || "0";
+    // Buscar saques pendentes ou aprovados (ainda não refletidos em totalWithdrawn)
+    const pendingWithdrawalsResult = await db
+      .select({
+        total: sum(withdrawal.amount),
+      })
+      .from(withdrawal)
+      .where(
+        and(
+          eq(withdrawal.userId, session.userId),
+          sql`${withdrawal.status} IN ('pending', 'approved')`,
+        ),
+      );
+
+    const availableAmount = Number(availableResult[0]?.total || 0);
+    const pendingWithdrawals = Number(pendingWithdrawalsResult[0]?.total || 0);
+
+    const totalPaidWithdrawn = Number(balanceData[0].totalWithdrawn || 0);
+
+    // Disponível real = Comissões liberadas - Saques em andamento - Saques já pagos
+    const availableBalance = Math.max(
+      0,
+      availableAmount - pendingWithdrawals - totalPaidWithdrawn,
+    ).toFixed(2);
+
     const pendingFromRecent = pendingResult[0]?.total || "0";
     const pendingFromStatus = pendingStatusResult[0]?.total || "0";
     const pendingBalance = (

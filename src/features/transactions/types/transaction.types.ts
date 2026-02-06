@@ -95,3 +95,11 @@ export type BalanceSummary = {
   totalWithdrawn: string; // Total já sacado
   totalEarned: string; // Total ganho em comissões
 };
+
+// Resumo de saldo para Admin
+export type AdminBalanceSummary = {
+  totalRevenue: string; // Total recebido em transações (exceto subscriptions)
+  totalUsersWithdrawable: string; // Total que usuários podem sacar (para controle de caixa)
+  totalUsersWithdrawn: string; // Total já sacado por usuários
+  totalUsersCommissions: string; // Total de comissões dos usuários
+};

@@ -1,5 +1,6 @@
 // Actions
 export {
+  getAdminBalanceSummary,
   getBalanceSummary,
   getTransactions,
   requestWithdrawal,
@@ -22,6 +23,7 @@ export { useTransactionFilters } from "./hooks";
 
 // Types
 export {
+  type AdminBalanceSummary,
   type BalanceSummary,
   type GetTransactionsResult,
   type Transaction,

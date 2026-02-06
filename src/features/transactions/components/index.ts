@@ -1,4 +1,5 @@
 export { BalanceCards, BalanceCardsSkeleton } from "./balance-cards";
+export { PendingWithdrawals } from "./pending-withdrawals";
 export { TransactionsFilters } from "./transactions-filters";
 export { TransactionsPagination } from "./transactions-pagination";
 export {

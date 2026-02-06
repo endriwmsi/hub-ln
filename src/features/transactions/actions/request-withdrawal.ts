@@ -1,10 +1,12 @@
 "use server";
 
 import { and, eq, lt, sum } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { verifySession } from "@/core/auth/dal";
 import { db } from "@/core/db";
-import { commission, withdrawal } from "@/core/db/schema";
+import { commission, user, withdrawal } from "@/core/db/schema";
+import { createNotification } from "@/features/notifications";
 import type { ActionResponse } from "@/shared/lib/server-actions";
 
 // Número de dias para liberar comissão para saque
@@ -99,6 +101,28 @@ export async function requestWithdrawal(
         status: "pending",
       })
       .returning({ id: withdrawal.id });
+
+    // Buscar admins para notificar
+    const admins = await db
+      .select({ id: user.id })
+      .from(user)
+      .where(eq(user.role, "admin"));
+
+    // Notificar todos os admins
+    await Promise.allSettled(
+      admins.map((admin) =>
+        createNotification({
+          userId: admin.id,
+          type: "withdrawal_request",
+          title: "Saque Solicitado",
+          message: `O usuário ${session.user.name || session.user.email} solicitou um saque de R$ ${amount.toFixed(2)}.`,
+          relatedId: newWithdrawal.id,
+          link: "/transacoes",
+        }),
+      ),
+    );
+
+    revalidatePath("/transacoes");
 
     return {
       success: true,

@@ -1,17 +1,16 @@
 "use client";
 import { IconLogout } from "@tabler/icons-react";
 import { motion } from "framer-motion";
-import { Bell, Settings, User } from "lucide-react";
+import { Settings, User } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { useState } from "react";
 import { authClient } from "@/core";
+import { NotificationsDropdown } from "@/features/notifications";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/shared/components/ui/avatar";
-import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
   DropdownMenu,
@@ -25,18 +24,8 @@ import { SidebarTrigger } from "../ui/sidebar";
 import { Skeleton } from "../ui/skeleton";
 import { ModeToggle } from "./mode-toggle";
 
-const mockNotifications = [
-  { id: 1, title: "Bem vindo a plataforma", time: "1 min atrás", unread: true },
-];
-
 export function SiteHeader() {
   const { data: session, isPending } = authClient.useSession();
-  const [notifications, setNotifications] = useState(mockNotifications);
-  const unreadCount = notifications.filter((n) => n.unread).length;
-
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
-  };
 
   return (
     <motion.header
@@ -47,66 +36,13 @@ export function SiteHeader() {
     >
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
         <SidebarTrigger className="-ml-1" />
-        {/* <Separator
-          orientation="vertical"
-          className="mx-2 data-[orientation=vertical]:h-4"
-        /> */}
         <div className="ml-auto flex items-center gap-2">
           <div className="flex items-center gap-2">
             <ModeToggle />
           </div>
 
           {/* Notifications Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="relative">
-                <Bell className="h-4 w-4" />
-                {unreadCount > 0 && (
-                  <Badge
-                    variant="destructive"
-                    className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full p-0 text-xs"
-                  >
-                    {unreadCount}
-                  </Badge>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel className="flex items-center justify-between">
-                Notifications
-                {unreadCount > 0 && (
-                  <Button variant="ghost" size="sm" onClick={markAllAsRead}>
-                    Mark all read
-                  </Button>
-                )}
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {notifications.length === 0 ? (
-                <div className="text-muted-foreground p-4 text-center">
-                  No notifications
-                </div>
-              ) : (
-                notifications.map((notification) => (
-                  <DropdownMenuItem
-                    key={notification.id}
-                    className="flex flex-col items-start gap-1 p-3"
-                  >
-                    <div className="flex w-full items-center gap-2">
-                      <div
-                        className={`h-2 w-2 rounded-full ${notification.unread ? "bg-blue-500" : "bg-transparent"}`}
-                      />
-                      <span className="text-sm font-medium">
-                        {notification.title}
-                      </span>
-                    </div>
-                    <span className="text-muted-foreground ml-4 text-xs">
-                      {notification.time}
-                    </span>
-                  </DropdownMenuItem>
-                ))
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <NotificationsDropdown />
 
           {/*  Added user info dropdown */}
           <DropdownMenu>
@@ -151,13 +87,9 @@ export function SiteHeader() {
                   className="flex w-full cursor-pointer"
                 >
                   <User className="mr-2 h-4 w-4" />
-                  Pefil
+                  Perfil
                 </Link>
               </DropdownMenuItem>
-              {/* <DropdownMenuItem>
-                <Mail className="mr-2 h-4 w-4" />
-                Messages
-              </DropdownMenuItem> */}
               <DropdownMenuItem asChild>
                 <Link
                   href="/configuracoes"

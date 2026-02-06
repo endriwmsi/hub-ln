@@ -2,10 +2,8 @@
 
 import {
   IconAlertCircle,
+  IconCreditCard,
   IconDashboard,
-  IconImageInPicture,
-  IconMoneybag,
-  IconNetwork,
   IconPackage,
   IconSend,
   IconSettings,
@@ -78,51 +76,57 @@ const data = {
       icon: IconSend,
     },
     {
-      title: "Cupons",
-      url: "/cupons",
-      icon: IconTicket,
-    },
-    {
-      title: "Capital de Giro",
-      url: "/solicitacoes-capital-giro",
-      icon: IconMoneybag,
-    },
-    {
-      title: "Indicações",
-      url: "/indicacoes",
-      icon: IconNetwork,
-    },
-    {
-      title: "Criativos",
-      url: "/criativos",
-      icon: IconImageInPicture,
-    },
-    {
-      title: "Editor de Criativos",
-      url: "/editor",
-      icon: IconImageInPicture,
+      title: "Financeiro",
+      url: "/transacoes",
+      icon: IconCreditCard,
     },
     // {
-    //   title: "Gestão Financeira",
+    //   title: "Cupons",
+    //   url: "/cupons",
+    //   icon: IconTicket,
+    // },
+    // {
+    //   title: "Capital de Giro",
+    //   url: "/solicitacoes-capital-giro",
+    //   icon: IconMoneybag,
+    // },
+    // {
+    //   title: "Indicações",
+    //   url: "/indicacoes",
+    //   icon: IconNetwork,
+    // },
+    // {
+    //   title: "Criativos",
+    //   url: "/criativos",
+    //   icon: IconImageInPicture,
+    // },
+    // {
+    //   title: "Editor de Criativos",
+    //   url: "/editor",
+    //   icon: IconImageInPicture,
+    // },
+    // {
+    //   title: "Financeiro",
     //   url: "#",
     //   icon: IconCreditCard,
     //   items: [
     //     {
     //       title: "Transações",
-    //       url: "/dashboard/gestao-financeira",
+    //       url: "/transacoes",
+    //       icon: IconCreditCard,
     //     },
-    //     {
-    //       title: "Vendas",
-    //       url: "/vendas",
-    //     },
-    //     {
-    //       title: "Mensalidades",
-    //       url: "/mensalidades",
-    //     },
-    //     {
-    //       title: "Inadimplência",
-    //       url: "/inadimplencia",
-    //     },
+    // {
+    //   title: "Vendas",
+    //   url: "/vendas",
+    // },
+    // {
+    //   title: "Mensalidades",
+    //   url: "/mensalidades",
+    // },
+    // {
+    //   title: "Inadimplência",
+    //   url: "/inadimplencia",
+    // },
     //   ],
     // },
     // {
