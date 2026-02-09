@@ -3,7 +3,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
-import type { User } from "@/core/db/schema";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Checkbox } from "@/shared/components/ui/checkbox";
@@ -15,8 +14,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
+import type { GetUsersResponse } from "../actions";
 import type { UserFilters } from "../schemas";
 import { ApprovalCell } from "./approval-cell";
+
+type UserWithSubscription = NonNullable<
+  GetUsersResponse["data"]
+>["users"][number];
 
 function formatDate(date: Date | null | undefined): string {
   if (!date) return "-";
@@ -40,7 +44,7 @@ type ColumnsProps = {
 export const createColumns = ({
   filters,
   updateFilters,
-}: ColumnsProps): ColumnDef<User>[] => [
+}: ColumnsProps): ColumnDef<UserWithSubscription>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -165,6 +169,121 @@ export const createColumns = ({
       return (
         <div className="flex justify-center">
           <ApprovalCell user={row.original} />
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "subscription",
+    id: "isActive",
+    header: () => {
+      const currentFilter = filters.activeStatus || "all";
+      const isSortedByActive = filters.sortBy === "activeStatus";
+      const sortOrder = filters.sortOrder || "asc";
+
+      return (
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            variant="ghost"
+            onClick={() => {
+              const nextFilter =
+                currentFilter === "all"
+                  ? "active"
+                  : currentFilter === "active"
+                    ? "inactive"
+                    : "all";
+              updateFilters({ activeStatus: nextFilter });
+            }}
+            className="flex-1"
+          >
+            Ativo
+            {currentFilter !== "all" && (
+              <Badge variant="outline" className="ml-2 text-xs">
+                {currentFilter === "active" ? "Ativo" : "Inativo"}
+              </Badge>
+            )}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              if (!isSortedByActive || sortOrder === "asc") {
+                // Sort inactive first (desc)
+                updateFilters({ sortBy: "activeStatus", sortOrder: "desc" });
+              } else {
+                // Sort active first (asc)
+                updateFilters({ sortBy: "activeStatus", sortOrder: "asc" });
+              }
+            }}
+            className="h-8 w-8 p-0"
+          >
+            <ArrowUpDown
+              className={`h-4 w-4 ${isSortedByActive ? "text-primary" : ""}`}
+            />
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }) => {
+      const subscription = row.original.subscription;
+      const isActive =
+        subscription?.status === "active" || subscription?.status === "trial";
+      return (
+        <div className="text-center">
+          <Badge variant={isActive ? "default" : "secondary"}>
+            {isActive ? "Ativo" : "Inativo"}
+          </Badge>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "subscription",
+    id: "planStatus",
+    header: () => <div className="text-center">Status do Plano</div>,
+    cell: ({ row }) => {
+      const subscription = row.original.subscription;
+      const status = subscription?.status || "expired";
+
+      const statusLabels: Record<string, string> = {
+        trial: "Teste",
+        pending: "Pendente",
+        active: "Ativo",
+        past_due: "Atrasado",
+        canceled: "Cancelado",
+        expired: "Expirado",
+      };
+
+      const statusVariants: Record<
+        string,
+        "default" | "secondary" | "destructive" | "outline"
+      > = {
+        trial: "outline",
+        pending: "secondary",
+        active: "default",
+        past_due: "destructive",
+        canceled: "secondary",
+        expired: "destructive",
+      };
+
+      return (
+        <div className="text-center">
+          <Badge variant={statusVariants[status] || "secondary"}>
+            {statusLabels[status] || status}
+          </Badge>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "subscription",
+    id: "lastPayment",
+    header: () => <div className="text-center">Último Pagamento</div>,
+    cell: ({ row }) => {
+      const subscription = row.original.subscription;
+      return (
+        <div className="text-center">
+          {subscription?.updatedAt ? formatDate(subscription.updatedAt) : "-"}
         </div>
       );
     },

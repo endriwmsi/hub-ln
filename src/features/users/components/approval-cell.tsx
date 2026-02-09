@@ -1,12 +1,14 @@
 "use client";
 
-import type { User } from "@/core/db/schema";
 import { Switch } from "@/shared/components/ui/switch";
 import { cn } from "@/shared/lib/utils";
 import { useToggleApproval } from "../hooks/use-toggle-approval";
 
 type ApprovalCellProps = {
-  user: User;
+  user: {
+    id: string;
+    approved: boolean;
+  };
 };
 
 export function ApprovalCell({ user }: ApprovalCellProps) {

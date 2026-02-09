@@ -1,6 +1,6 @@
 "use server";
 
-import { and, asc, count, desc, ilike, or, sql } from "drizzle-orm";
+import { and, asc, desc, ilike, or, sql } from "drizzle-orm";
 import { requireAdmin } from "@/core/auth/dal";
 import { db } from "@/core/db";
 import { user } from "@/core/db/schema";
@@ -17,6 +17,7 @@ export async function getUsers(filters: UserFilters) {
     const {
       search,
       role,
+      activeStatus,
       sortBy = "createdAt",
       sortOrder = "desc",
       page,
@@ -48,28 +49,63 @@ export async function getUsers(filters: UserFilters) {
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
     // Definir ordem de classificação
-    const orderColumn = {
-      createdAt: user.createdAt,
-      name: user.name,
-      email: user.email,
-    }[sortBy];
+    // activeStatus será ordenado manualmente depois
+    const orderColumn =
+      sortBy === "activeStatus"
+        ? user.createdAt // fallback, não será usado
+        : {
+            createdAt: user.createdAt,
+            name: user.name,
+            email: user.email,
+          }[sortBy];
 
     const orderDirection = sortOrder === "asc" ? asc : desc;
 
     // Buscar usuários com paginação
-    const offset = (page - 1) * pageSize;
 
-    const [users, [{ total }]] = await Promise.all([
-      db.query.user.findMany({
-        where: whereClause,
-        orderBy: orderDirection(orderColumn),
-        limit: pageSize,
-        offset,
-      }),
-      db.select({ total: count() }).from(user).where(whereClause),
-    ]);
+    const allUsers = await db.query.user.findMany({
+      where: whereClause,
+      orderBy: orderDirection(orderColumn),
+      with: {
+        subscription: true,
+      },
+    });
 
+    // Filtrar por status ativo (baseado na subscription)
+    let filteredUsers = allUsers;
+    if (activeStatus && activeStatus !== "all") {
+      filteredUsers = allUsers.filter((u) => {
+        const isActive =
+          u.subscription?.status === "active" ||
+          u.subscription?.status === "trial";
+        return activeStatus === "active" ? isActive : !isActive;
+      });
+    }
+
+    // Ordenar por status ativo se solicitado
+    if (sortBy === "activeStatus") {
+      filteredUsers.sort((a, b) => {
+        const aIsActive =
+          a.subscription?.status === "active" ||
+          a.subscription?.status === "trial";
+        const bIsActive =
+          b.subscription?.status === "active" ||
+          b.subscription?.status === "trial";
+
+        // desc = inativos primeiro, asc = ativos primeiro
+        if (sortOrder === "desc") {
+          return aIsActive === bIsActive ? 0 : aIsActive ? 1 : -1;
+        } else {
+          return aIsActive === bIsActive ? 0 : aIsActive ? -1 : 1;
+        }
+      });
+    }
+
+    // Aplicar paginação
+    const total = filteredUsers.length;
     const totalPages = Math.ceil(total / pageSize);
+    const offset = (page - 1) * pageSize;
+    const users = filteredUsers.slice(offset, offset + pageSize);
 
     return {
       success: true,
