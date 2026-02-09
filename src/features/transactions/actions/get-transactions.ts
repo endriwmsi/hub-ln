@@ -31,26 +31,37 @@ export async function getTransactions(
 
     // Buscar pagamentos de serviços (service requests pagos)
     if (type === "all" || type === "service_payment") {
+      const isAdmin = session.user.role === "admin";
+
       const servicePayments = await db.query.serviceRequest.findMany({
         where: and(
-          eq(serviceRequest.userId, session.userId),
+          isAdmin ? undefined : eq(serviceRequest.userId, session.userId),
           eq(serviceRequest.paid, true),
         ),
         with: {
           service: {
             columns: { title: true },
           },
+          user: {
+            columns: { name: true },
+          },
         },
         orderBy: [desc(serviceRequest.createdAt)],
       });
 
       for (const payment of servicePayments) {
+        const isMyPayment = payment.userId === session.userId;
+        const description =
+          isAdmin && !isMyPayment
+            ? `Pagamento - ${payment.service.title} (${payment.user.name})`
+            : `Pagamento - ${payment.service.title}`;
+
         transactions.push({
           id: payment.id,
           type: "service_payment",
           amount: payment.totalPrice,
           status: "paid",
-          description: `Pagamento - ${payment.service.title}`,
+          description,
           createdAt: payment.createdAt,
           relatedId: payment.id,
         });
@@ -59,8 +70,10 @@ export async function getTransactions(
 
     // Buscar comissões recebidas
     if (type === "all" || type === "commission") {
+      const isAdmin = session.user.role === "admin";
+
       const commissions = await db.query.commission.findMany({
-        where: eq(commission.userId, session.userId),
+        where: isAdmin ? undefined : eq(commission.userId, session.userId),
         with: {
           serviceRequest: {
             columns: { id: true },
@@ -73,17 +86,24 @@ export async function getTransactions(
           payer: {
             columns: { name: true },
           },
+          user: {
+            columns: { name: true },
+          },
         },
         orderBy: [desc(commission.createdAt)],
       });
 
       for (const comm of commissions) {
+        const isMyCommission = comm.userId === session.userId;
+        const userInfo =
+          isAdmin && !isMyCommission ? ` - ${comm.user.name}` : "";
+
         transactions.push({
           id: comm.id,
           type: "commission",
           amount: comm.amount,
           status: comm.status,
-          description: `Comissão - ${comm.serviceRequest.service.title} (${comm.payer.name})`,
+          description: `Comissão - ${comm.serviceRequest.service.title} (${comm.payer.name})${userInfo}`,
           createdAt: comm.createdAt,
           availableAt: comm.availableAt,
           relatedId: comm.serviceRequestId,

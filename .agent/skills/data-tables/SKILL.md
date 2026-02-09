@@ -11,10 +11,8 @@ Skill para criação de tabelas de dados com filtros, paginação e integração
 
 ```
 features/{feature}/components/
-├── {feature}-table-container.tsx  # Container com React Query
-├── {feature}-table-filters.tsx    # Filtros com debounce
+
 ├── data-table.tsx                 # Tabela genérica
-├── data-table-pagination.tsx      # Paginação
 ├── data-table-skeleton.tsx        # Loading skeleton
 └── columns.tsx                    # Definição de colunas
 ```

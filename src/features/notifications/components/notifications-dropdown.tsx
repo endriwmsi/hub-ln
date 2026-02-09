@@ -1,10 +1,11 @@
 "use client";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Bell, Check } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useState } from "react";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -20,57 +21,49 @@ import { getNotifications, markNotificationsAsRead } from "../actions";
 import type { Notification } from "../types";
 
 export function NotificationsDropdown() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const queryClient = useQueryClient();
 
-  // Carregar notificações
-  const loadNotifications = useCallback(async () => {
-    const result = await getNotifications(10);
+  // Fetch notifications with react-query
+  const { data, isLoading } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: () => getNotifications(10),
+    refetchInterval: 30000, // Refetch every 30 seconds
+    staleTime: 10000, // Consider data stale after 10 seconds
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+  });
 
-    if (result.success && result.data) {
-      setNotifications(result.data.notifications);
-      setUnreadCount(result.data.unreadCount);
-    }
-  }, []);
+  const notifications = data?.data?.notifications || [];
+  const unreadCount = data?.data?.unreadCount || 0;
 
-  // Carregar ao montar e quando abrir
-  useEffect(() => {
-    loadNotifications();
-  }, [loadNotifications]);
+  // Mark all as read mutation
+  const markAllAsReadMutation = useMutation({
+    mutationFn: () => markNotificationsAsRead(),
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
 
-  useEffect(() => {
-    if (isOpen) {
-      loadNotifications();
-    }
-  }, [isOpen, loadNotifications]);
+  // Mark single notification as read mutation
+  const markAsReadMutation = useMutation({
+    mutationFn: (notificationId: string) =>
+      markNotificationsAsRead([notificationId]),
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
 
   // Marcar todas como lidas
   const handleMarkAllAsRead = () => {
-    startTransition(async () => {
-      await markNotificationsAsRead();
-      setNotifications((prev) =>
-        prev.map((n) => ({ ...n, read: true, readAt: new Date() })),
-      );
-      setUnreadCount(0);
-    });
+    markAllAsReadMutation.mutate();
   };
 
   // Marcar uma como lida
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.read) {
-      startTransition(async () => {
-        await markNotificationsAsRead([notification.id]);
-        setNotifications((prev) =>
-          prev.map((n) =>
-            n.id === notification.id
-              ? { ...n, read: true, readAt: new Date() }
-              : n,
-          ),
-        );
-        setUnreadCount((prev) => Math.max(0, prev - 1));
-      });
+      markAsReadMutation.mutate(notification.id);
     }
   };
 
@@ -97,10 +90,10 @@ export function NotificationsDropdown() {
               variant="ghost"
               size="sm"
               onClick={handleMarkAllAsRead}
-              disabled={isPending}
+              disabled={markAllAsReadMutation.isPending}
               className="h-auto py-1 px-2 text-xs"
             >
-              {isPending ? (
+              {markAllAsReadMutation.isPending ? (
                 <Spinner className="h-3 w-3" />
               ) : (
                 <>
@@ -113,7 +106,11 @@ export function NotificationsDropdown() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <div className="max-h-80 overflow-y-auto">
-          {notifications.length === 0 ? (
+          {isLoading ? (
+            <div className="flex justify-center items-center p-4">
+              <Spinner className="h-5 w-5" />
+            </div>
+          ) : notifications.length === 0 ? (
             <div className="text-muted-foreground p-4 text-center text-sm">
               Nenhuma notificação
             </div>
@@ -153,12 +150,15 @@ function NotificationContent({ notification }: { notification: Notification }) {
           }`}
         />
         <div className="flex-1 min-w-0">
-          <span className="text-sm font-medium block truncate">
-            {notification.title}
-          </span>
-          <span className="text-muted-foreground text-xs block truncate">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium block truncate">
+              {notification.title}
+            </span>
+            {notification.read ?? <Check className="h-3 w-3" />}
+          </div>
+          <p className="text-muted-foreground text-xs block truncate">
             {notification.message}
-          </span>
+          </p>
         </div>
       </div>
       <span className="text-muted-foreground ml-4 text-xs">

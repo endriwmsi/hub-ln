@@ -6,23 +6,11 @@ import {
 } from "@/features/transactions";
 import BalanceCardsSection from "@/features/transactions/components/balance-cards-section";
 import PendingWithdrawalsSection from "@/features/transactions/components/pending-withdrawals-section";
-import TransactionsTableSection from "@/features/transactions/components/transaction-table-section";
+import { TransactionsTableContainer } from "@/features/transactions/components/transactions-table-container";
 import WithdrawalSection from "@/features/transactions/components/withdrawal-section";
 import { Card, CardContent } from "@/shared/components/ui/card";
 
-type PageProps = {
-  searchParams: Promise<{
-    search?: string;
-    type?: string;
-    status?: string;
-    page?: string;
-    pageSize?: string;
-  }>;
-};
-
-export default async function TransacoesPage({ searchParams }: PageProps) {
-  const params = await searchParams;
-
+export default async function TransacoesPage() {
   return (
     <div className="space-y-6 p-8">
       {/* Header */}
@@ -55,7 +43,7 @@ export default async function TransacoesPage({ searchParams }: PageProps) {
           <TransactionsFilters />
 
           <Suspense fallback={<TransactionsTableSkeleton />}>
-            <TransactionsTableSection params={params} />
+            <TransactionsTableContainer />
           </Suspense>
         </CardContent>
       </Card>

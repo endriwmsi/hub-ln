@@ -1,4 +1,4 @@
-import { eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/core/db";
 import {
@@ -6,6 +6,7 @@ import {
   serviceRequest,
   user,
   userBalance,
+  userServicePrice,
 } from "@/core/db/schema";
 import { asaas } from "@/lib/asaas";
 import type {
@@ -187,7 +188,6 @@ async function processPaymentConfirmed(
       const commissionsCreated = await processCommissions(
         request.id,
         request.userId,
-        parseFloat(request.totalPrice),
       );
       totalCommissions += commissionsCreated;
     }
@@ -211,17 +211,35 @@ async function processPaymentConfirmed(
  * Processa comissões para a cadeia de indicações
  *
  * Lógica:
- * - O pagamento total vai para o admin (usuário 01)
- * - A comissão de cada revendedor na cadeia é calculada como:
- *   (preço de revenda do revendedor) - (preço que ele paga ao indicador ou admin)
- * - Percorre a cadeia do comprador até o admin
+ * - Admin (level 1) NÃO recebe comissão - ele é responsável pelo valor base
+ * - A comissão de cada revendedor é: (resalePrice - costPrice) * quantity
+ * - Só recebe comissão quem tem userServicePrice configurado
  */
 async function processCommissions(
   serviceRequestId: string,
   payerUserId: string,
-  totalValue: number,
 ): Promise<number> {
   try {
+    // Buscar dados da solicitação para obter serviceId e quantity
+    const requestData = await db
+      .select({
+        serviceId: serviceRequest.serviceId,
+        quantity: serviceRequest.quantity,
+      })
+      .from(serviceRequest)
+      .where(eq(serviceRequest.id, serviceRequestId))
+      .limit(1);
+
+    if (!requestData[0]) {
+      console.error(
+        "[Commissions] Service request not found:",
+        serviceRequestId,
+      );
+      return 0;
+    }
+
+    const { serviceId, quantity } = requestData[0];
+
     // Buscar dados do pagador (quem comprou)
     const payerData = await db
       .select({
@@ -244,7 +262,6 @@ async function processCommissions(
     }
 
     // Buscar a cadeia de indicações
-    // referredBy contém o código de referência, precisamos encontrar o usuário
     let currentReferralCode: string | null = payer.referredBy;
     let commissionsCreated = 0;
     let level = 1;
@@ -277,36 +294,61 @@ async function processCommissions(
 
       const referrer: ReferrerData = referrerData[0];
 
-      // Calcular comissão para este nível
-      // Por enquanto, usamos uma lógica simplificada:
-      // - Nível 1 (indicador direto): 10% do valor
-      // - Níveis subsequentes: 5% cada
-      // TODO: Implementar lógica de preços personalizados por usuário
-      const commissionPercentage = level === 1 ? 0.1 : 0.05;
-      const commissionAmount = totalValue * commissionPercentage;
-
-      if (commissionAmount > 0) {
-        // Criar registro de comissão
-        await db.insert(commission).values({
-          userId: referrer.id,
-          serviceRequestId: serviceRequestId,
-          payerUserId: payerUserId,
-          amount: commissionAmount.toFixed(2),
-          status: "available", // Disponível imediatamente após pagamento
-          description: `Comissão nível ${level} - Pagamento de serviço`,
-          level: level.toString(),
-          availableAt: new Date(),
-        });
-
-        // Atualizar saldo do usuário
-        await updateUserBalance(referrer.id, commissionAmount);
-
-        commissionsCreated++;
+      // Admin NÃO recebe comissão - para a cadeia aqui
+      if (referrer.role === "admin") {
+        console.log(
+          "[Commissions] Reached admin, stopping chain (no commission for admin)",
+        );
+        break;
       }
 
-      // Se chegou no admin, para a cadeia
-      if (referrer.role === "admin") {
-        break;
+      // Buscar preço configurado para este usuário e serviço
+      const priceConfig = await db
+        .select({
+          resalePrice: userServicePrice.resalePrice,
+          costPrice: userServicePrice.costPrice,
+        })
+        .from(userServicePrice)
+        .where(
+          and(
+            eq(userServicePrice.userId, referrer.id),
+            eq(userServicePrice.serviceId, serviceId),
+          ),
+        )
+        .limit(1);
+
+      if (priceConfig[0]) {
+        // Calcular comissão: (resalePrice - costPrice) * quantity
+        const resalePrice = Number(priceConfig[0].resalePrice);
+        const costPrice = Number(priceConfig[0].costPrice);
+        const margin = resalePrice - costPrice;
+        const commissionAmount = margin * quantity;
+
+        if (commissionAmount > 0) {
+          // Criar registro de comissão
+          await db.insert(commission).values({
+            userId: referrer.id,
+            serviceRequestId: serviceRequestId,
+            payerUserId: payerUserId,
+            amount: commissionAmount.toFixed(2),
+            status: "available",
+            description: `Comissão de revenda - Margem R$ ${margin.toFixed(2)} x ${quantity} unidades`,
+            level: level.toString(),
+            availableAt: new Date(),
+          });
+
+          // Atualizar saldo do usuário
+          await updateUserBalance(referrer.id, commissionAmount);
+
+          commissionsCreated++;
+          console.log(
+            `[Commissions] Created commission for user ${referrer.id}: R$ ${commissionAmount.toFixed(2)}`,
+          );
+        }
+      } else {
+        console.log(
+          `[Commissions] No price config for user ${referrer.id}, skipping`,
+        );
       }
 
       // Próximo nível
