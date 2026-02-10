@@ -19,6 +19,8 @@ export type AcaoClientItem = {
   userEmail: string;
   requestCreatedAt: Date;
   requestPaid: boolean;
+  // Valor unitário pago pelo parceiro
+  precoUnitario: number;
 };
 
 export type GetAcaoClientsFilters = {
@@ -64,6 +66,8 @@ export async function getAcaoClients(
         itemsStatus: serviceRequest.itemsStatus,
         paid: serviceRequest.paid,
         createdAt: serviceRequest.createdAt,
+        totalPrice: serviceRequest.totalPrice,
+        quantity: serviceRequest.quantity,
         userName: user.name,
         userEmail: user.email,
       })
@@ -77,6 +81,12 @@ export async function getAcaoClients(
     for (const request of requests) {
       const formData = request.formData as Record<string, unknown>;
       const isBulkUpload = formData?.uploadType === "bulk";
+
+      // Calcular preço unitário (totalPrice / quantity)
+      const precoUnitario =
+        request.quantity > 0
+          ? Number(request.totalPrice) / request.quantity
+          : 0;
 
       if (isBulkUpload) {
         const items =
@@ -105,6 +115,7 @@ export async function getAcaoClients(
             userEmail: request.userEmail,
             requestCreatedAt: request.createdAt,
             requestPaid: request.paid,
+            precoUnitario,
           });
         });
       } else {
@@ -135,6 +146,7 @@ export async function getAcaoClients(
             userEmail: request.userEmail,
             requestCreatedAt: request.createdAt,
             requestPaid: request.paid,
+            precoUnitario,
           });
         }
       }

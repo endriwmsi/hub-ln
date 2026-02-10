@@ -1,7 +1,6 @@
 "use client";
 
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import type { RowSelectionState } from "@tanstack/react-table";
 import {
   CheckCircle2,
   ChevronLeft,
@@ -12,11 +11,9 @@ import {
   XCircle,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
-import { Checkbox } from "@/shared/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,20 +29,15 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { Skeleton } from "@/shared/components/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/shared/components/ui/table";
 import { useDebounce } from "@/shared/hooks/use-debounce";
 import {
   useAcaoClients,
   useUpdateBulkItemsStatus,
   useUpdateSingleItemStatus,
 } from "../hooks";
+import { createAcaoClientsColumns } from "./acao-clients-columns";
+import { AcaoClientsDataTable } from "./acao-clients-data-table";
+import { AcaoClientsDataTableSkeleton } from "./acao-clients-data-table-skeleton";
 
 type StatusType = "aguardando" | "baixas_completas" | "baixas_negadas";
 
@@ -58,66 +50,6 @@ type AcaoClientsTableProps = {
 };
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
-
-const statusConfig = {
-  aguardando: {
-    label: "Aguardando",
-    className:
-      "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-    icon: Hourglass,
-  },
-  baixas_completas: {
-    label: "Baixas Completas",
-    className:
-      "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-    icon: CheckCircle2,
-  },
-  baixas_negadas: {
-    label: "Baixas Negadas",
-    className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-    icon: XCircle,
-  },
-};
-
-function TableSkeletonRow({ variant = 1 }: { variant?: 1 | 2 | 3 | 4 | 5 }) {
-  const widths = {
-    1: { nome: "w-32", doc: "w-28", user: "w-24", userEmail: "w-32" },
-    2: { nome: "w-36", doc: "w-24", user: "w-28", userEmail: "w-36" },
-    3: { nome: "w-28", doc: "w-32", user: "w-20", userEmail: "w-28" },
-    4: { nome: "w-40", doc: "w-28", user: "w-32", userEmail: "w-40" },
-    5: { nome: "w-32", doc: "w-28", user: "w-24", userEmail: "w-32" },
-  };
-  const w = widths[variant];
-
-  return (
-    <TableRow>
-      <TableCell>
-        <Skeleton className="h-4 w-4" />
-      </TableCell>
-      <TableCell>
-        <Skeleton className={`h-4 ${w.nome}`} />
-      </TableCell>
-      <TableCell>
-        <Skeleton className={`h-4 ${w.doc}`} />
-      </TableCell>
-      <TableCell>
-        <Skeleton className="h-6 w-24" />
-      </TableCell>
-      <TableCell>
-        <div className="space-y-1">
-          <Skeleton className={`h-4 ${w.user}`} />
-          <Skeleton className={`h-3 ${w.userEmail}`} />
-        </div>
-      </TableCell>
-      <TableCell>
-        <Skeleton className="h-4 w-20" />
-      </TableCell>
-      <TableCell>
-        <Skeleton className="h-8 w-16" />
-      </TableCell>
-    </TableRow>
-  );
-}
 
 export function AcaoClientsTable({
   acaoId,
@@ -135,9 +67,7 @@ export function AcaoClientsTable({
   const [currentStatus, setCurrentStatus] = useState(initialStatus);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [pageSize, setPageSize] = useState(initialPageSize);
-  const [selectedItems, setSelectedItems] = useState<
-    Array<{ requestId: string; itemIndex: number }>
-  >([]);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   // Debounce do valor de busca (400ms)
   const debouncedSearch = useDebounce(searchValue, 400);
@@ -175,6 +105,32 @@ export function AcaoClientsTable({
       }
     : { aguardando: 0, baixas_completas: 0, baixas_negadas: 0 };
   const totalItems = data?.success ? data.data?.totalItems || 0 : 0;
+
+  const isPending =
+    bulkUpdateMutation.isPending || singleUpdateMutation.isPending;
+  const isSearching = isFetching && !isLoading;
+
+  // Converter rowSelection para array de items selecionados
+  const selectedItems = useMemo(() => {
+    return Object.keys(rowSelection)
+      .filter((key) => rowSelection[key])
+      .map((key) => {
+        const [requestId, itemIndex] = key.split("-");
+        return { requestId, itemIndex: Number.parseInt(itemIndex) };
+      });
+  }, [rowSelection]);
+
+  // Colunas com callbacks
+  const columns = useMemo(
+    () =>
+      createAcaoClientsColumns({
+        onStatusUpdate: (requestId, itemIndex, status) => {
+          singleUpdateMutation.mutate({ requestId, itemIndex, status });
+        },
+        isPending,
+      }),
+    [singleUpdateMutation, isPending],
+  );
 
   // Atualiza a URL quando os filtros mudam
   const updateUrl = useCallback(
@@ -236,69 +192,25 @@ export function AcaoClientsTable({
   const handleStatusFilter = (status: string) => {
     setCurrentStatus(status);
     setCurrentPage(1);
-    setSelectedItems([]);
+    setRowSelection({});
     updateUrl({ status, page: 1 });
   };
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
-    setSelectedItems([]);
+    setRowSelection({});
     updateUrl({ page: newPage });
   };
 
   const handlePageSizeChange = (newPageSize: string) => {
-    const size = parseInt(newPageSize);
+    const size = Number.parseInt(newPageSize);
     setPageSize(size);
     setCurrentPage(1);
-    setSelectedItems([]);
+    setRowSelection({});
     updateUrl({ pageSize: size, page: 1 });
   };
 
-  // Seleção
-  const isAllSelected =
-    items.length > 0 &&
-    items.every((item) =>
-      selectedItems.some(
-        (s) => s.requestId === item.requestId && s.itemIndex === item.itemIndex,
-      ),
-    );
-
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedItems(
-        items.map((item) => ({
-          requestId: item.requestId,
-          itemIndex: item.itemIndex,
-        })),
-      );
-    } else {
-      setSelectedItems([]);
-    }
-  };
-
-  const handleSelectItem = (
-    requestId: string,
-    itemIndex: number,
-    checked: boolean,
-  ) => {
-    if (checked) {
-      setSelectedItems((prev) => [...prev, { requestId, itemIndex }]);
-    } else {
-      setSelectedItems((prev) =>
-        prev.filter(
-          (s) => !(s.requestId === requestId && s.itemIndex === itemIndex),
-        ),
-      );
-    }
-  };
-
-  const isItemSelected = (requestId: string, itemIndex: number) => {
-    return selectedItems.some(
-      (s) => s.requestId === requestId && s.itemIndex === itemIndex,
-    );
-  };
-
-  // Atualização de status
+  // Atualização de status em lote
   const handleBulkStatusUpdate = (status: StatusType) => {
     if (selectedItems.length === 0) {
       toast.error("Selecione pelo menos um item");
@@ -309,23 +221,11 @@ export function AcaoClientsTable({
       { items: selectedItems, status },
       {
         onSuccess: () => {
-          setSelectedItems([]);
+          setRowSelection({});
         },
       },
     );
   };
-
-  const handleSingleStatusUpdate = (
-    requestId: string,
-    itemIndex: number,
-    status: StatusType,
-  ) => {
-    singleUpdateMutation.mutate({ requestId, itemIndex, status });
-  };
-
-  const isPending =
-    bulkUpdateMutation.isPending || singleUpdateMutation.isPending;
-  const isSearching = isFetching && !isLoading;
 
   return (
     <div className="space-y-4">
@@ -468,7 +368,7 @@ export function AcaoClientsTable({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setSelectedItems([])}
+              onClick={() => setRowSelection({})}
             >
               Limpar
             </Button>
@@ -476,157 +376,17 @@ export function AcaoClientsTable({
         )}
       </div>
 
-      {/* Table */}
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12">
-                <Checkbox
-                  checked={isAllSelected}
-                  onCheckedChange={handleSelectAll}
-                  aria-label="Selecionar todos"
-                  disabled={isLoading}
-                />
-              </TableHead>
-              <TableHead>Nome</TableHead>
-              <TableHead>Documento</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Usuário</TableHead>
-              <TableHead>Data Envio</TableHead>
-              <TableHead className="w-25">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              // Skeleton loading
-              <>
-                <TableSkeletonRow variant={1} />
-                <TableSkeletonRow variant={2} />
-                <TableSkeletonRow variant={3} />
-                <TableSkeletonRow variant={4} />
-                <TableSkeletonRow variant={5} />
-              </>
-            ) : items.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={7}
-                  className="h-24 text-center text-muted-foreground"
-                >
-                  Nenhum cliente encontrado
-                </TableCell>
-              </TableRow>
-            ) : (
-              items.map((item) => {
-                const status = statusConfig[item.status];
-                const Icon = status.icon;
-                const isSelected = isItemSelected(
-                  item.requestId,
-                  item.itemIndex,
-                );
-
-                return (
-                  <TableRow
-                    key={`${item.requestId}-${item.itemIndex}`}
-                    className={isSelected ? "bg-primary/5" : ""}
-                  >
-                    <TableCell>
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={(checked) =>
-                          handleSelectItem(
-                            item.requestId,
-                            item.itemIndex,
-                            !!checked,
-                          )
-                        }
-                        aria-label={`Selecionar ${item.nome}`}
-                      />
-                    </TableCell>
-                    <TableCell className="font-medium">{item.nome}</TableCell>
-                    <TableCell className="font-mono text-sm">
-                      {item.documento}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="secondary"
-                        className={`gap-1 ${status.className}`}
-                      >
-                        <Icon className="h-3 w-3" />
-                        {status.label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="text-sm font-medium">{item.userName}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {item.userEmail}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {format(new Date(item.requestCreatedAt), "dd/MM/yyyy", {
-                        locale: ptBR,
-                      })}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            disabled={isPending}
-                          >
-                            Editar
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() =>
-                              handleSingleStatusUpdate(
-                                item.requestId,
-                                item.itemIndex,
-                                "aguardando",
-                              )
-                            }
-                          >
-                            <Hourglass className="h-4 w-4 mr-2 text-yellow-600" />
-                            Aguardando
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() =>
-                              handleSingleStatusUpdate(
-                                item.requestId,
-                                item.itemIndex,
-                                "baixas_completas",
-                              )
-                            }
-                          >
-                            <CheckCircle2 className="h-4 w-4 mr-2 text-green-600" />
-                            Baixas Completas
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() =>
-                              handleSingleStatusUpdate(
-                                item.requestId,
-                                item.itemIndex,
-                                "baixas_negadas",
-                              )
-                            }
-                          >
-                            <XCircle className="h-4 w-4 mr-2 text-red-600" />
-                            Baixas Negadas
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      {/* Data Table */}
+      {isLoading ? (
+        <AcaoClientsDataTableSkeleton />
+      ) : (
+        <AcaoClientsDataTable
+          columns={columns}
+          data={items}
+          rowSelection={rowSelection}
+          onRowSelectionChange={setRowSelection}
+        />
+      )}
 
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
