@@ -3,9 +3,19 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Check, Eye, MoreHorizontal, Trash2, X } from "lucide-react";
+import {
+  Check,
+  CheckCircle2,
+  Eye,
+  Hourglass,
+  MoreHorizontal,
+  Trash2,
+  X,
+  XCircle,
+} from "lucide-react";
 import Link from "next/link";
 import { formatCurrency } from "@/shared";
+import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import {
@@ -15,7 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
-import type { Submission } from "../types";
+import type { GlobalStatus, Submission } from "../types";
 
 type ColumnsOptions = {
   onDelete?: (id: string) => void;
@@ -92,6 +102,57 @@ export function createColumns(
             <span className="text-sm">Pendente</span>
           </div>
         ),
+    },
+    {
+      accessorKey: "globalStatus",
+      header: "Status Baixas",
+      cell: ({ row }) => {
+        const globalStatus = row.original.globalStatus;
+
+        if (!globalStatus) {
+          return <span className="text-muted-foreground text-sm">-</span>;
+        }
+
+        const statusConfig: Record<
+          GlobalStatus,
+          { label: string; className: string; icon: typeof CheckCircle2 }
+        > = {
+          aguardando: {
+            label: "Aguardando",
+            className:
+              "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+            icon: Hourglass,
+          },
+          baixas_completas: {
+            label: "Completas",
+            className:
+              "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+            icon: CheckCircle2,
+          },
+          baixas_parciais: {
+            label: "Parciais",
+            className:
+              "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+            icon: Hourglass,
+          },
+          baixas_negadas: {
+            label: "Negadas",
+            className:
+              "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+            icon: XCircle,
+          },
+        };
+
+        const config = statusConfig[globalStatus];
+        const Icon = config.icon;
+
+        return (
+          <Badge variant="secondary" className={`gap-1 ${config.className}`}>
+            <Icon className="h-3 w-3" />
+            {config.label}
+          </Badge>
+        );
+      },
     },
     {
       accessorKey: "createdAt",

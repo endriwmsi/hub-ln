@@ -1,5 +1,11 @@
 import type { ServiceRequestStatus } from "@/features/service-requests/schemas";
 
+export type GlobalStatus =
+  | "aguardando"
+  | "baixas_completas"
+  | "baixas_parciais"
+  | "baixas_negadas";
+
 export type Submission = {
   id: string;
   quantity: number;
@@ -8,6 +14,7 @@ export type Submission = {
   paid: boolean;
   paidAt: Date | null;
   createdAt: Date;
+  globalStatus: GlobalStatus | null;
   service: {
     id: string;
     title: string;

@@ -67,6 +67,8 @@ export async function getSubmissions(
         paid: serviceRequest.paid,
         paidAt: serviceRequest.paidAt,
         createdAt: serviceRequest.createdAt,
+        formData: serviceRequest.formData,
+        itemsStatus: serviceRequest.itemsStatus,
         service: {
           id: services.id,
           title: services.title,
@@ -94,12 +96,53 @@ export async function getSubmissions(
     return {
       success: true,
       data: {
-        submissions: submissions.map((s) => ({
-          ...s,
-          service: s.service as { id: string; title: string; slug: string },
-          user: s.user as { id: string; name: string; email: string },
-          acao: s.acao?.id ? (s.acao as { id: string; nome: string }) : null,
-        })),
+        submissions: submissions.map((s) => {
+          // Calcular status global para envios em lote (limpa nome)
+          const formData = s.formData as Record<string, unknown> | null;
+          const isBulkUpload = formData?.uploadType === "bulk";
+          const itemsStatus = (s.itemsStatus || []) as Array<{
+            status: "aguardando" | "baixas_completas" | "baixas_negadas";
+          }>;
+
+          let globalStatus:
+            | "aguardando"
+            | "baixas_completas"
+            | "baixas_parciais"
+            | "baixas_negadas"
+            | null = null;
+
+          if (isBulkUpload && itemsStatus.length > 0) {
+            const completasCount = itemsStatus.filter(
+              (i) => i.status === "baixas_completas",
+            ).length;
+            const negadasCount = itemsStatus.filter(
+              (i) => i.status === "baixas_negadas",
+            ).length;
+            const totalItems = itemsStatus.length;
+
+            if (completasCount === totalItems) {
+              globalStatus = "baixas_completas";
+            } else if (completasCount > 0 || negadasCount > 0) {
+              globalStatus = "baixas_parciais";
+            } else {
+              globalStatus = "aguardando";
+            }
+          }
+
+          return {
+            id: s.id,
+            quantity: s.quantity,
+            totalPrice: s.totalPrice,
+            status: s.status,
+            paid: s.paid,
+            paidAt: s.paidAt,
+            createdAt: s.createdAt,
+            globalStatus,
+            service: s.service as { id: string; title: string; slug: string },
+            user: s.user as { id: string; name: string; email: string },
+            acao: s.acao?.id ? (s.acao as { id: string; nome: string }) : null,
+          };
+        }),
         pagination: {
           page,
           pageSize,

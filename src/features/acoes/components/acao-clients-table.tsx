@@ -111,12 +111,16 @@ export function AcaoClientsTable({
   const isSearching = isFetching && !isLoading;
 
   // Converter rowSelection para array de items selecionados
+  // O rowId tem formato: {requestId}-{itemIndex}
+  // Como requestId é UUID com hífens, usamos lastIndexOf para pegar apenas o último hífen
   const selectedItems = useMemo(() => {
     return Object.keys(rowSelection)
       .filter((key) => rowSelection[key])
       .map((key) => {
-        const [requestId, itemIndex] = key.split("-");
-        return { requestId, itemIndex: Number.parseInt(itemIndex) };
+        const lastDashIndex = key.lastIndexOf("-");
+        const requestId = key.substring(0, lastDashIndex);
+        const itemIndex = Number.parseInt(key.substring(lastDashIndex + 1));
+        return { requestId, itemIndex };
       });
   }, [rowSelection]);
 
