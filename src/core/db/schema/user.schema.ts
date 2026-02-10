@@ -59,6 +59,8 @@ export const user = pgTable("user", {
 
   // Integração com AbacatePay
   abacatePayCustomerId: text("abacate_pay_customer_id"),
+
+  pixKey: text("pix_key"),
 });
 
 export const userRelations = relations(user, ({ one }) => ({

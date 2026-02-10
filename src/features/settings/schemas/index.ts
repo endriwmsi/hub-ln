@@ -14,6 +14,13 @@ export const updateProfileSchema = z.object({
     .max(20, "Telefone deve ter no máximo 20 dígitos"),
 });
 
+export const updatePixKeySchema = z.object({
+  key: z
+    .string()
+    .min(3, "Nome deve ter pelo menos 3 caracteres")
+    .max(100, "Nome deve ter no máximo 100 caracteres"),
+});
+
 export const updatePasswordSchema = z
   .object({
     currentPassword: z
@@ -57,3 +64,4 @@ export const updateAddressSchema = z.object({
 export type UpdateProfileSchema = z.infer<typeof updateProfileSchema>;
 export type UpdatePasswordInput = z.infer<typeof updatePasswordSchema>;
 export type UpdateAddressInput = z.infer<typeof updateAddressSchema>;
+export type UpdatePixKeyInput = z.infer<typeof updatePixKeySchema>;

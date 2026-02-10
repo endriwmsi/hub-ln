@@ -1,7 +1,14 @@
 "use client";
 
 import { motion, type Variants } from "framer-motion";
-import { CreditCard, FileText, MapPin, Shield, User } from "lucide-react";
+import {
+  CreditCard,
+  FileText,
+  KeyIcon,
+  MapPin,
+  Shield,
+  User,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -32,6 +39,11 @@ export const sidebarNavItems = [
     title: "Assinatura",
     href: "/configuracoes/assinatura",
     icon: CreditCard,
+  },
+  {
+    title: "Chaves",
+    href: "/configuracoes/chaves",
+    icon: KeyIcon,
   },
 ];
 
