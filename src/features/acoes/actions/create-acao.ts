@@ -29,6 +29,9 @@ export async function createAcao(input: CreateAcaoInput) {
         statusOutros: validated.statusOutros,
         visivel: validated.visivel,
         permiteEnvios: validated.permiteEnvios,
+        // Campos admin
+        responsavel: validated.responsavel || null,
+        custoProcesso: validated.custoProcesso || null,
         createdById: user.id,
       })
       .returning();

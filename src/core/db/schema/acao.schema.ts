@@ -1,12 +1,5 @@
 import { relations } from "drizzle-orm";
-import {
-  boolean,
-  date,
-  pgEnum,
-  pgTable,
-  text,
-  timestamp,
-} from "drizzle-orm/pg-core";
+import { boolean, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { uuidv7 } from "uuidv7";
 import { user } from "./user.schema";
 
@@ -24,8 +17,8 @@ export const acao = pgTable("acao", {
 
   // Informações básicas
   nome: text("nome").notNull(),
-  dataInicio: date("data_inicio", { mode: "date" }).notNull(),
-  dataFim: date("data_fim", { mode: "date" }).notNull(),
+  dataInicio: timestamp("data_inicio", { withTimezone: true }).notNull(),
+  dataFim: timestamp("data_fim", { withTimezone: true }).notNull(),
 
   // Status por órgão
   statusSpc: statusOrgaoEnum("status_spc")
@@ -50,6 +43,10 @@ export const acao = pgTable("acao", {
   // Configurações de visibilidade e envios
   visivel: boolean("visivel").default(true).notNull(),
   permiteEnvios: boolean("permite_envios").default(true).notNull(),
+
+  // Campos admin-only
+  responsavel: text("responsavel"), // Nullable - nome do responsável
+  custoProcesso: text("custo_processo"), // Stored as text to avoid precision issues, nullable
 
   // Metadados
   createdAt: timestamp("created_at").defaultNow().notNull(),

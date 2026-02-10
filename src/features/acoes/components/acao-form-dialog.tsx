@@ -1,12 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import type { Acao } from "@/core/db/schema";
 import { Button } from "@/shared/components/ui/button";
+import { DateTimePicker } from "@/shared/components/ui/date-time-picker";
 import {
   Dialog,
   DialogContent,
@@ -75,6 +75,9 @@ export function AcaoFormDialog({
       statusOutros: "aguardando_baixas",
       visivel: true,
       permiteEnvios: true,
+      // Campos admin
+      responsavel: null,
+      custoProcesso: null,
     },
   });
 
@@ -93,6 +96,8 @@ export function AcaoFormDialog({
         statusOutros: acao.statusOutros as StatusOrgao,
         visivel: acao.visivel,
         permiteEnvios: acao.permiteEnvios,
+        responsavel: acao.responsavel || null,
+        custoProcesso: acao.custoProcesso || null,
       });
     } else {
       form.reset({
@@ -107,6 +112,8 @@ export function AcaoFormDialog({
         statusOutros: "aguardando_baixas",
         visivel: true,
         permiteEnvios: true,
+        responsavel: null,
+        custoProcesso: null,
       });
     }
   }, [acao, form]);
@@ -182,18 +189,12 @@ export function AcaoFormDialog({
                   name="dataInicio"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Data de Início</FormLabel>
+                      <FormLabel>Data e Hora de Início</FormLabel>
                       <FormControl>
-                        <Input
-                          type="date"
-                          value={
-                            field.value ? format(field.value, "yyyy-MM-dd") : ""
-                          }
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value ? new Date(e.target.value) : null,
-                            )
-                          }
+                        <DateTimePicker
+                          date={field.value}
+                          setDate={field.onChange}
+                          placeholder="Selecione data e hora de início"
                         />
                       </FormControl>
                       <FormMessage />
@@ -206,18 +207,12 @@ export function AcaoFormDialog({
                   name="dataFim"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Data de Fim</FormLabel>
+                      <FormLabel>Data e Hora de Fim</FormLabel>
                       <FormControl>
-                        <Input
-                          type="date"
-                          value={
-                            field.value ? format(field.value, "yyyy-MM-dd") : ""
-                          }
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value ? new Date(e.target.value) : null,
-                            )
-                          }
+                        <DateTimePicker
+                          date={field.value}
+                          setDate={field.onChange}
+                          placeholder="Selecione data e hora de fim"
                         />
                       </FormControl>
                       <FormMessage />
@@ -225,6 +220,56 @@ export function AcaoFormDialog({
                   )}
                 />
               </div>
+            </div>
+
+            {/* Campos Admin */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="responsavel"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Responsável</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Nome do responsável"
+                          {...field}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="custoProcesso"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Custo do Processo (R$)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        placeholder="0.00"
+                        {...field}
+                        value={field.value || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          // Allow only numbers and dots
+                          if (/^\d*\.?\d{0,2}$/.test(value) || value === "") {
+                            field.onChange(value);
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormDescription>Custos totais do processo</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             {/* Status por órgão */}

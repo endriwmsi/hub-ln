@@ -7,5 +7,6 @@ export { DataTable } from "./data-table";
 export { DataTablePagination } from "./data-table-pagination";
 export { DataTableSkeleton } from "./data-table-skeleton";
 export { DeleteAcaoDialog } from "./delete-acao-dialog";
+export { ExpandedRow } from "./expanded-row";
 export { StatusCell } from "./status-cell";
 export { ToggleCell } from "./toggle-cell";

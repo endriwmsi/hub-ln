@@ -1,9 +1,18 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import {
+  ArrowUpDown,
+  ChevronDown,
+  ChevronRight,
+  Eye,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import Link from "next/link";
 import type { Acao } from "@/core/db/schema";
+import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import {
@@ -15,7 +24,6 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
 import type { AcaoFilters } from "../schemas";
-import { StatusCell } from "./status-cell";
 import { ToggleCell } from "./toggle-cell";
 
 function formatDate(date: Date | string | null | undefined): string {
@@ -28,11 +36,60 @@ function formatDate(date: Date | string | null | undefined): string {
   }).format(d);
 }
 
+type StatusSummary = {
+  aguardando: number;
+  iniciadas: number;
+  completas: number;
+};
+
+function getStatusSummary(acao: Acao): StatusSummary {
+  const statuses = [
+    acao.statusSpc,
+    acao.statusBoaVista,
+    acao.statusSerasa,
+    acao.statusCenprotNacional,
+    acao.statusCenprotSp,
+    acao.statusOutros,
+  ];
+
+  return {
+    aguardando: statuses.filter((s) => s === "aguardando_baixas").length,
+    iniciadas: statuses.filter((s) => s === "baixas_iniciadas").length,
+    completas: statuses.filter((s) => s === "baixas_completas").length,
+  };
+}
+
+function StatusSummaryBadges({ acao }: { acao: Acao }) {
+  const summary = getStatusSummary(acao);
+
+  return (
+    <div className="flex gap-1.5 flex-wrap">
+      {summary.completas > 0 && (
+        <Badge variant="default" className="text-xs bg-green-600">
+          {summary.completas} ✓
+        </Badge>
+      )}
+      {summary.iniciadas > 0 && (
+        <Badge variant="secondary" className="text-xs">
+          {summary.iniciadas} ⏳
+        </Badge>
+      )}
+      {summary.aguardando > 0 && (
+        <Badge variant="outline" className="text-xs">
+          {summary.aguardando} ⏸
+        </Badge>
+      )}
+    </div>
+  );
+}
+
 type ColumnsProps = {
   filters: AcaoFilters;
   updateFilters: (newFilters: Partial<AcaoFilters>) => void;
   onEdit: (acao: Acao) => void;
   onDelete: (acao: Acao) => void;
+  expandedRows: Set<string>;
+  toggleRow: (id: string) => void;
 };
 
 export const createColumns = ({
@@ -40,7 +97,32 @@ export const createColumns = ({
   updateFilters,
   onEdit,
   onDelete,
+  expandedRows,
+  toggleRow,
 }: ColumnsProps): ColumnDef<Acao>[] => [
+  {
+    id: "expander",
+    header: () => <div className="w-8" />,
+    cell: ({ row }) => {
+      const isExpanded = expandedRows.has(row.original.id);
+      return (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0"
+          onClick={() => toggleRow(row.original.id)}
+        >
+          {isExpanded ? (
+            <ChevronDown className="h-4 w-4" />
+          ) : (
+            <ChevronRight className="h-4 w-4" />
+          )}
+        </Button>
+      );
+    },
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     id: "select",
     header: ({ table }) => (
@@ -90,7 +172,7 @@ export const createColumns = ({
     },
     cell: ({ row }) => {
       return (
-        <div className="font-medium text-left max-w-50 truncate">
+        <div className="font-medium text-left max-w-[200px] truncate">
           {row.getValue("nome")}
         </div>
       );
@@ -122,7 +204,7 @@ export const createColumns = ({
       );
     },
     cell: ({ row }) => (
-      <div className="text-center">
+      <div className="text-center text-sm">
         {formatDate(row.getValue("dataInicio"))}
       </div>
     ),
@@ -153,60 +235,17 @@ export const createColumns = ({
       );
     },
     cell: ({ row }) => (
-      <div className="text-center">{formatDate(row.getValue("dataFim"))}</div>
-    ),
-  },
-  {
-    accessorKey: "statusSpc",
-    header: () => <div className="text-center">SPC</div>,
-    cell: ({ row }) => (
-      <div className="flex justify-center">
-        <StatusCell acao={row.original} field="statusSpc" />
+      <div className="text-center text-sm">
+        {formatDate(row.getValue("dataFim"))}
       </div>
     ),
   },
   {
-    accessorKey: "statusBoaVista",
-    header: () => <div className="text-center">Boa Vista</div>,
+    id: "status",
+    header: () => <div className="text-center">Status Geral</div>,
     cell: ({ row }) => (
       <div className="flex justify-center">
-        <StatusCell acao={row.original} field="statusBoaVista" />
-      </div>
-    ),
-  },
-  {
-    accessorKey: "statusSerasa",
-    header: () => <div className="text-center">Serasa</div>,
-    cell: ({ row }) => (
-      <div className="flex justify-center">
-        <StatusCell acao={row.original} field="statusSerasa" />
-      </div>
-    ),
-  },
-  {
-    accessorKey: "statusCenprotNacional",
-    header: () => <div className="text-center">Cenprot Nacional</div>,
-    cell: ({ row }) => (
-      <div className="flex justify-center">
-        <StatusCell acao={row.original} field="statusCenprotNacional" />
-      </div>
-    ),
-  },
-  {
-    accessorKey: "statusCenprotSp",
-    header: () => <div className="text-center">Cenprot SP</div>,
-    cell: ({ row }) => (
-      <div className="flex justify-center">
-        <StatusCell acao={row.original} field="statusCenprotSp" />
-      </div>
-    ),
-  },
-  {
-    accessorKey: "statusOutros",
-    header: () => <div className="text-center">Outros</div>,
-    cell: ({ row }) => (
-      <div className="flex justify-center">
-        <StatusCell acao={row.original} field="statusOutros" />
+        <StatusSummaryBadges acao={row.original} />
       </div>
     ),
   },

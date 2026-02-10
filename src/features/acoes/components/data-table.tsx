@@ -7,8 +7,9 @@ import {
   type RowSelectionState,
   useReactTable,
 } from "@tanstack/react-table";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
+import type { Acao } from "@/core/db/schema";
 import {
   Table,
   TableBody,
@@ -17,17 +18,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/components/ui/table";
+import { ExpandedRow } from "./expanded-row";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onSelectionChange?: (selectedRows: TData[]) => void;
+  expandedRows: Set<string>;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   onSelectionChange,
+  expandedRows,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
@@ -85,21 +89,30 @@ export function DataTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map((row) => {
+                const isExpanded = expandedRows.has((row.original as Acao).id);
+                return (
+                  <Fragment key={row.id}>
+                    <TableRow data-state={row.getIsSelected() && "selected"}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                    {isExpanded && (
+                      <TableRow>
+                        <TableCell colSpan={columns.length} className="p-0">
+                          <ExpandedRow acao={row.original as Acao} />
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </Fragment>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell

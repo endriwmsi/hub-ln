@@ -28,6 +28,19 @@ export function AcoesTableContainer() {
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedAcao, setSelectedAcao] = useState<Acao | null>(null);
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+
+  const toggleRow = useCallback((id: string) => {
+    setExpandedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
 
   const handleSelectionChange = useCallback((selectedAcoes: Acao[]) => {
     console.log("Selected acoes:", selectedAcoes);
@@ -55,8 +68,10 @@ export function AcoesTableContainer() {
         updateFilters,
         onEdit: handleEdit,
         onDelete: handleDelete,
+        expandedRows,
+        toggleRow,
       }),
-    [filters, updateFilters, handleEdit, handleDelete],
+    [filters, updateFilters, handleEdit, handleDelete, expandedRows, toggleRow],
   );
 
   const { data, isLoading, isError, error } = useQuery({
@@ -97,6 +112,7 @@ export function AcoesTableContainer() {
         columns={columns}
         data={acoes}
         onSelectionChange={handleSelectionChange}
+        expandedRows={expandedRows}
       />
     );
   };

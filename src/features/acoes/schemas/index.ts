@@ -42,6 +42,13 @@ export const createAcaoBaseSchema = z.object({
   statusOutros: statusOrgaoSchema,
   visivel: z.boolean(),
   permiteEnvios: z.boolean(),
+  // Campos admin-only
+  responsavel: z.string().max(100, "Nome muito longo").optional().nullable(),
+  custoProcesso: z
+    .string()
+    .regex(/^\d+(\.\d{1,2})?$/, "Formato inválido. Use: 0.00")
+    .optional()
+    .nullable(),
 });
 
 export type CreateAcaoInput = z.infer<typeof createAcaoBaseSchema>;
@@ -60,6 +67,9 @@ export const createAcaoSchema = z
     statusOutros: statusOrgaoSchema.default("aguardando_baixas"),
     visivel: z.boolean().default(true),
     permiteEnvios: z.boolean().default(true),
+    // Campos admin-only
+    responsavel: z.string().max(100).optional().nullable(),
+    custoProcesso: z.string().optional().nullable(),
   })
   .refine((data) => data.dataFim >= data.dataInicio, {
     message: "Data de fim deve ser maior ou igual à data de início",
@@ -84,6 +94,9 @@ export const updateAcaoSchema = z.object({
   statusOutros: statusOrgaoSchema.optional(),
   visivel: z.boolean().optional(),
   permiteEnvios: z.boolean().optional(),
+  // Campos admin-only
+  responsavel: z.string().max(100).optional().nullable(),
+  custoProcesso: z.string().optional().nullable(),
 });
 
 export type UpdateAcaoInput = z.infer<typeof updateAcaoSchema>;
