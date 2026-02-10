@@ -37,7 +37,7 @@ export function UpdatePixKeyForm({ defaultValues }: UpdatePixKeyFormProps) {
   const form = useForm<UpdatePixKeyInput>({
     resolver: zodResolver(updatePixKeySchema),
     defaultValues: {
-      key: defaultValues.key ?? "",
+      key: defaultValues.key || "",
     },
   });
 

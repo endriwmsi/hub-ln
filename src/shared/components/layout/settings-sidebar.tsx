@@ -41,8 +41,8 @@ export const sidebarNavItems = [
     icon: CreditCard,
   },
   {
-    title: "Chaves",
-    href: "/configuracoes/chaves",
+    title: "Integrações",
+    href: "/configuracoes/integracoes",
     icon: KeyIcon,
   },
 ];
