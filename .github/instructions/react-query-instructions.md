@@ -1,77 +1,140 @@
-## 🔄 React Query Pattern
+---
+applyTo: "**/*.ts,**/*.tsx"
+---
 
-### Hook de Query com Auto-Refetch
+# React Query (TanStack Query)
+
+Esta skill orienta a implementação de gerenciamento de dados assíncronos usando `@tanstack/react-query` v5, seguindo os padrões estabelecidos neste projeto.
+
+## Quando usar esta skill
+
+- **Buscar dados do servidor** - Listagens, detalhes, dados paginados
+- **Criar, atualizar ou deletar recursos** - Operações CRUD com feedback visual
+- **Sincronizar cache automaticamente** - Invalidar queries após mutations
+- **Gerenciar loading/error states** - Estados de carregamento e erro de forma declarativa
+
+## Como usar
+
+### 1. Estrutura de Arquivos
+
+Os hooks de React Query devem seguir a estrutura feature-based:
+
+```
+src/features/{feature-name}/
+├── actions.ts          # Server actions (Next.js)
+├── schemas.ts          # Tipos e validações Zod
+└── hooks/
+    ├── use-{entities}.ts        # Query para listar (ex: use-services.ts)
+    ├── use-create-{entity}.ts   # Mutation para criar
+    ├── use-update-{entity}.ts   # Mutation para atualizar
+    └── use-delete-{entity}.ts   # Mutation para deletar
+```
+
+### 2. Convenções de Nomenclatura
+
+| Tipo                 | Padrão              | Exemplo                   |
+| -------------------- | ------------------- | ------------------------- |
+| Query (listar)       | `use{Entities}`     | `useServices`, `useUsers` |
+| Query (detalhe)      | `use{Entity}`       | `useService`, `useUser`   |
+| Mutation (criar)     | `useCreate{Entity}` | `useCreateService`        |
+| Mutation (atualizar) | `useUpdate{Entity}` | `useUpdateService`        |
+| Mutation (deletar)   | `useDelete{Entity}` | `useDeleteService`        |
+
+### 3. Query Keys
+
+Use arrays estruturados para query keys:
 
 ```typescript
-// features/commissions/hooks/use-commissions.ts
+// ✅ Bom - permite invalidação granular
+queryKey: ["services"]; // Lista todos
+queryKey: ["services", { onlyActive: true }]; // Lista com filtro
+queryKey: ["services", id]; // Detalhe por ID
+
+// ❌ Evitar - dificulta invalidação
+queryKey: ["all-services"];
+queryKey: [`service-${id}`];
+```
+
+### 4. Padrão de useQuery (Buscar Dados)
+
+```typescript
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { getCommissions } from "../actions";
+import { getEntities } from "../actions";
 
-export function useCommissions() {
+export function useEntities(filter?: boolean) {
   return useQuery({
-    queryKey: ["commissions"],
-    queryFn: getCommissions,
-    refetchInterval: 30000, // 30 segundos (requisito para página de transações)
-    staleTime: 20000,
+    queryKey: ["entities", { filter }],
+    queryFn: () => getEntities(filter),
   });
 }
 ```
 
-### Hook de Mutation
+### 5. Padrão de useMutation (Modificar Dados)
 
 ```typescript
-// features/commissions/hooks/use-request-withdrawal.ts
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { requestWithdrawal } from "../actions";
 import { toast } from "sonner";
+import { createEntity } from "../actions";
+import type { CreateEntityInput } from "../schemas";
 
-export function useRequestWithdrawal() {
+export function useCreateEntity() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: requestWithdrawal,
-    onSuccess: () => {
-      toast.success("Solicitação de saque enviada!");
-      queryClient.invalidateQueries({ queryKey: ["commissions"] });
-      queryClient.invalidateQueries({ queryKey: ["withdrawals"] });
+    mutationFn: (data: CreateEntityInput) => createEntity(data),
+    onSuccess: (result) => {
+      if (result.success) {
+        toast.success("Criado com sucesso!");
+        queryClient.invalidateQueries({ queryKey: ["entities"] });
+      } else {
+        toast.error("Erro ao criar");
+      }
     },
-    onError: (error) => {
-      toast.error("Erro ao solicitar saque");
-      console.error(error);
+    onError: () => {
+      toast.error("Erro ao criar");
     },
   });
 }
 ```
 
-### Provider no Layout
+### 6. Uso em Componentes
 
-```typescript
-// core/providers/index.tsx
-'use client'
+```tsx
+"use client";
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { useState } from 'react';
+import { useEntities } from "../hooks/use-entities";
+import { useCreateEntity } from "../hooks/use-create-entity";
 
-export function Providers({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-      staleTime: 60 * 1000, // 1 minuto
-      retry: 1,
-    },
-  },
-}));
+export function EntitiesTable() {
+  const { data, isLoading, error } = useEntities();
+  const createMutation = useCreateEntity();
 
-return (
-  <QueryClientProvider client={queryClient}>
-    {children}
-    <ReactQueryDevtools initialIsOpen={false} />
-  </QueryClientProvider>
-  );
+  if (isLoading) return <Loading />;
+  if (error) return <Error message={error.message} />;
+
+  const handleCreate = (data: CreateEntityInput) => {
+    createMutation.mutate(data);
+  };
+
+  return <Table data={data} />;
 }
 ```
+
+## Regras importantes
+
+> [!IMPORTANT]
+> Todos os hooks de React Query devem incluir `"use client"` no topo do arquivo.
+
+> [!TIP]
+> Sempre invalide queries relacionadas após uma mutation para manter o cache sincronizado.
+
+> [!WARNING]
+> Não use `queryClient.setQueryData` para modificar o cache diretamente, prefira `invalidateQueries` para garantir dados frescos.
+
+## Referências
+
+- [TanStack Query Docs](https://tanstack.com/query/latest)

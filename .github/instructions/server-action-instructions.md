@@ -1,27 +1,38 @@
-## ⚡ Server Actions Pattern
+---
+applyTo: "**/*.ts"
+---
 
-### Estrutura de uma Server Action
+# Server Actions
+
+Skill para implementação de Server Actions seguindo os padrões do projeto.
+
+## Quando usar
+
+- Criar, atualizar ou deletar recursos no banco
+- Operações que requerem autenticação
+- Ações que precisam revalidar cache
+
+## Estrutura Padrão
 
 ```typescript
-// features/acoes/actions/create-acao.ts
 "use server";
 
 import { verifySession } from "@/core/auth/dal";
 import { db } from "@/core/db";
-import { acoes } from "../db/schema";
-import { createAcaoSchema } from "../schemas";
+import { entities } from "../db/schema";
+import { createEntitySchema } from "../schemas";
 import { revalidatePath } from "next/cache";
 
-export async function createAcao(input: unknown) {
+export async function createEntity(input: unknown) {
   // 1. Verificar autenticação
   const { userId } = await verifySession();
 
-  // 2. Validar input
-  const validatedData = createAcaoSchema.parse(input);
+  // 2. Validar input com Zod
+  const validatedData = createEntitySchema.parse(input);
 
   // 3. Lógica de negócio
-  const [acao] = await db
-    .insert(acoes)
+  const [entity] = await db
+    .insert(entities)
     .values({
       ...validatedData,
       createdById: userId,
@@ -29,26 +40,35 @@ export async function createAcao(input: unknown) {
     .returning();
 
   // 4. Revalidar cache
-  revalidatePath("/acoes");
+  revalidatePath("/entities");
 
   // 5. Retornar resultado
-  return { success: true, data: acao };
+  return { success: true, data: entity };
 }
 ```
 
-### Public API da Feature
+## Checklist
 
-````typescript
-// features/acoes/index.ts
-export { AcaoForm } from './components/acao-form';
-export { AcoesTable } from './components/acoes-table';
-export { AcaoCard } from './components/acao-card';
+> [!IMPORTANT]
+> Sempre inclua `"use server"` no topo do arquivo.
 
-export { useAcoes } from './hooks/use-acoes';
-export { useCreateAcao } from './hooks/use-create-acao';
+> [!TIP]
+> Use `verifySession()` para obter o `userId` autenticado.
 
-export { createAcao, updateAcao, deleteAcao } from './actions';
+> [!WARNING]
+> Nunca confie em inputs do cliente - sempre valide com Zod.
 
-export type { Acao } from './types';
-```-
-````
+## Organização de Arquivos
+
+```
+features/{feature}/
+└── actions/
+    ├── create-entity.ts
+    ├── update-entity.ts
+    ├── delete-entity.ts
+    └── index.ts  // Re-exports
+```
+
+## Referências
+
+- Exemplos: [examples/](./examples/)
