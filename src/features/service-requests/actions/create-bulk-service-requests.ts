@@ -41,38 +41,26 @@ export async function createBulkServiceRequests(
       where: eq(user.id, session.userId),
     });
 
-    // Determinar preço a usar: preço de revenda do usuário > preço do indicador > preço base
+    // Determinar preço a usar: preço do indicador (costPrice) > preço base
+    // O usuário sempre paga o preço do indicador, não o seu próprio resalePrice
     let unitPrice = Number(service[0].basePrice);
 
-    if (currentUser) {
-      // Primeiro, tentar buscar preço de revenda do próprio usuário
-      const userPrice = await db.query.userServicePrice.findFirst({
-        where: and(
-          eq(userServicePrice.userId, session.userId),
-          eq(userServicePrice.serviceId, validatedInput.serviceId),
-        ),
+    if (currentUser?.referredBy) {
+      // Buscar preço do indicador
+      const referrer = await db.query.user.findFirst({
+        where: eq(user.referralCode, currentUser.referredBy),
       });
 
-      if (userPrice) {
-        // Usuário tem preço de revenda definido
-        unitPrice = Number(userPrice.resalePrice);
-      } else if (currentUser.referredBy) {
-        // Buscar preço do indicador
-        const referrer = await db.query.user.findFirst({
-          where: eq(user.referralCode, currentUser.referredBy),
+      if (referrer) {
+        const referrerPrice = await db.query.userServicePrice.findFirst({
+          where: and(
+            eq(userServicePrice.userId, referrer.id),
+            eq(userServicePrice.serviceId, validatedInput.serviceId),
+          ),
         });
 
-        if (referrer) {
-          const referrerPrice = await db.query.userServicePrice.findFirst({
-            where: and(
-              eq(userServicePrice.userId, referrer.id),
-              eq(userServicePrice.serviceId, validatedInput.serviceId),
-            ),
-          });
-
-          if (referrerPrice) {
-            unitPrice = Number(referrerPrice.resalePrice);
-          }
+        if (referrerPrice) {
+          unitPrice = Number(referrerPrice.resalePrice);
         }
       }
     }

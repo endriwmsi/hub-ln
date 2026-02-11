@@ -40,12 +40,8 @@ export default async function SolicitarServicoPage({
     ? pricesResult.data?.find((p) => p.id === service.id)
     : null;
 
-  // Preço a exibir: resalePrice > costPrice > basePrice
-  const displayPrice =
-    userPrice?.resalePrice || userPrice?.costPrice || service.basePrice;
-  const hasResalePrice =
-    userPrice?.resalePrice !== null && userPrice?.resalePrice !== undefined;
-  const commission = userPrice?.commissionPerItem || "0.00";
+  // Preço a exibir: costPrice (o que o usuário PAGA) - não o resalePrice
+  const displayPrice = userPrice?.costPrice || service.basePrice;
 
   // Determinar qual tipo de formulário exibir
   const isSimpleService = service.type === "simple";
@@ -89,14 +85,6 @@ export default async function SolicitarServicoPage({
                 {formatCurrency(displayPrice)}
               </p>
             </div>
-            {hasResalePrice && Number(commission) > 0 && (
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">Sua comissão</p>
-                <p className="text-lg font-semibold text-green-600 dark:text-green-400">
-                  +{formatCurrency(commission)}/nome
-                </p>
-              </div>
-            )}
           </div>
         </div>
 
@@ -129,10 +117,14 @@ export default async function SolicitarServicoPage({
           <ExcelUploadForm
             service={service}
             acaoId={acaoId}
-            resalePrice={displayPrice}
+            costPrice={displayPrice}
           />
         ) : hasFormFields ? (
-          <DynamicFormRenderer service={service} fields={formFields} />
+          <DynamicFormRenderer
+            service={service}
+            fields={formFields}
+            costPrice={displayPrice}
+          />
         ) : (
           <div className="rounded-lg border p-6 text-center">
             <p className="text-muted-foreground">

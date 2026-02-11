@@ -1,11 +1,16 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { verifySession } from "@/core/auth/dal";
 import { db } from "@/core/db";
 import type { ServiceRequest } from "@/core/db/schema";
-import { serviceRequest, services } from "@/core/db/schema";
+import {
+  serviceRequest,
+  services,
+  user,
+  userServicePrice,
+} from "@/core/db/schema";
 import type { ActionResponse } from "@/shared/lib/server-actions";
 import {
   type CreateServiceRequestInput,
@@ -30,9 +35,37 @@ export async function createServiceRequest(
       return { success: false, error: "Serviço não encontrado" };
     }
 
-    // Calcular preço total (preço base * quantidade)
-    const totalPrice =
-      Number(service[0].basePrice) * (validatedInput.quantity || 1);
+    // Buscar usuário atual para obter o indicador
+    const currentUser = await db.query.user.findFirst({
+      where: eq(user.id, session.userId),
+    });
+
+    // Determinar preço a usar: preço do indicador (costPrice) > preço base
+    // O usuário sempre paga o preço do indicador, não o seu próprio resalePrice
+    let unitPrice = Number(service[0].basePrice);
+
+    if (currentUser?.referredBy) {
+      // Buscar preço do indicador
+      const referrer = await db.query.user.findFirst({
+        where: eq(user.referralCode, currentUser.referredBy),
+      });
+
+      if (referrer) {
+        const referrerPrice = await db.query.userServicePrice.findFirst({
+          where: and(
+            eq(userServicePrice.userId, referrer.id),
+            eq(userServicePrice.serviceId, validatedInput.serviceId),
+          ),
+        });
+
+        if (referrerPrice) {
+          unitPrice = Number(referrerPrice.resalePrice);
+        }
+      }
+    }
+
+    // Calcular preço total
+    const totalPrice = unitPrice * (validatedInput.quantity || 1);
 
     const newRequest = await db
       .insert(serviceRequest)

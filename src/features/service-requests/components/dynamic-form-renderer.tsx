@@ -34,6 +34,7 @@ type DynamicFormRendererProps = {
   service: Service;
   fields: FormField[];
   acaoId?: string;
+  costPrice?: string;
 };
 
 type UploadedDocument = {
@@ -52,7 +53,7 @@ function generateZodSchema(fields: FormField[], requiresDocument: boolean) {
 
     switch (field.type as FieldType) {
       case "email":
-        fieldSchema = z.string().email("E-mail inválido");
+        fieldSchema = z.email("E-mail inválido");
         break;
       case "phone":
         fieldSchema = z.string().min(10, "Telefone inválido");
@@ -135,6 +136,7 @@ export function DynamicFormRenderer({
   service,
   fields,
   acaoId,
+  costPrice,
 }: DynamicFormRendererProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -461,7 +463,7 @@ export function DynamicFormRenderer({
               {new Intl.NumberFormat("pt-BR", {
                 style: "currency",
                 currency: "BRL",
-              }).format(Number(service.basePrice))}
+              }).format(Number(costPrice || service.basePrice))}
             </span>
           </div>
         </div>

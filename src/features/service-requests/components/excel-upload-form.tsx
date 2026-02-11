@@ -32,7 +32,7 @@ import {
 type ExcelUploadFormProps = {
   service: Service;
   acaoId?: string;
-  resalePrice?: string;
+  costPrice?: string;
 };
 
 type ParsedRow = {
@@ -45,7 +45,7 @@ type ParsedRow = {
 export function ExcelUploadForm({
   service,
   acaoId,
-  resalePrice,
+  costPrice,
 }: ExcelUploadFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -215,10 +215,8 @@ export function ExcelUploadForm({
 
   const validCount = parsedData.filter((row) => row.valid).length;
   const invalidCount = parsedData.length - validCount;
-  // Usar preço de revenda se disponível, senão usar preço base
-  const unitPrice = resalePrice
-    ? Number(resalePrice)
-    : Number(service.basePrice);
+  // Usar preço de custo (preço do indicador) se disponível, senão usar preço base
+  const unitPrice = costPrice ? Number(costPrice) : Number(service.basePrice);
   const totalPrice = unitPrice * validCount;
 
   return (
