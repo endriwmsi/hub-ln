@@ -16,10 +16,12 @@ export type ServiceWithPrice = {
   requiresDocument: boolean;
   // Preço que o usuário paga (do indicador ou base)
   costPrice: string;
-  // Preço de revenda definido pelo usuário
+  // Preço de revenda definido pelo usuário (null = invalidado)
   resalePrice: string | null;
   // Comissão estimada por nome
   commissionPerItem: string;
+  // Indica se o preço está válido ou precisa ser reconfigurado
+  isValid: boolean;
 };
 
 /**
@@ -88,6 +90,9 @@ export async function getUserServicePrices(): Promise<
       const userPrice = userPrices.find((p) => p.serviceId === service.id);
       const resalePrice = userPrice?.resalePrice ?? null;
 
+      // Verifica se o preço está válido
+      const isValid = resalePrice !== null;
+
       // Comissão = resalePrice - costPrice (se tiver resalePrice)
       const commission = resalePrice
         ? (Number(resalePrice) - Number(costPrice)).toFixed(2)
@@ -104,6 +109,7 @@ export async function getUserServicePrices(): Promise<
         costPrice,
         resalePrice,
         commissionPerItem: commission,
+        isValid,
       };
     });
 

@@ -108,7 +108,8 @@ export const userServicePrice = pgTable("user_service_price", {
 
   // Preço de revenda definido pelo usuário
   // Se o preço base é R$100, este usuário pode revender por R$150
-  resalePrice: numeric("resale_price", { precision: 10, scale: 2 }).notNull(),
+  // Pode ser null se foi invalidado por mudança de preço do indicador
+  resalePrice: numeric("resale_price", { precision: 10, scale: 2 }),
 
   // Preço que este usuário paga (preço do indicador ou preço base)
   costPrice: numeric("cost_price", { precision: 10, scale: 2 }).notNull(),

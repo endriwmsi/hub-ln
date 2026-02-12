@@ -8,6 +8,7 @@ import { db } from "@/core/db";
 import type { UserServicePrice } from "@/core/db/schema";
 import { services, user, userServicePrice } from "@/core/db/schema";
 import type { ActionResponse } from "@/shared/lib/server-actions";
+import { invalidateReferralPrices } from "./invalidate-referral-prices";
 
 // Schema de validação
 const updatePriceSchema = z.object({
@@ -133,6 +134,14 @@ export async function updateUserServicePrice(
 
       result = inserted;
     }
+
+    // Invalidar preços em cascata para usuários indicados
+    // (executa em background para não bloquear a resposta)
+    invalidateReferralPrices(session.userId, serviceId, resalePrice).catch(
+      (error) => {
+        console.error("[Services] Error invalidating referral prices:", error);
+      },
+    );
 
     // Revalidar página de serviços
     revalidatePath("/servicos");

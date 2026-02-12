@@ -7,6 +7,7 @@ export {
   getUserServicePrices,
   type ServiceWithPrice,
 } from "./get-user-service-prices";
+export { invalidateReferralPrices } from "./invalidate-referral-prices";
 export { updateService } from "./update-service";
 export {
   type UpdateUserServicePriceInput,
