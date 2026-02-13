@@ -1,8 +1,25 @@
 "use client";
 
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GripVertical, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { FormField } from "@/core/db/schema";
 import { Button } from "@/shared/components/ui/button";
@@ -34,6 +51,7 @@ import {
 import { Switch } from "@/shared/components/ui/switch";
 import { useCreateFormField } from "../hooks/use-create-form-field";
 import { useDeleteFormField } from "../hooks/use-delete-form-field";
+import { useReorderFormFields } from "../hooks/use-reorder-form-fields";
 import { useUpdateFormField } from "../hooks/use-update-form-field";
 import {
   type CreateFormFieldInput,
@@ -42,6 +60,69 @@ import {
   fieldTypeLabels,
   fieldTypes,
 } from "../schemas";
+
+// Componente interno para itens arrastáveis
+type SortableFieldItemProps = {
+  field: FormField;
+  onEdit: (field: FormField) => void;
+  onDelete: (field: FormField) => void;
+};
+
+function SortableFieldItem({
+  field,
+  onEdit,
+  onDelete,
+}: SortableFieldItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: field.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-2 p-3 border rounded-lg bg-card"
+    >
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing touch-none"
+      >
+        <GripVertical className="h-4 w-4 text-muted-foreground" />
+      </div>
+      <div className="flex-1">
+        <div className="flex items-center gap-2">
+          <span className="font-medium">{field.label}</span>
+          {field.required && (
+            <span className="text-xs text-destructive">*</span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span>{fieldTypeLabels[field.type as FieldType]}</span>
+          <span>•</span>
+          <code className="text-xs bg-muted px-1 rounded">{field.name}</code>
+        </div>
+      </div>
+      <Button variant="ghost" size="icon" onClick={() => onEdit(field)}>
+        <Pencil className="h-4 w-4" />
+      </Button>
+      <Button variant="ghost" size="icon" onClick={() => onDelete(field)}>
+        <Trash2 className="h-4 w-4 text-destructive" />
+      </Button>
+    </div>
+  );
+}
 
 type FormBuilderProps = {
   serviceId: string;
@@ -53,10 +134,58 @@ export function FormBuilder({ serviceId, fields }: FormBuilderProps) {
   const [editingField, setEditingField] = useState<FormField | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [fieldToDelete, setFieldToDelete] = useState<FormField | null>(null);
+  const [localFields, setLocalFields] = useState<FormField[]>(fields);
+
+  // Sincronizar localFields quando fields mudar
+  useEffect(() => {
+    setLocalFields(fields);
+  }, [fields]);
 
   const { mutate: createField, isPending: isCreating } = useCreateFormField();
   const { mutate: updateField, isPending: isUpdating } = useUpdateFormField();
   const { mutate: deleteField, isPending: isDeleting } = useDeleteFormField();
+  const { mutate: reorderFields } = useReorderFormFields();
+
+  // Configuração de sensores para drag and drop
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  // Handler do drag end
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    setLocalFields((items) => {
+      const oldIndex = items.findIndex((item) => item.id === active.id);
+      const newIndex = items.findIndex((item) => item.id === over.id);
+
+      const newItems = arrayMove(items, oldIndex, newIndex);
+
+      // Atualizar a ordem no backend
+      const fieldOrders = newItems.map((item, index) => ({
+        id: item.id,
+        order: index,
+      }));
+
+      reorderFields({
+        serviceId,
+        fieldOrders,
+      });
+
+      return newItems;
+    });
+  };
 
   const form = useForm<CreateFormFieldInput>({
     resolver: zodResolver(createFormFieldSchema),
@@ -67,7 +196,7 @@ export function FormBuilder({ serviceId, fields }: FormBuilderProps) {
       placeholder: "",
       type: "text",
       required: false,
-      order: fields.length,
+      order: localFields.length,
       options: undefined,
     },
   });
@@ -147,7 +276,7 @@ export function FormBuilder({ serviceId, fields }: FormBuilderProps) {
         </Button>
       </div>
 
-      {fields.length === 0 ? (
+      {localFields.length === 0 ? (
         <div className="border border-dashed rounded-lg p-8 text-center">
           <p className="text-muted-foreground">
             Nenhum campo adicionado ainda.
@@ -158,48 +287,30 @@ export function FormBuilder({ serviceId, fields }: FormBuilderProps) {
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {fields.map((field) => (
-            <div
-              key={field.id}
-              className="flex items-center gap-2 p-3 border rounded-lg bg-card"
-            >
-              <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{field.label}</span>
-                  {field.required && (
-                    <span className="text-xs text-destructive">*</span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>{fieldTypeLabels[field.type as FieldType]}</span>
-                  <span>•</span>
-                  <code className="text-xs bg-muted px-1 rounded">
-                    {field.name}
-                  </code>
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => openEditDialog(field)}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  setFieldToDelete(field);
-                  setDeleteDialogOpen(true);
-                }}
-              >
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={localFields.map((f) => f.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-2">
+              {localFields.map((field) => (
+                <SortableFieldItem
+                  key={field.id}
+                  field={field}
+                  onEdit={openEditDialog}
+                  onDelete={(field) => {
+                    setFieldToDelete(field);
+                    setDeleteDialogOpen(true);
+                  }}
+                />
+              ))}
             </div>
-          ))}
-        </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       {/* Dialog de criação/edição */}
