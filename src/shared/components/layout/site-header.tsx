@@ -20,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
+import { getUserInitials } from "@/shared/lib/utils";
 import { SidebarTrigger } from "../ui/sidebar";
 import { Skeleton } from "../ui/skeleton";
 import { ModeToggle } from "./mode-toggle";
@@ -56,7 +57,7 @@ export function SiteHeader() {
                     />
                   )}
                   <AvatarFallback className="rounded-lg">
-                    {session?.user.name.slice(0, 2).toUpperCase()}
+                    {getUserInitials(session?.user.name || "SN")}
                   </AvatarFallback>
                 </Avatar>
                 <div className="hidden max-w-40 flex-col items-start md:flex">

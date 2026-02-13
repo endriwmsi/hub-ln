@@ -27,7 +27,6 @@ import { Logo } from "./logo";
 import NavAdmin from "./nav-admin";
 import { NavMain } from "./nav-main";
 import { NavSecondary } from "./nav-secondary";
-import { NavUser } from "./nav-user";
 
 const headerVariants: Variants = {
   hidden: {
@@ -162,7 +161,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           animate="visible"
         >
           <NavSecondary items={data.navSecondary} className="mt-auto" />
-          <NavUser />
+          {/* <NavUser /> */}
         </motion.div>
       </SidebarFooter>
     </Sidebar>
