@@ -3,7 +3,7 @@ import { getAcoesAtivas } from "@/features/acoes/actions";
 import { getFormFieldsByServiceId } from "@/features/form-fields";
 import {
   DynamicFormRenderer,
-  ExcelUploadForm,
+  ServiceRequestModeSelector,
 } from "@/features/service-requests";
 import { AcaoSelector } from "@/features/service-requests/components";
 import { getServiceBySlug, getUserServicePrices } from "@/features/services";
@@ -114,7 +114,7 @@ export default async function SolicitarServicoPage({
             </p>
           </div>
         ) : isSimpleService ? (
-          <ExcelUploadForm
+          <ServiceRequestModeSelector
             service={service}
             acaoId={acaoId}
             costPrice={displayPrice}
@@ -126,14 +126,10 @@ export default async function SolicitarServicoPage({
             costPrice={displayPrice}
           />
         ) : (
-          <div className="rounded-lg border p-6 text-center">
-            <p className="text-muted-foreground">
-              Este serviço ainda não possui um formulário configurado.
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Entre em contato com o suporte para mais informações.
-            </p>
-          </div>
+          <ServiceRequestModeSelector
+            service={service}
+            costPrice={displayPrice}
+          />
         )}
       </div>
     </SubscriptionGuard>
