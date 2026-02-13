@@ -45,7 +45,7 @@ export default async function AcaoDetalhesPage({
   const acao = acaoResult.data;
 
   return (
-    <div className="space-y-6 lg:mx-10 lg:my-5">
+    <div className="container space-y-6 gap-6 py-4 md:gap-8 md:py-6 px-6">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" asChild>

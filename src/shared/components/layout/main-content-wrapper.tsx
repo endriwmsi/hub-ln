@@ -47,9 +47,7 @@ export function MainContentWrapper({
         className="flex-1 overflow-auto"
       >
         <div className="@container/main flex flex-1 flex-col gap-2 h-full">
-          <div className="flex flex-col gap-6 py-4 md:gap-8 md:py-6 px-6">
-            {children}
-          </div>
+          <div className="flex flex-col">{children}</div>
         </div>
       </motion.div>
     </motion.div>

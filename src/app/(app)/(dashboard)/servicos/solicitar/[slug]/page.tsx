@@ -58,7 +58,7 @@ export default async function SolicitarServicoPage({
 
   return (
     <SubscriptionGuard>
-      <div className="container py-6 space-y-6 max-w-3xl">
+      <div className="container space-y-6 gap-6 py-4 md:gap-8 md:py-6 px-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
             Solicitar Serviço

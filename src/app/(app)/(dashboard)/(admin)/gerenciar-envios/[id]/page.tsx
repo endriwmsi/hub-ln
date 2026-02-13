@@ -75,7 +75,7 @@ export default async function AdminServiceRequestDetailPage({
   };
 
   return (
-    <div className="container max-w-4xl py-8">
+    <div className="container space-y-6 gap-6 py-4 md:gap-8 md:py-6 px-6">
       <div className="mb-6">
         <Link
           href="/gerenciar-envios"

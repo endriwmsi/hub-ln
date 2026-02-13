@@ -42,7 +42,7 @@ export default async function UserPage({ params }: UserPageProps) {
   const user = result.data;
 
   return (
-    <div className="space-y-6 lg:mx-10 lg:my-5">
+    <div className="container space-y-6 gap-6 py-4 md:gap-8 md:py-6 px-6">
       <div className="space-y-4">
         <Button variant="outline" size="sm" asChild>
           <Link href="/usuarios" className="flex items-center gap-2">

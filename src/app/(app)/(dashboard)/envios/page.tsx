@@ -7,7 +7,7 @@ export default async function EnviosPage() {
   const services = await getServices();
 
   return (
-    <div className="container py-6 space-y-6">
+    <div className="container space-y-6 gap-6 py-4 md:gap-8 md:py-6 px-6">
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-lg bg-primary/10">
           <Send className="h-6 w-6 text-primary" />

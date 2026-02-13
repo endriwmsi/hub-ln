@@ -12,7 +12,7 @@ import { Card, CardContent } from "@/shared/components/ui/card";
 
 export default async function TransacoesPage() {
   return (
-    <div className="space-y-6 p-8">
+    <div className="space-y-6 gap-6 py-4 md:gap-8 md:py-6 px-6">
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>

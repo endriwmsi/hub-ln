@@ -120,7 +120,7 @@ export default async function EnvioDetalhesPage({
   };
 
   return (
-    <div className="container py-6 space-y-6 max-w-4xl">
+    <div className="container space-y-6 gap-6 py-4 md:gap-8 md:py-6 px-6">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" asChild>
