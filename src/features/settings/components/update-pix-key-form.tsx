@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useSession } from "@/core";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -32,6 +33,7 @@ interface UpdatePixKeyFormProps {
 }
 
 export function UpdatePixKeyForm({ defaultValues }: UpdatePixKeyFormProps) {
+  const { refetch } = useSession();
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<UpdatePixKeyInput>({
@@ -45,8 +47,8 @@ export function UpdatePixKeyForm({ defaultValues }: UpdatePixKeyFormProps) {
     startTransition(async () => {
       const result = await updatePixKey(data);
       if (result.success) {
+        await refetch();
         toast.success(result.message);
-        form.reset();
       } else {
         toast.error(result.message);
       }

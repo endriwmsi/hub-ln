@@ -22,7 +22,8 @@ export async function updatePixKey(data: UpdatePixKeyInput) {
       })
       .where(eq(user.id, userId));
 
-    revalidatePath("/configuracoes/integracoes", "page");
+    revalidatePath("/configuracoes/integracoes");
+    revalidatePath("/", "layout");
 
     return {
       success: true,
