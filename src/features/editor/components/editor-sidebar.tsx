@@ -15,6 +15,11 @@ import {
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Label } from "@/shared/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/shared/components/ui/popover";
 import { Separator } from "@/shared/components/ui/separator";
 import {
   Tooltip,
@@ -209,26 +214,29 @@ export function EditorSidebar({
 
         {/* Background Color */}
         <div className="space-y-1">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex flex-col items-center gap-0.5">
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="flex flex-col items-center gap-0.5 w-full hover:opacity-80 transition-opacity"
+              >
                 <Palette className="h-3 w-3 text-muted-foreground" />
                 <div
                   className="w-8 h-8 rounded-md border-2 cursor-pointer hover:scale-105 transition-transform"
                   style={{ backgroundColor }}
                 />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <div className="p-2">
-                <Label className="text-xs mb-2 block">Cor de Fundo</Label>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent side="right" className="w-auto p-3">
+              <div className="space-y-2">
+                <Label className="text-xs">Cor de Fundo</Label>
                 <ColorPicker
                   color={backgroundColor}
                   onChange={onBackgroundColorChange}
                 />
               </div>
-            </TooltipContent>
-          </Tooltip>
+            </PopoverContent>
+          </Popover>
         </div>
 
         <div className="flex-1" />

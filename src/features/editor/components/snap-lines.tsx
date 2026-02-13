@@ -1,14 +1,20 @@
 "use client";
 
 import { Line } from "react-konva";
-import type { CanvasDimensions, SnapGuide } from "../types";
+import type { SnapGuide } from "../types";
 
 interface SnapLinesProps {
   guides: SnapGuide[];
-  dimensions: CanvasDimensions;
+  canvasWidth: number;
+  canvasHeight: number;
 }
 
-export function SnapLines({ guides, dimensions }: SnapLinesProps) {
+export function SnapLines({
+  guides,
+  canvasWidth,
+  canvasHeight,
+}: SnapLinesProps) {
+  // Renderizar apenas linhas ativas (magenta) durante o drag
   return (
     <>
       {guides.map((guide) => {
@@ -16,20 +22,22 @@ export function SnapLines({ guides, dimensions }: SnapLinesProps) {
           return (
             <Line
               key={`v-${guide.position}`}
-              points={[guide.position, 0, guide.position, dimensions.height]}
+              points={[guide.position, 0, guide.position, canvasHeight]}
               stroke="#ff00ff"
-              strokeWidth={1}
+              strokeWidth={2}
               dash={[4, 6]}
+              listening={false}
             />
           );
         }
         return (
           <Line
             key={`h-${guide.position}`}
-            points={[0, guide.position, dimensions.width, guide.position]}
+            points={[0, guide.position, canvasWidth, guide.position]}
             stroke="#ff00ff"
-            strokeWidth={1}
+            strokeWidth={2}
             dash={[4, 6]}
+            listening={false}
           />
         );
       })}

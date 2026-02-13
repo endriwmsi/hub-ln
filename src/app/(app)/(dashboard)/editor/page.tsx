@@ -9,6 +9,15 @@ import {
   PropertiesPanel,
   useEditor,
 } from "@/features/editor";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -20,11 +29,15 @@ import {
 } from "@/shared/components/ui/dialog";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
+import { useIsMobile } from "@/shared/hooks";
 
 export default function EditorPage() {
   const editor = useEditor("1:1");
+  const isMobile = useIsMobile();
   const [creativeName, setCreativeName] = useState("");
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [showMobileWarning, setShowMobileWarning] = useState(true);
+  const [exportCanvas, setExportCanvas] = useState<(() => void) | null>(null);
 
   const handleSave = () => {
     if (!creativeName.trim()) {
@@ -38,8 +51,12 @@ export default function EditorPage() {
   };
 
   const handleExport = () => {
-    // TODO: Implementar exportação/download
-    toast.success("Exportando criativo...");
+    if (exportCanvas) {
+      exportCanvas();
+      toast.success("Criativo exportado com sucesso!");
+    } else {
+      toast.error("Aguarde o carregamento do canvas...");
+    }
   };
 
   return (
@@ -54,7 +71,7 @@ export default function EditorPage() {
       />
 
       {/* Content */}
-      <div className="relative z-10 flex w-full">
+      <div className="relative z-10 flex w-full h-[calc(100vh-120px)]">
         {/* Sidebar */}
         <EditorSidebar
           format={editor.canvasFormat}
@@ -75,7 +92,7 @@ export default function EditorPage() {
         />
 
         {/* Canvas Area */}
-        <div className="flex-1 flex items-center justify-center p-8">
+        <div className="flex-1 flex items-center justify-center p-8 h-[calc(100vh-120px)]">
           <div>
             <Canvas
               dimensions={editor.canvasDimensions}
@@ -87,12 +104,15 @@ export default function EditorPage() {
               onSelect={editor.selectElement}
               onElementChange={editor.updateElement}
               onDragEnd={editor.finishUpdateElement}
+              onSnapCalculate={editor.calculateSnap}
+              onDelete={editor.deleteElement}
+              onExportReady={(exportFn) => setExportCanvas(() => exportFn)}
             />
           </div>
         </div>
 
         {/* Properties Panel */}
-        <div className="bg-background/80 backdrop-blur-lg border-l shadow-lg">
+        <div className="bg-transparent h-[calc(100vh-120px)]">
           <PropertiesPanel
             selectedElement={editor.selectedElement || null}
             canvasDimensions={editor.canvasDimensions}
@@ -127,6 +147,36 @@ export default function EditorPage() {
           }
         />
       </div>
+
+      {/* Mobile Warning Dialog */}
+      <AlertDialog
+        open={isMobile && showMobileWarning}
+        onOpenChange={setShowMobileWarning}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl">
+              ⚠️ Dispositivo Móvel Detectado
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3 text-base">
+              <p>
+                A experiência do editor em dispositivos móveis é limitada e pode
+                não funcionar adequadamente.
+              </p>
+              <p className="font-semibold text-foreground">
+                Para utilizar todas as funcionalidades e ter a melhor
+                experiência possível, recomendamos fortemente acessar via
+                computador.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowMobileWarning(false)}>
+              Entendi, continuar mesmo assim
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Save Dialog */}
       <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>

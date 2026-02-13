@@ -1,7 +1,7 @@
 "use client";
 
 import type Konva from "konva";
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { Circle, Line, Rect, RegularPolygon, Transformer } from "react-konva";
 import type { ShapeElement } from "../types";
 
@@ -11,15 +11,23 @@ interface CanvasShapeProps {
   onSelect: () => void;
   onChange: (attrs: Partial<ShapeElement>) => void;
   onDragEnd: (attrs: Partial<ShapeElement>) => void;
+  onSnapCalculate: (
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+  ) => { x: number; y: number };
 }
 
-export function CanvasShape({
+export const CanvasShape = memo(function CanvasShape({
   element,
   isSelected,
   onSelect,
   onChange,
   onDragEnd,
+  onSnapCalculate,
 }: CanvasShapeProps) {
+  // biome-ignore lint/suspicious/noExplicitAny: Konva shapes têm tipos diferentes dependendo do shapeType
   const shapeRef = useRef<any>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
 
@@ -44,6 +52,27 @@ export function CanvasShape({
     draggable: element.draggable,
     onClick: onSelect,
     onTap: onSelect,
+    dragBoundFunc: (pos: { x: number; y: number }) => {
+      const snapped = onSnapCalculate(
+        pos.x,
+        pos.y,
+        element.width,
+        element.height,
+      );
+      return snapped;
+    },
+    onMouseEnter: (e: Konva.KonvaEventObject<MouseEvent>) => {
+      const container = e.target.getStage()?.container();
+      if (container) {
+        container.style.cursor = isSelected ? "move" : "pointer";
+      }
+    },
+    onMouseLeave: (e: Konva.KonvaEventObject<MouseEvent>) => {
+      const container = e.target.getStage()?.container();
+      if (container) {
+        container.style.cursor = "default";
+      }
+    },
     onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => {
       onDragEnd({
         x: e.target.x(),
@@ -130,4 +159,6 @@ export function CanvasShape({
       )}
     </>
   );
-}
+});
+
+CanvasShape.displayName = "CanvasShape";

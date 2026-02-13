@@ -15,7 +15,7 @@ import type {
 } from "../types";
 import { CANVAS_FORMATS } from "../types";
 
-const SNAP_THRESHOLD = 10;
+const SNAP_THRESHOLD = 15; // Aumentado para melhor usabilidade
 const MARGIN_GUIDE = 100; // Guias a 100px das bordas
 
 export function useEditor(initialFormat: CanvasFormat = "1:1") {
@@ -52,69 +52,129 @@ export function useEditor(initialFormat: CanvasFormat = "1:1") {
       const canvasBottom = canvasDimensions.height;
 
       // ===== SNAPS HORIZONTAIS (X) =====
+      const snapPointsX: Array<{
+        pos: number;
+        guidePos: number;
+        distance: number;
+      }> = [];
 
       // Margem esquerda (x=0)
-      if (Math.abs(x) < SNAP_THRESHOLD) {
-        snappedX = 0;
-        guides.push({ type: "vertical", position: 0 });
+      const distToLeft = Math.abs(x);
+      if (distToLeft < SNAP_THRESHOLD) {
+        snapPointsX.push({ pos: 0, guidePos: 0, distance: distToLeft });
       }
 
       // Margem direita (elemento alinhado à direita)
-      if (Math.abs(elementRight - canvasRight) < SNAP_THRESHOLD) {
-        snappedX = canvasRight - width;
-        guides.push({ type: "vertical", position: canvasRight });
+      const distToRight = Math.abs(elementRight - canvasRight);
+      if (distToRight < SNAP_THRESHOLD) {
+        snapPointsX.push({
+          pos: canvasRight - width,
+          guidePos: canvasRight,
+          distance: distToRight,
+        });
       }
 
       // Centro horizontal do canvas
-      if (Math.abs(elementCenterX - canvasCenterX) < SNAP_THRESHOLD) {
-        snappedX = canvasCenterX - width / 2;
-        guides.push({ type: "vertical", position: canvasCenterX });
+      const distToCenterX = Math.abs(elementCenterX - canvasCenterX);
+      if (distToCenterX < SNAP_THRESHOLD) {
+        snapPointsX.push({
+          pos: canvasCenterX - width / 2,
+          guidePos: canvasCenterX,
+          distance: distToCenterX,
+        });
       }
 
       // Guia a 100px da margem esquerda
-      if (Math.abs(x - MARGIN_GUIDE) < SNAP_THRESHOLD) {
-        snappedX = MARGIN_GUIDE;
-        guides.push({ type: "vertical", position: MARGIN_GUIDE });
+      const distToLeftGuide = Math.abs(x - MARGIN_GUIDE);
+      if (distToLeftGuide < SNAP_THRESHOLD) {
+        snapPointsX.push({
+          pos: MARGIN_GUIDE,
+          guidePos: MARGIN_GUIDE,
+          distance: distToLeftGuide,
+        });
       }
 
       // Guia a 100px da margem direita
       const rightGuide = canvasRight - MARGIN_GUIDE;
-      if (Math.abs(elementRight - rightGuide) < SNAP_THRESHOLD) {
-        snappedX = rightGuide - width;
-        guides.push({ type: "vertical", position: rightGuide });
+      const distToRightGuide = Math.abs(elementRight - rightGuide);
+      if (distToRightGuide < SNAP_THRESHOLD) {
+        snapPointsX.push({
+          pos: rightGuide - width,
+          guidePos: rightGuide,
+          distance: distToRightGuide,
+        });
+      }
+
+      // Escolher o snap X mais próximo
+      if (snapPointsX.length > 0) {
+        const closestX = snapPointsX.reduce((prev, curr) =>
+          curr.distance < prev.distance ? curr : prev,
+        );
+        snappedX = closestX.pos;
+        guides.push({ type: "vertical", position: closestX.guidePos });
       }
 
       // ===== SNAPS VERTICAIS (Y) =====
+      const snapPointsY: Array<{
+        pos: number;
+        guidePos: number;
+        distance: number;
+      }> = [];
 
       // Margem superior (y=0)
-      if (Math.abs(y) < SNAP_THRESHOLD) {
-        snappedY = 0;
-        guides.push({ type: "horizontal", position: 0 });
+      const distToTop = Math.abs(y);
+      if (distToTop < SNAP_THRESHOLD) {
+        snapPointsY.push({ pos: 0, guidePos: 0, distance: distToTop });
       }
 
       // Margem inferior (elemento alinhado embaixo)
-      if (Math.abs(elementBottom - canvasBottom) < SNAP_THRESHOLD) {
-        snappedY = canvasBottom - height;
-        guides.push({ type: "horizontal", position: canvasBottom });
+      const distToBottom = Math.abs(elementBottom - canvasBottom);
+      if (distToBottom < SNAP_THRESHOLD) {
+        snapPointsY.push({
+          pos: canvasBottom - height,
+          guidePos: canvasBottom,
+          distance: distToBottom,
+        });
       }
 
       // Centro vertical do canvas
-      if (Math.abs(elementCenterY - canvasCenterY) < SNAP_THRESHOLD) {
-        snappedY = canvasCenterY - height / 2;
-        guides.push({ type: "horizontal", position: canvasCenterY });
+      const distToCenterY = Math.abs(elementCenterY - canvasCenterY);
+      if (distToCenterY < SNAP_THRESHOLD) {
+        snapPointsY.push({
+          pos: canvasCenterY - height / 2,
+          guidePos: canvasCenterY,
+          distance: distToCenterY,
+        });
       }
 
       // Guia a 100px da margem superior
-      if (Math.abs(y - MARGIN_GUIDE) < SNAP_THRESHOLD) {
-        snappedY = MARGIN_GUIDE;
-        guides.push({ type: "horizontal", position: MARGIN_GUIDE });
+      const distToTopGuide = Math.abs(y - MARGIN_GUIDE);
+      if (distToTopGuide < SNAP_THRESHOLD) {
+        snapPointsY.push({
+          pos: MARGIN_GUIDE,
+          guidePos: MARGIN_GUIDE,
+          distance: distToTopGuide,
+        });
       }
 
       // Guia a 100px da margem inferior
       const bottomGuide = canvasBottom - MARGIN_GUIDE;
-      if (Math.abs(elementBottom - bottomGuide) < SNAP_THRESHOLD) {
-        snappedY = bottomGuide - height;
-        guides.push({ type: "horizontal", position: bottomGuide });
+      const distToBottomGuide = Math.abs(elementBottom - bottomGuide);
+      if (distToBottomGuide < SNAP_THRESHOLD) {
+        snapPointsY.push({
+          pos: bottomGuide - height,
+          guidePos: bottomGuide,
+          distance: distToBottomGuide,
+        });
+      }
+
+      // Escolher o snap Y mais próximo
+      if (snapPointsY.length > 0) {
+        const closestY = snapPointsY.reduce((prev, curr) =>
+          curr.distance < prev.distance ? curr : prev,
+        );
+        snappedY = closestY.pos;
+        guides.push({ type: "horizontal", position: closestY.guidePos });
       }
 
       setSnapGuides(guides);
@@ -237,29 +297,15 @@ export function useEditor(initialFormat: CanvasFormat = "1:1") {
     setSnapGuides([]);
   }, []);
 
-  // Atualizar elemento (durante drag, com snap)
+  // Atualizar elemento (para transform, cor, etc - não para drag)
   const updateElement = useCallback(
     (id: string, attrs: Partial<CanvasElement>) => {
-      const element = state.elements.find((el) => el.id === id);
-      if (!element) return;
-
-      // Se está movendo (x ou y mudou), aplicar snap
-      if (attrs.x !== undefined || attrs.y !== undefined) {
-        const x = attrs.x ?? element.x;
-        const y = attrs.y ?? element.y;
-        const width = attrs.width ?? element.width;
-        const height = attrs.height ?? element.height;
-
-        const snapped = calculateSnap(x, y, width, height);
-        attrs = { ...attrs, x: snapped.x, y: snapped.y };
-      }
-
       const newElements = state.elements.map((el) =>
         el.id === id ? ({ ...el, ...attrs } as CanvasElement) : el,
       );
       setState((prev) => ({ ...prev, elements: newElements }));
     },
-    [state.elements, calculateSnap],
+    [state.elements],
   );
 
   // Finalizar atualização (adiciona ao histórico)
@@ -506,5 +552,6 @@ export function useEditor(initialFormat: CanvasFormat = "1:1") {
     sendToBack,
     bringForward,
     sendBackward,
+    calculateSnap,
   };
 }

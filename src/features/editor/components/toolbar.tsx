@@ -25,7 +25,7 @@ interface ToolbarProps {
 
 export function Toolbar({ onAddText, onAddShape, onAddImage }: ToolbarProps) {
   return (
-    <div className="flex items-center gap-2 p-2 border-b bg-background">
+    <div className="flex items-center gap-1.5 px-2 py-1 border-b bg-background h-[calc(100vh-120px)]">
       <TooltipProvider delayDuration={300}>
         {/* Texto */}
         <div className="flex items-center gap-1">
@@ -56,7 +56,7 @@ export function Toolbar({ onAddText, onAddShape, onAddImage }: ToolbarProps) {
           </Tooltip>
         </div>
 
-        <Separator orientation="vertical" className="h-6" />
+        <Separator orientation="vertical" className="h-5" />
 
         {/* Formas */}
         <div className="flex items-center gap-1">
@@ -113,7 +113,7 @@ export function Toolbar({ onAddText, onAddShape, onAddImage }: ToolbarProps) {
           </Tooltip>
         </div>
 
-        <Separator orientation="vertical" className="h-6" />
+        <Separator orientation="vertical" className="h-5" />
 
         {/* Imagem */}
         <Tooltip>

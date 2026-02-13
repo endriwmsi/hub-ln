@@ -1,7 +1,7 @@
 "use client";
 
 import { Upload } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -20,6 +20,7 @@ interface ImageUploadProps {
 
 export function ImageUpload({ onUpload, trigger }: ImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [open, setOpen] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -37,6 +38,7 @@ export function ImageUpload({ onUpload, trigger }: ImageUploadProps) {
       img.onload = () => {
         onUpload(event.target?.result as string, img.width, img.height);
         toast.success("Imagem adicionada com sucesso!");
+        setOpen(false); // Fechar modal após upload
       };
       img.src = event.target?.result as string;
     };
@@ -49,7 +51,7 @@ export function ImageUpload({ onUpload, trigger }: ImageUploadProps) {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="outline" size="sm">

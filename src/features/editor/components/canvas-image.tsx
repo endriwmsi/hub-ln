@@ -1,7 +1,7 @@
 "use client";
 
 import type Konva from "konva";
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { Image, Transformer } from "react-konva";
 import type { ImageElement } from "../types";
 
@@ -11,14 +11,21 @@ interface CanvasImageProps {
   onSelect: () => void;
   onChange: (attrs: Partial<ImageElement>) => void;
   onDragEnd: (attrs: Partial<ImageElement>) => void;
+  onSnapCalculate: (
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+  ) => { x: number; y: number };
 }
 
-export function CanvasImage({
+export const CanvasImage = memo(function CanvasImage({
   element,
   isSelected,
   onSelect,
   onChange,
   onDragEnd,
+  onSnapCalculate,
 }: CanvasImageProps) {
   const imageRef = useRef<Konva.Image>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
@@ -56,6 +63,27 @@ export function CanvasImage({
         draggable={element.draggable}
         onClick={onSelect}
         onTap={onSelect}
+        dragBoundFunc={(pos) => {
+          const snapped = onSnapCalculate(
+            pos.x,
+            pos.y,
+            element.width,
+            element.height,
+          );
+          return snapped;
+        }}
+        onMouseEnter={(e) => {
+          const container = e.target.getStage()?.container();
+          if (container) {
+            container.style.cursor = isSelected ? "move" : "pointer";
+          }
+        }}
+        onMouseLeave={(e) => {
+          const container = e.target.getStage()?.container();
+          if (container) {
+            container.style.cursor = "default";
+          }
+        }}
         onDragEnd={(e) => {
           onDragEnd({
             x: e.target.x(),
@@ -100,4 +128,6 @@ export function CanvasImage({
       )}
     </>
   );
-}
+});
+
+CanvasImage.displayName = "CanvasImage";
