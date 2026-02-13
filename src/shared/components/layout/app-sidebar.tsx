@@ -6,6 +6,7 @@ import {
   IconDashboard,
   IconImageInPicture,
   IconPackage,
+  IconPencil,
   IconSend,
   IconSettings,
   IconTicket,
@@ -85,6 +86,11 @@ const data = {
       title: "Criativos",
       url: "/criativos",
       icon: IconImageInPicture,
+    },
+    {
+      title: "Editor",
+      url: "/editor",
+      icon: IconPencil,
     },
     // {
     //   title: "Cupons",
