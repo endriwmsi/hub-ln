@@ -4,6 +4,7 @@ import {
   IconAlertCircle,
   IconCreditCard,
   IconDashboard,
+  IconImageInPicture,
   IconPackage,
   IconSend,
   IconSettings,
@@ -80,100 +81,15 @@ const data = {
       url: "/transacoes",
       icon: IconCreditCard,
     },
+    {
+      title: "Criativos",
+      url: "/criativos",
+      icon: IconImageInPicture,
+    },
     // {
     //   title: "Cupons",
     //   url: "/cupons",
     //   icon: IconTicket,
-    // },
-    // {
-    //   title: "Capital de Giro",
-    //   url: "/solicitacoes-capital-giro",
-    //   icon: IconMoneybag,
-    // },
-    // {
-    //   title: "Indicações",
-    //   url: "/indicacoes",
-    //   icon: IconNetwork,
-    // },
-    // {
-    //   title: "Criativos",
-    //   url: "/criativos",
-    //   icon: IconImageInPicture,
-    // },
-    // {
-    //   title: "Editor de Criativos",
-    //   url: "/editor",
-    //   icon: IconImageInPicture,
-    // },
-    // {
-    //   title: "Financeiro",
-    //   url: "#",
-    //   icon: IconCreditCard,
-    //   items: [
-    //     {
-    //       title: "Transações",
-    //       url: "/transacoes",
-    //       icon: IconCreditCard,
-    //     },
-    // {
-    //   title: "Vendas",
-    //   url: "/vendas",
-    // },
-    // {
-    //   title: "Mensalidades",
-    //   url: "/mensalidades",
-    // },
-    // {
-    //   title: "Inadimplência",
-    //   url: "/inadimplencia",
-    // },
-    //   ],
-    // },
-    // {
-    //   title: "Serviços e Produtos",
-    //   url: "#",
-    //   icon: IconShoppingCart,
-    //   items: [
-    //     {
-    //       title: "Limpa Nome",
-    //       url: "/limpa-nome",
-    //     },
-    //     {
-    //       title: "CNH",
-    //       url: "/cnh",
-    //     },
-    //     {
-    //       title: "Rating PF",
-    //       url: "/rating-pf",
-    //     },
-    //     {
-    //       title: "Rating PJ",
-    //       url: "/rating-pj",
-    //     },
-    //     {
-    //       title: "Jus-Brasil e Escavador",
-    //       url: "/jus-brasil",
-    //     },
-    //     {
-    //       title: "Bacen",
-    //       url: "/bacen",
-    //     },
-    //   ],
-    // },
-    // {
-    //   title: "Consultas",
-    //   url: "#",
-    //   icon: IconEye,
-    //   items: [
-    //     {
-    //       title: "Comprar Consultas",
-    //       url: "/comprar-consultas",
-    //     },
-    //     {
-    //       title: "Minhas Consultas",
-    //       url: "/minhas-consultas",
-    //     },
-    //   ],
     // },
   ],
   navSecondary: [
@@ -203,6 +119,11 @@ const data = {
       name: "Gerenciar Serviços",
       url: "/gerenciar-servicos",
       icon: IconPackage,
+    },
+    {
+      name: "Gerenciar Criativos",
+      url: "/gerenciar-criativos",
+      icon: IconImageInPicture,
     },
   ],
 };

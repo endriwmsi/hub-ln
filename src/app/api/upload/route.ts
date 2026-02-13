@@ -141,7 +141,10 @@ export async function POST(request: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const folder = `documents/${user.id}`;
+
+    // Permitir pasta customizada via formData ou usar padrão
+    const customFolder = formData.get("folder") as string | null;
+    const folder = customFolder || `documents/${user.id}`;
 
     const url = await uploadToS3({
       file: buffer,
