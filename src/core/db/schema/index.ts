@@ -2,6 +2,7 @@
 
 export * from "./acao.schema";
 export * from "./account.schema";
+export * from "./announcement.schema";
 export * from "./commission.schema";
 export * from "./creative.schema";
 export * from "./form-field.schema";
