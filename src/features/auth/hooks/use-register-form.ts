@@ -12,7 +12,7 @@ import {
   step3Schema,
 } from "../schemas/register-schemas";
 
-export function useRegisterForm(referralCode: string) {
+export function useRegisterForm(referralCode: string | null) {
   const [currentStep, setCurrentStep] = useState(1);
   const [isPending, setIsPending] = useState(false);
   const router = useRouter();
@@ -21,6 +21,7 @@ export function useRegisterForm(referralCode: string) {
     resolver: zodResolver(registerSchema),
     mode: "onChange",
     defaultValues: {
+      referralCode: referralCode ?? "",
       fullname: "",
       email: "",
       password: "",
@@ -47,6 +48,7 @@ export function useRegisterForm(referralCode: string) {
       switch (currentStep) {
         case 1:
           await step1Schema.parseAsync({
+            referralCode: values.referralCode,
             fullname: values.fullname,
             email: values.email,
             password: values.password,
@@ -106,7 +108,7 @@ export function useRegisterForm(referralCode: string) {
 
     const submitData = {
       ...values,
-      referredBy: referralCode,
+      referredBy: values.referralCode,
     };
 
     console.log("Dados a serem enviados:", submitData);

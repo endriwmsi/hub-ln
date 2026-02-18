@@ -15,6 +15,9 @@ export const step1Schema = z
     confirmPassword: z.string().min(8, {
       message: "A confirmação da senha deve ter pelo menos 8 caracteres.",
     }),
+    referralCode: z.string().min(1, {
+      message: "O código de parceiro é obrigatório.",
+    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "As senhas devem ser iguais.",
@@ -60,6 +63,9 @@ export const registerSchema = z
     }),
     confirmPassword: z.string().min(8, {
       message: "A confirmação da senha deve ter pelo menos 8 caracteres.",
+    }),
+    referralCode: z.string().min(1, {
+      message: "O código de parceiro é obrigatório.",
     }),
     // Etapa 2
     cpf: z

@@ -5,6 +5,7 @@ import {
   IconCreditCard,
   IconDashboard,
   IconImageInPicture,
+  IconNetwork,
   IconPackage,
   IconPencil,
   IconSend,
@@ -80,6 +81,11 @@ const data = {
       title: "Financeiro",
       url: "/transacoes",
       icon: IconCreditCard,
+    },
+    {
+      title: "Indicações",
+      url: "/indicacoes",
+      icon: IconNetwork,
     },
     {
       title: "Criativos",

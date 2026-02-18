@@ -22,7 +22,7 @@ interface RegisterFormProps {
 
 export function RegisterForm({ referralCode }: RegisterFormProps) {
   const { formData, currentStep, isPending, nextStep, prevStep, onSubmit } =
-    useRegisterForm(referralCode ?? "IK5W");
+    useRegisterForm(referralCode);
 
   // Usar useWatch para garantir re-renderização
   const acceptTerms = useWatch({

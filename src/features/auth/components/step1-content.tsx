@@ -17,6 +17,26 @@ export function Step1Content({ control }: Step1ContentProps) {
     <div className="space-y-4">
       <FormField
         control={control}
+        name="referralCode"
+        render={({ field }) => (
+          <div className="grid gap-2">
+            <FormControl>
+              <Input
+                {...field}
+                id="referralCode"
+                type="text"
+                placeholder="Código de parceiro"
+                className="w-full border-0 bg-primary/10 px-4 py-5"
+                autoComplete="off"
+              />
+            </FormControl>
+            <FormMessage />
+          </div>
+        )}
+      />
+
+      <FormField
+        control={control}
         name="fullname"
         render={({ field }) => (
           <div className="grid gap-2">
