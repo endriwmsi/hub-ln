@@ -10,6 +10,11 @@ export {
 export { type GetAcoesResponse, getAcoes } from "./get-acoes";
 export { type AcaoAtiva, getAcoesAtivas } from "./get-acoes-ativas";
 export {
+  type GetLatestAcoesResponse,
+  getLatestAcoes,
+  type LatestAcao,
+} from "./get-latest-acoes";
+export {
   type ToggleAcaoFieldResponse,
   toggleAcaoField,
 } from "./toggle-acao-field";

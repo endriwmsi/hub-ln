@@ -1,7 +1,5 @@
 "use client";
 
-import { PanelRight } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -29,15 +27,18 @@ export const ResponsiveDashboardUtils = ({
       <div className="lg:hidden">
         <Sheet>
           <SheetTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="fixed bottom-4 right-4 z-50 h-14 w-14 rounded-full shadow-lg border-primary bg-background hover:bg-accent"
+            <button
+              type="button"
+              className="fixed right-0 top-3/4 -translate-y-1/2 z-50 h-32 w-8 rounded-l-4xl shadow-lg border border-r-0 border-primary/10 bg-primary/10 hover:bg-accent hover:w-10 transition-all duration-200 flex flex-col items-center justify-center gap-2 group"
             >
-              <PanelRight className="h-6 w-6 text-primary" />
-            </Button>
+              <span className="text-xs font-semibold text-primary whitespace-nowrap -rotate-90">
+                VER MAIS
+              </span>
+
+              {/* <PanelRight className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" /> */}
+            </button>
           </SheetTrigger>
-          <SheetContent className="w-full sm:max-w-md overflow-y-auto p-2">
+          <SheetContent className="w-full sm:max-w-md overflow-y-auto p-2 items-center">
             <SheetHeader className="mb-4">
               <SheetTitle>Utilidades do Dashboard</SheetTitle>
               <SheetDescription>
