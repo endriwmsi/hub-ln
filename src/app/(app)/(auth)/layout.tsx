@@ -1,3 +1,6 @@
+"use client";
+
+import Image from "next/image";
 import Logo from "@/shared/components/layout/logo";
 
 export default function AuthLayout({
@@ -6,43 +9,83 @@ export default function AuthLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="relative flex min-h-screen items-center justify-center p-6">
-      {/* Background image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1490093158370-1a6be674437b?q=80&w=1014&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
-        }}
-      ></div>
-
-      {/* Overlay for better contrast */}
-      <div className="absolute inset-0 bg-black/30"></div>
-
-      {/* Background decorative circles */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-white/20 blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-white/10 blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-white/5 blur-2xl"></div>
-      </div>
-
-      {/* Login card */}
-      <div className="relative z-10 flex w-full max-w-7xl">
-        <div className="w-full rounded-2xl border border-secondary/50 bg-secondary p-8 shadow-2xl md:w-[40%] md:rounded-l-2xl md:rounded-r-none md:p-14">
-          {/* Logo */}
+    <div className="flex min-h-screen">
+      {/* Left side - Auth Form */}
+      <div className="flex items-center justify-center w-full lg:w-2/5 p-6">
+        <div className="flex flex-col w-full max-w-md">
           <div className="mb-10">
             <Logo className="w-48" />
           </div>
 
-          {/* Content with original padding */}
-          <div className="pt-12">{children}</div>
+          <div>{children}</div>
         </div>
+      </div>
 
-        <div className="relative hidden w-[60%] overflow-hidden rounded-r-2xl border border-white/20 bg-white/10 p-8 shadow-2xl backdrop-blur-xs md:block">
-          <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent" />
-          <div className="absolute inset-0 bg-linear-to-tl from-gray-400/10 via-transparent to-white/5" />
-          <div className="relative z-10 flex h-full items-center justify-center">
-            <div className="text-lg font-light text-white/60"></div>
+      {/* Right side - Image */}
+      <div className="hidden md:flex items-center justify-center w-3/5 p-4 relative">
+        <div className="relative w-full h-full rounded-3xl shadow-2xl overflow-hidden">
+          <Image
+            src="/assets/images/auth-bg.jpg"
+            alt="Authentication illustration"
+            fill
+            className="object-cover rounded-2xl"
+            priority
+          />
+
+          {/* Overlay gradient for better card visibility */}
+          <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
+
+          {/* Steps cards */}
+          <div className="absolute bottom-8 left-8 right-8 z-10">
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold text-white mb-2">
+                Comece agora!
+              </h2>
+              <p className="text-white/80 text-sm">
+                Siga estes passos simples para começar a usar nossa plataforma
+              </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              {/* Step 1 */}
+              <div className="bg-primary/80 backdrop-blur-md rounded-xl p-4 border border-secondary/20">
+                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mb-3">
+                  <span className="text-secondary font-bold text-lg">1</span>
+                </div>
+                <h3 className="text-secondary font-semibold text-sm mb-1">
+                  Crie sua conta
+                </h3>
+                <p className="text-secondary/70 text-xs">
+                  Cadastre-se gratuitamente e comece a explorar
+                </p>
+              </div>
+
+              {/* Step 2 */}
+              <div className="bg-secondary/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
+                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mb-3">
+                  <span className="text-white font-bold text-lg">2</span>
+                </div>
+                <h3 className="text-white font-semibold text-sm mb-1">
+                  Configure seu perfil
+                </h3>
+                <p className="text-white/70 text-xs">
+                  Personalize suas preferências e comece
+                </p>
+              </div>
+
+              {/* Step 3 */}
+              <div className="bg-secondary/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
+                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mb-3">
+                  <span className="text-white font-bold text-lg">3</span>
+                </div>
+                <h3 className="text-white font-semibold text-sm mb-1">
+                  Comece a usar
+                </h3>
+                <p className="text-white/70 text-xs">
+                  Acesse todas as funcionalidades disponíveis
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
