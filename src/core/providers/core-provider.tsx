@@ -14,8 +14,8 @@ export default function CoreProvider({
     <QueryProvider>
       <ThemeProvider
         attribute="class"
-        defaultTheme="system"
-        enableSystem
+        defaultTheme="light"
+        enableSystem={false}
         disableTransitionOnChange
       >
         {children}

@@ -86,6 +86,10 @@ export const serviceRequest = pgTable("service_request", {
   paid: boolean("paid").default(false).notNull(),
   paidAt: timestamp("paid_at"),
 
+  // Cupom de desconto
+  couponCode: text("coupon_code"), // Código do cupom usado
+  discountAmount: numeric("discount_amount", { precision: 10, scale: 2 }), // Valor total do desconto aplicado
+
   // Integração Asaas
   asaasPaymentId: text("asaas_payment_id"), // ID da cobrança no Asaas
   asaasCustomerId: text("asaas_customer_id"), // ID do cliente no Asaas

@@ -130,6 +130,11 @@ const data = {
       url: "/gerenciar-criativos",
       icon: IconImageInPicture,
     },
+    {
+      name: "Gerenciar Cupons",
+      url: "/gerenciar-cupons",
+      icon: IconTicket,
+    },
   ],
 };
 

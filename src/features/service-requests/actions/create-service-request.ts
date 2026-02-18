@@ -11,6 +11,7 @@ import {
   user,
   userServicePrice,
 } from "@/core/db/schema";
+import { recordCouponUsage } from "@/features/coupons";
 import type { ActionResponse } from "@/shared/lib/server-actions";
 import {
   type CreateServiceRequestInput,
@@ -64,8 +65,19 @@ export async function createServiceRequest(
       }
     }
 
+    // Aplicar desconto do cupom se fornecido
+    let finalUnitPrice = unitPrice;
+    let totalDiscountAmount = 0;
+
+    if (validatedInput.discountAmount && validatedInput.discountAmount > 0) {
+      // O desconto já foi calculado no frontend, usar o valor fornecido
+      totalDiscountAmount = validatedInput.discountAmount;
+      finalUnitPrice =
+        unitPrice - totalDiscountAmount / (validatedInput.quantity || 1);
+    }
+
     // Calcular preço total
-    const totalPrice = unitPrice * (validatedInput.quantity || 1);
+    const totalPrice = finalUnitPrice * (validatedInput.quantity || 1);
 
     const newRequest = await db
       .insert(serviceRequest)
@@ -78,8 +90,20 @@ export async function createServiceRequest(
         quantity: validatedInput.quantity || 1,
         totalPrice: totalPrice.toFixed(2),
         status: "pending",
+        couponCode: validatedInput.couponCode,
+        discountAmount:
+          totalDiscountAmount > 0 ? totalDiscountAmount.toFixed(2) : null,
       })
       .returning();
+
+    // Registrar uso do cupom se aplicado
+    if (validatedInput.couponId && totalDiscountAmount > 0) {
+      await recordCouponUsage(
+        validatedInput.couponId,
+        newRequest[0].id,
+        totalDiscountAmount,
+      );
+    }
 
     revalidatePath("/envios");
     revalidatePath("/configuracoes/solicitacoes");

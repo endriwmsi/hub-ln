@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { Service } from "@/core/db/schema";
+import { CouponInput } from "@/features/coupons";
 import { createBulkServiceRequests } from "@/features/service-requests";
 import {
   Alert,
@@ -52,6 +53,16 @@ export function ExcelUploadForm({
   const [parsedData, setParsedData] = useState<ParsedRow[]>([]);
   const [fileName, setFileName] = useState<string | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
+
+  // Estado para cupom aplicado
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    couponId: string;
+    couponCode: string;
+    discountType: "percentage" | "fixed";
+    discountValue: number;
+    discountPerUnit: number;
+    totalDiscount: number;
+  } | null>(null);
 
   // Função para validar CPF/CNPJ
   const validateDocument = (
@@ -188,6 +199,9 @@ export function ExcelUploadForm({
           nome: row.nome,
           documento: row.documento,
         })),
+        couponCode: appliedCoupon?.couponCode,
+        couponId: appliedCoupon?.couponId,
+        discountPerUnit: appliedCoupon?.discountPerUnit,
       });
 
       if (!result.success) {
@@ -217,7 +231,13 @@ export function ExcelUploadForm({
   const invalidCount = parsedData.length - validCount;
   // Usar preço de custo (preço do indicador) se disponível, senão usar preço base
   const unitPrice = costPrice ? Number(costPrice) : Number(service.basePrice);
-  const totalPrice = unitPrice * validCount;
+  const finalUnitPrice = appliedCoupon
+    ? unitPrice - appliedCoupon.discountPerUnit
+    : unitPrice;
+  const totalPrice = finalUnitPrice * validCount;
+  const totalDiscount = appliedCoupon
+    ? appliedCoupon.discountPerUnit * validCount
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -364,18 +384,58 @@ export function ExcelUploadForm({
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
+            {/* Input de Cupom */}
+            <div className="w-full">
+              <CouponInput
+                serviceId={service.id}
+                quantity={validCount}
+                unitPrice={unitPrice}
+                onApplyCoupon={(couponData) => setAppliedCoupon(couponData)}
+                onRemoveCoupon={() => setAppliedCoupon(null)}
+                appliedCoupon={
+                  appliedCoupon
+                    ? {
+                        couponCode: appliedCoupon.couponCode,
+                        totalDiscount: appliedCoupon.totalDiscount,
+                      }
+                    : null
+                }
+              />
+            </div>
+
             {/* Resumo do preço */}
-            <div className="w-full border rounded-lg p-4 bg-muted/50">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-muted-foreground">
-                    {validCount} nome(s) x{" "}
+            <div className="w-full border rounded-lg p-4 bg-muted/50 space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">
+                  {validCount} nome(s) x{" "}
+                  {new Intl.NumberFormat("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  }).format(unitPrice)}
+                </span>
+                <span className="font-medium">
+                  {new Intl.NumberFormat("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  }).format(unitPrice * validCount)}
+                </span>
+              </div>
+              {appliedCoupon && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-green-600">Desconto total</span>
+                  <span className="font-medium text-green-600">
+                    -{" "}
                     {new Intl.NumberFormat("pt-BR", {
                       style: "currency",
                       currency: "BRL",
-                    }).format(unitPrice)}
+                    }).format(totalDiscount)}
                   </span>
                 </div>
+              )}
+              <div className="flex items-center justify-between pt-2 border-t">
+                <span className="text-muted-foreground font-semibold">
+                  Total final
+                </span>
                 <span className="text-xl font-bold">
                   {new Intl.NumberFormat("pt-BR", {
                     style: "currency",

@@ -49,6 +49,10 @@ export const createServiceRequestSchema = z.object({
   formData: z.record(z.string(), z.unknown()),
   documents: z.array(documentSchema).optional(),
   quantity: z.number().int().positive().default(1),
+  // Campos de cupom
+  couponCode: z.string().optional(),
+  couponId: z.string().optional(),
+  discountAmount: z.number().optional(),
 });
 
 export type CreateServiceRequestInput = z.infer<
@@ -97,6 +101,10 @@ export const bulkUploadSchema = z.object({
       documento: z.string().min(1, "Documento é obrigatório"),
     }),
   ),
+  // Campos de cupom
+  couponCode: z.string().optional(),
+  couponId: z.string().optional(),
+  discountPerUnit: z.number().optional(),
 });
 
 export type BulkUploadInput = z.infer<typeof bulkUploadSchema>;

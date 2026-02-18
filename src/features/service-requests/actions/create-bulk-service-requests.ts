@@ -10,6 +10,7 @@ import {
   user,
   userServicePrice,
 } from "@/core/db/schema";
+import { recordCouponUsage } from "@/features/coupons";
 import type { ActionResponse } from "@/shared/lib/server-actions";
 import { type BulkUploadInput, bulkUploadSchema } from "../schemas";
 
@@ -66,7 +67,17 @@ export async function createBulkServiceRequests(
     }
 
     const quantity = validatedInput.items.length;
-    const totalPrice = unitPrice * quantity;
+
+    // Aplicar desconto do cupom se fornecido
+    let finalUnitPrice = unitPrice;
+    let totalDiscountAmount = 0;
+
+    if (validatedInput.discountPerUnit && validatedInput.discountPerUnit > 0) {
+      finalUnitPrice = unitPrice - validatedInput.discountPerUnit;
+      totalDiscountAmount = validatedInput.discountPerUnit * quantity;
+    }
+
+    const totalPrice = finalUnitPrice * quantity;
 
     // Criar uma solicitação única com todos os itens
     const formData = {
@@ -74,16 +85,31 @@ export async function createBulkServiceRequests(
       uploadType: "bulk",
     };
 
-    await db.insert(serviceRequest).values({
-      userId: session.userId,
-      serviceId: validatedInput.serviceId,
-      acaoId: validatedInput.acaoId,
-      formData,
-      documents: [],
-      quantity,
-      totalPrice: totalPrice.toFixed(2),
-      status: "pending",
-    });
+    const newRequest = await db
+      .insert(serviceRequest)
+      .values({
+        userId: session.userId,
+        serviceId: validatedInput.serviceId,
+        acaoId: validatedInput.acaoId,
+        formData,
+        documents: [],
+        quantity,
+        totalPrice: totalPrice.toFixed(2),
+        status: "pending",
+        couponCode: validatedInput.couponCode,
+        discountAmount:
+          totalDiscountAmount > 0 ? totalDiscountAmount.toFixed(2) : null,
+      })
+      .returning();
+
+    // Registrar uso do cupom se aplicado
+    if (validatedInput.couponId && totalDiscountAmount > 0) {
+      await recordCouponUsage(
+        validatedInput.couponId,
+        newRequest[0].id,
+        totalDiscountAmount,
+      );
+    }
 
     revalidatePath("/envios");
     revalidatePath("/configuracoes/solicitacoes");

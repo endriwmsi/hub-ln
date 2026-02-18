@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import type { Service } from "@/core/db/schema";
+import { CouponInput } from "@/features/coupons";
 import { createServiceRequest } from "@/features/service-requests";
 import { formatCurrency } from "@/shared";
 import { Button } from "@/shared/components/ui/button";
@@ -76,6 +77,16 @@ export function SingleSubmissionForm({
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Estado para cupom aplicado
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    couponId: string;
+    couponCode: string;
+    discountType: "percentage" | "fixed";
+    discountValue: number;
+    discountPerUnit: number;
+    totalDiscount: number;
+  } | null>(null);
+
   const form = useForm<SingleSubmissionFormData>({
     resolver: zodResolver(singleSubmissionSchema),
     defaultValues: {
@@ -99,6 +110,9 @@ export function SingleSubmissionForm({
         acaoId,
         formData,
         quantity: 1,
+        couponCode: appliedCoupon?.couponCode,
+        couponId: appliedCoupon?.couponId,
+        discountAmount: appliedCoupon?.totalDiscount,
       });
 
       if (result.success) {
@@ -115,7 +129,10 @@ export function SingleSubmissionForm({
     }
   };
 
-  const priceDisplay = costPrice || service.basePrice;
+  const priceDisplay = Number(costPrice || service.basePrice);
+  const finalPrice = appliedCoupon
+    ? priceDisplay - appliedCoupon.discountPerUnit
+    : priceDisplay;
 
   return (
     <Card>
@@ -173,21 +190,54 @@ export function SingleSubmissionForm({
               )}
             />
 
+            {/* Input de Cupom */}
             <div className="pt-4 border-t">
-              <div className="flex justify-between items-center">
-                <div>
+              <CouponInput
+                serviceId={service.id}
+                quantity={1}
+                unitPrice={priceDisplay}
+                onApplyCoupon={(couponData) => setAppliedCoupon(couponData)}
+                onRemoveCoupon={() => setAppliedCoupon(null)}
+                appliedCoupon={
+                  appliedCoupon
+                    ? {
+                        couponCode: appliedCoupon.couponCode,
+                        totalDiscount: appliedCoupon.totalDiscount,
+                      }
+                    : null
+                }
+              />
+            </div>
+
+            <div className="pt-4 border-t">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Preço unitário</span>
+                  <span className="font-medium">
+                    {formatCurrency(priceDisplay)}
+                  </span>
+                </div>
+                {appliedCoupon && (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-green-600">Desconto</span>
+                    <span className="font-medium text-green-600">
+                      - {formatCurrency(appliedCoupon.discountPerUnit)}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center pt-2 border-t">
                   <p className="text-sm text-muted-foreground">
                     Valor total do serviço
                   </p>
                   <p className="text-2xl font-bold text-primary">
-                    {formatCurrency(priceDisplay)}
+                    {formatCurrency(finalPrice)}
                   </p>
                 </div>
               </div>
             </div>
           </CardContent>
 
-          <CardFooter>
+          <CardFooter className="mt-8">
             <Button
               type="submit"
               disabled={isSubmitting}
