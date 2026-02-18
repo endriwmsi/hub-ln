@@ -1,10 +1,9 @@
-"use client";
 import { IconLogout } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import { Settings, User } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { authClient } from "@/core";
+import { authClient, useSession } from "@/core";
 import { NotificationsDropdown } from "@/features/notifications";
 import {
   Avatar,
@@ -26,7 +25,7 @@ import { Skeleton } from "../ui/skeleton";
 import { ModeToggle } from "./mode-toggle";
 
 export function SiteHeader() {
-  const { data: session, isPending } = authClient.useSession();
+  const { data: session, isPending } = useSession();
 
   return (
     <motion.header
@@ -53,11 +52,11 @@ export function SiteHeader() {
                   {session?.user.image && (
                     <AvatarImage
                       src={session?.user.image || "/assets/placeholder.svg"}
-                      alt={session?.user.name || "User"}
+                      alt={session?.user.name || ""}
                     />
                   )}
                   <AvatarFallback className="rounded-lg">
-                    {getUserInitials(session?.user.name || "SN")}
+                    {getUserInitials(session?.user.name || "")}
                   </AvatarFallback>
                 </Avatar>
                 <div className="hidden max-w-40 flex-col items-start md:flex">
@@ -69,7 +68,7 @@ export function SiteHeader() {
                   ) : (
                     <>
                       <span className="truncate font-medium">
-                        {session?.user.name || "SN"}
+                        {session?.user.name || ""}
                       </span>
                       <span className="text-muted-foreground truncate text-xs">
                         {session?.user.email}

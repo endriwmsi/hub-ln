@@ -80,12 +80,12 @@ export function NavUser() {
                     />
                   )}
                   <AvatarFallback className="rounded-lg">
-                    {getUserInitials(session?.user.name || "SN")}
+                    {getUserInitials(session?.user.name || "")}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">
-                    {session?.user.name || "SN"}
+                    {session?.user.name || ""}
                   </span>
                   <span className="text-muted-foreground truncate text-xs">
                     {session?.user.email}
