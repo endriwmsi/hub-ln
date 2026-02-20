@@ -1,7 +1,8 @@
 "use client";
 
-import { Search, X } from "lucide-react";
+import { Download, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import {
@@ -11,11 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import { exportUsers } from "../actions";
 import { useUserFilters } from "../hooks/use-user-filters";
 
 export function UsersTableFilters() {
   const { filters, updateFilters, clearFilters } = useUserFilters();
   const [searchInput, setSearchInput] = useState(filters.search || "");
+  const [isExporting, setIsExporting] = useState(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   // Sincronizar input de busca com filtros da URL
@@ -44,6 +47,47 @@ export function UsersTableFilters() {
       }
     };
   }, []);
+
+  const handleExport = async () => {
+    try {
+      setIsExporting(true);
+      toast("Exportando usuários...");
+
+      const result = await exportUsers(filters);
+
+      if (!result.success || !result.data) {
+        throw new Error(result.error || "Erro ao exportar usuários");
+      }
+
+      // Converter base64 para blob
+      const byteCharacters = atob(result.data.base64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      // Criar link de download
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = result.data.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast("Exportação concluída!");
+    } catch (error) {
+      console.error("Erro ao exportar:", error);
+      toast("Erro ao exportar usuários");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const hasActiveFilters =
     filters.search || (filters.role && filters.role !== "all");
@@ -108,6 +152,17 @@ export function UsersTableFilters() {
           </Button>
         )}
       </div>
+
+      {/* Botão Exportar */}
+      <Button
+        onClick={handleExport}
+        disabled={isExporting}
+        className="h-10"
+        variant="outline"
+      >
+        <Download className="mr-2 h-4 w-4" />
+        {isExporting ? "Exportando..." : "Exportar Excel"}
+      </Button>
     </div>
   );
 }

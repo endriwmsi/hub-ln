@@ -96,7 +96,7 @@ export const serviceRequest = pgTable("service_request", {
   paymentStatus: paymentStatusEnum("payment_status").default("pending"),
 
   // Status individual dos itens (para envios em lote)
-  // Array de objetos com: { nome, documento, status }
+  // Array de objetos com: { nome, documento, status, extracted }
   itemsStatus: jsonb("items_status")
     .$type<
       Array<{
@@ -105,6 +105,8 @@ export const serviceRequest = pgTable("service_request", {
         status: "aguardando" | "baixas_completas" | "baixas_negadas";
         observacao?: string;
         processedAt?: string;
+        extracted?: boolean;
+        extractedAt?: string;
       }>
     >()
     .default([]),
@@ -161,4 +163,6 @@ export type ServiceRequestItem = {
   status: ItemStatus;
   observacao?: string;
   processedAt?: string;
+  extracted?: boolean;
+  extractedAt?: string;
 };

@@ -142,6 +142,35 @@ export function createAcaoClientsColumns(
       ),
     },
     {
+      id: "extracted",
+      header: "Extraído",
+      cell: ({ row }) => {
+        const { extracted, extractedAt } = row.original;
+        if (extracted && extractedAt) {
+          return (
+            <div>
+              <Badge
+                variant="secondary"
+                className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+              >
+                Sim
+              </Badge>
+              <p className="text-xs text-muted-foreground mt-1">
+                {format(new Date(extractedAt), "dd/MM/yy", {
+                  locale: ptBR,
+                })}
+              </p>
+            </div>
+          );
+        }
+        return (
+          <Badge variant="outline" className="text-muted-foreground">
+            Não
+          </Badge>
+        );
+      },
+    },
+    {
       id: "actions",
       header: "Ações",
       cell: ({ row }) => (

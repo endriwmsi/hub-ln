@@ -1,5 +1,13 @@
 export { type CreateAcaoResponse, createAcao } from "./create-acao";
 export { type DeleteAcaoResponse, deleteAcao } from "./delete-acao";
+export {
+  type ExportOverdueClientsResponse,
+  exportOverdueClients,
+} from "./export-overdue-clients";
+export {
+  type ExportPaidClientsResponse,
+  exportPaidClients,
+} from "./export-paid-clients";
 export { type GetAcaoByIdResponse, getAcaoById } from "./get-acao-by-id";
 export {
   type AcaoClientItem,

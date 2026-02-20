@@ -65,6 +65,9 @@ export function AcaoClientsTable({
   // Estados locais
   const [searchValue, setSearchValue] = useState(initialSearch);
   const [currentStatus, setCurrentStatus] = useState(initialStatus);
+  const [extractedFilter, setExtractedFilter] = useState<"all" | "yes" | "no">(
+    "all",
+  );
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [pageSize, setPageSize] = useState(initialPageSize);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -79,6 +82,7 @@ export function AcaoClientsTable({
       search: debouncedSearch || undefined,
       status:
         currentStatus === "all" ? undefined : (currentStatus as StatusType),
+      extracted: extractedFilter === "all" ? undefined : extractedFilter,
       page: currentPage,
       pageSize,
     },
@@ -332,6 +336,22 @@ export function AcaoClientsTable({
               </button>
             )}
           </div>
+          <Select
+            value={extractedFilter}
+            onValueChange={(value: "all" | "yes" | "no") => {
+              setExtractedFilter(value);
+              setCurrentPage(1);
+            }}
+          >
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Extraído" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="yes">Extraídos</SelectItem>
+              <SelectItem value="no">Não Extraídos</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {selectedItems.length > 0 && (

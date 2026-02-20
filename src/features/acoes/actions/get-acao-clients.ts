@@ -13,6 +13,8 @@ export type AcaoClientItem = {
   status: "aguardando" | "baixas_completas" | "baixas_negadas";
   observacao?: string;
   processedAt?: string;
+  extracted?: boolean;
+  extractedAt?: string;
   // Dados do envio
   userId: string;
   userName: string;
@@ -26,6 +28,7 @@ export type AcaoClientItem = {
 export type GetAcaoClientsFilters = {
   search?: string;
   status?: "all" | "aguardando" | "baixas_completas" | "baixas_negadas";
+  extracted?: "all" | "yes" | "no";
   page?: number;
   pageSize?: number;
 };
@@ -41,7 +44,7 @@ export async function getAcaoClients(
   try {
     await requireAdmin();
 
-    const { search, status, page = 1, pageSize = 50 } = filters;
+    const { search, status, extracted, page = 1, pageSize = 50 } = filters;
 
     // Verificar se a ação existe
     const acaoData = await db
@@ -97,6 +100,8 @@ export async function getAcaoClients(
           status: "aguardando" | "baixas_completas" | "baixas_negadas";
           observacao?: string;
           processedAt?: string;
+          extracted?: boolean;
+          extractedAt?: string;
         }>;
 
         items.forEach((item, index) => {
@@ -110,6 +115,8 @@ export async function getAcaoClients(
             status: statusData?.status || "aguardando",
             observacao: statusData?.observacao,
             processedAt: statusData?.processedAt,
+            extracted: statusData?.extracted,
+            extractedAt: statusData?.extractedAt,
             userId: request.userId,
             userName: request.userName,
             userEmail: request.userEmail,
@@ -130,6 +137,8 @@ export async function getAcaoClients(
             status: "aguardando" | "baixas_completas" | "baixas_negadas";
             observacao?: string;
             processedAt?: string;
+            extracted?: boolean;
+            extractedAt?: string;
           }>;
           const statusData = itemsStatus[0];
 
@@ -141,6 +150,8 @@ export async function getAcaoClients(
             status: statusData?.status || "aguardando",
             observacao: statusData?.observacao,
             processedAt: statusData?.processedAt,
+            extracted: statusData?.extracted,
+            extractedAt: statusData?.extractedAt,
             userId: request.userId,
             userName: request.userName,
             userEmail: request.userEmail,
@@ -167,6 +178,15 @@ export async function getAcaoClients(
 
     if (status && status !== "all") {
       filteredItems = filteredItems.filter((item) => item.status === status);
+    }
+
+    if (extracted && extracted !== "all") {
+      filteredItems = filteredItems.filter((item) => {
+        if (extracted === "yes") {
+          return item.extracted === true;
+        }
+        return !item.extracted;
+      });
     }
 
     // Ordenar por data de criação (mais recente primeiro)

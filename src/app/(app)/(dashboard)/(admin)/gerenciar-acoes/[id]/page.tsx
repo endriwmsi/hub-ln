@@ -6,6 +6,8 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/core/auth/dal";
 import { getAcaoById } from "@/features/acoes/actions/get-acao-by-id";
 import { AcaoClientsTable } from "@/features/acoes/components/acao-clients-table";
+import { ExportOverdueClientsButton } from "@/features/acoes/components/export-overdue-clients-button";
+import { ExportPaidClientsButton } from "@/features/acoes/components/export-paid-clients-button";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -104,11 +106,19 @@ export default async function AcaoDetalhesPage({
       {/* Tabela de clientes */}
       <Card>
         <CardHeader>
-          <CardTitle>Clientes Enviados</CardTitle>
-          <CardDescription>
-            Lista de todos os nomes enviados nesta ação. Use os filtros para
-            buscar por nome, documento ou status.
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <CardTitle>Clientes Enviados</CardTitle>
+              <CardDescription>
+                Lista de todos os nomes enviados nesta ação. Use os filtros para
+                buscar por nome, documento ou status.
+              </CardDescription>
+            </div>
+            <div className="flex gap-2">
+              <ExportOverdueClientsButton acaoId={id} />
+              <ExportPaidClientsButton acaoId={id} />
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <AcaoClientsTable
