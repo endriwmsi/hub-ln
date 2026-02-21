@@ -15,10 +15,13 @@ export async function updateFormField(
     const validatedInput = updateFormFieldSchema.parse(input);
     const { id, ...updateData } = validatedInput;
 
-    // Remover campos undefined
-    const cleanData = Object.fromEntries(
-      Object.entries(updateData).filter(([, v]) => v !== undefined),
-    );
+    // Remover apenas campos undefined (manter null e strings vazias)
+    const cleanData: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(updateData)) {
+      if (value !== undefined) {
+        cleanData[key] = value === "" ? null : value;
+      }
+    }
 
     const updatedField = await db
       .update(formField)

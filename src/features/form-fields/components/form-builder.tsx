@@ -18,9 +18,9 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { GripVertical, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { GripVertical, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { type Control, useFieldArray, useForm } from "react-hook-form";
 import type { FormField } from "@/core/db/schema";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -60,6 +60,85 @@ import {
   fieldTypeLabels,
   fieldTypes,
 } from "../schemas";
+
+// Componente para gerenciar opções do select
+type SelectOptionsManagerProps = {
+  control: Control<CreateFormFieldInput>;
+};
+
+function SelectOptionsManager({ control }: SelectOptionsManagerProps) {
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "options.options",
+  });
+
+  return (
+    <div className="rounded-lg border p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <FormLabel>Opções do Select</FormLabel>
+          <FormDescription className="mt-1">
+            Adicione as opções disponíveis para seleção
+          </FormDescription>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => append({ value: "", label: "" })}
+        >
+          <Plus className="h-4 w-4 mr-1" />
+          Opção
+        </Button>
+      </div>
+
+      {fields.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-4">
+          Nenhuma opção adicionada
+        </p>
+      ) : (
+        <div className="space-y-2">
+          {fields.map((field, index) => (
+            <div key={field.id} className="flex gap-2">
+              <FormFieldComponent
+                control={control}
+                name={`options.options.${index}.value`}
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormControl>
+                      <Input placeholder="valor" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormFieldComponent
+                control={control}
+                name={`options.options.${index}.label`}
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormControl>
+                      <Input placeholder="Texto exibido" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => remove(index)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // Componente interno para itens arrastáveis
 type SortableFieldItemProps = {
@@ -197,7 +276,9 @@ export function FormBuilder({ serviceId, fields }: FormBuilderProps) {
       type: "text",
       required: false,
       order: localFields.length,
-      options: undefined,
+      options: {
+        options: [],
+      },
     },
   });
 
@@ -212,13 +293,18 @@ export function FormBuilder({ serviceId, fields }: FormBuilderProps) {
       type: "text",
       required: false,
       order: fields.length,
-      options: undefined,
+      options: {
+        options: [],
+      },
     });
     setEditingField(null);
     setDialogOpen(true);
   };
 
   const openEditDialog = (field: FormField) => {
+    const fieldOptions = field.options as {
+      options?: Array<{ value: string; label: string }>;
+    } | null;
     form.reset({
       serviceId: field.serviceId,
       name: field.name,
@@ -227,7 +313,7 @@ export function FormBuilder({ serviceId, fields }: FormBuilderProps) {
       type: field.type as FieldType,
       required: field.required,
       order: field.order,
-      options: field.options as Record<string, unknown> | undefined,
+      options: fieldOptions || { options: [] },
     });
     setEditingField(field);
     setDialogOpen(true);
@@ -433,12 +519,7 @@ export function FormBuilder({ serviceId, fields }: FormBuilderProps) {
               />
 
               {selectedType === "select" && (
-                <div className="rounded-lg border p-3 space-y-2">
-                  <FormLabel>Opções do Select</FormLabel>
-                  <FormDescription>
-                    As opções podem ser configuradas após criar o campo.
-                  </FormDescription>
-                </div>
+                <SelectOptionsManager control={form.control} />
               )}
 
               <DialogFooter>
