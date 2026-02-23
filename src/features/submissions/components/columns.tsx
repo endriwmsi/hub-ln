@@ -4,16 +4,24 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
+  Ban,
   Check,
   CheckCircle2,
+  Clock,
   Eye,
   Hourglass,
+  Loader2,
   MoreHorizontal,
   Trash2,
   X,
   XCircle,
 } from "lucide-react";
 import Link from "next/link";
+import {
+  type ServiceRequestStatus,
+  serviceRequestStatusColors,
+  serviceRequestStatusLabels,
+} from "@/features/service-requests";
 import { formatCurrency } from "@/shared";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
@@ -105,53 +113,83 @@ export function createColumns(
     },
     {
       accessorKey: "globalStatus",
-      header: "Status Baixas",
+      header: "Status",
       cell: ({ row }) => {
-        const globalStatus = row.original.globalStatus;
+        const { globalStatus, status, quantity } = row.original;
 
-        if (!globalStatus) {
-          return <span className="text-muted-foreground text-sm">-</span>;
+        // Para envios individuais (quantity === 1), mostrar status individual
+        if (quantity === 1 && status) {
+          const statusIconMap: Record<
+            ServiceRequestStatus,
+            typeof CheckCircle2
+          > = {
+            pending: Clock,
+            processing: Loader2,
+            completed: CheckCircle2,
+            cancelled: Ban,
+            rejected: XCircle,
+          };
+
+          const Icon = statusIconMap[status];
+          const label = serviceRequestStatusLabels[status];
+          const colorClass = serviceRequestStatusColors[status];
+
+          return (
+            <Badge
+              variant="secondary"
+              className={`gap-1 ${colorClass} dark:bg-opacity-30`}
+            >
+              <Icon className="h-3 w-3" />
+              {label}
+            </Badge>
+          );
         }
 
-        const statusConfig: Record<
-          GlobalStatus,
-          { label: string; className: string; icon: typeof CheckCircle2 }
-        > = {
-          aguardando: {
-            label: "Aguardando",
-            className:
-              "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-            icon: Hourglass,
-          },
-          baixas_completas: {
-            label: "Completas",
-            className:
-              "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-            icon: CheckCircle2,
-          },
-          baixas_parciais: {
-            label: "Parciais",
-            className:
-              "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-            icon: Hourglass,
-          },
-          baixas_negadas: {
-            label: "Negadas",
-            className:
-              "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-            icon: XCircle,
-          },
-        };
+        // Para envios em bulk (quantity > 1), mostrar globalStatus
+        if (quantity > 1 && globalStatus) {
+          const globalStatusConfig: Record<
+            GlobalStatus,
+            { label: string; className: string; icon: typeof CheckCircle2 }
+          > = {
+            aguardando: {
+              label: "Aguardando",
+              className:
+                "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+              icon: Hourglass,
+            },
+            baixas_completas: {
+              label: "Completas",
+              className:
+                "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+              icon: CheckCircle2,
+            },
+            baixas_parciais: {
+              label: "Parciais",
+              className:
+                "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+              icon: Hourglass,
+            },
+            baixas_negadas: {
+              label: "Negadas",
+              className:
+                "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+              icon: XCircle,
+            },
+          };
 
-        const config = statusConfig[globalStatus];
-        const Icon = config.icon;
+          const config = globalStatusConfig[globalStatus];
+          const Icon = config.icon;
 
-        return (
-          <Badge variant="secondary" className={`gap-1 ${config.className}`}>
-            <Icon className="h-3 w-3" />
-            {config.label}
-          </Badge>
-        );
+          return (
+            <Badge variant="secondary" className={`gap-1 ${config.className}`}>
+              <Icon className="h-3 w-3" />
+              {config.label}
+            </Badge>
+          );
+        }
+
+        // Fallback se não houver status
+        return <span className="text-muted-foreground text-sm">-</span>;
       },
     },
     {
