@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hub LN - Plataforma SaaS Multi-Tenant",
-  description: "Plataforma para agência de serviços financeiros",
+  title: "Hub LN - Sua Plataforma Limpa Nome.",
+  description:
+    "Plataforma de serviços Limpa Nome, recuperação de crédito e gestão de clientes.",
 };
 
 export default function RootLayout({

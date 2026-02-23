@@ -137,6 +137,11 @@ const data = {
       icon: IconImageInPicture,
     },
     {
+      name: "Gerenciar Clientes",
+      url: "/gerenciar-clientes",
+      icon: IconUsers,
+    },
+    {
       name: "Gerenciar Cupons",
       url: "/gerenciar-cupons",
       icon: IconTicket,
