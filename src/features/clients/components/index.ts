@@ -1,3 +1,4 @@
+export { ClientsActionsBar } from "./clients-actions-bar";
 export { ClientsTableContainer } from "./clients-table-container";
 export { ClientsTableFilters } from "./clients-table-filters";
 export { columns } from "./columns";

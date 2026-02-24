@@ -10,6 +10,7 @@ export type Client = {
   extractedAt?: string;
   // Metadados do service request
   serviceRequestId: string;
+  itemIndex: number; // Índice do item no array itemsStatus
   serviceTitle: string;
   serviceId: string;
   acaoNome?: string;

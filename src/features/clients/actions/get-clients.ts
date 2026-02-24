@@ -93,7 +93,7 @@ export async function getClients(
         extractedAt?: string;
       }>;
 
-      return itemsStatus.map((item) => ({
+      return itemsStatus.map((item, itemIndex) => ({
         nome: item.nome,
         documento: item.documento,
         status: item.status,
@@ -102,6 +102,7 @@ export async function getClients(
         extracted: item.extracted,
         extractedAt: item.extractedAt,
         serviceRequestId: request.id,
+        itemIndex, // Adicionar índice do item
         serviceTitle: request.service?.title || "",
         serviceId: request.service?.id || "",
         acaoNome: request.acao?.nome,
