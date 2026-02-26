@@ -45,7 +45,14 @@ export async function getAcaoClients(
   try {
     await requireAdmin();
 
-    const { search, status, extracted, page = 1, pageSize = 50 } = filters;
+    const {
+      search,
+      status,
+      extracted,
+      paid,
+      page = 1,
+      pageSize = 50,
+    } = filters;
 
     // Verificar se a ação existe
     const acaoData = await db
