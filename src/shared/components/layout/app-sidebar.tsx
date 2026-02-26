@@ -28,6 +28,7 @@ import { Logo } from "./logo";
 import NavAdmin from "./nav-admin";
 import { NavMain } from "./nav-main";
 import { NavSecondary } from "./nav-secondary";
+import { TrafficManagerCTA } from "./traffic-manager-cta";
 
 const headerVariants: Variants = {
   hidden: {
@@ -176,7 +177,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           initial="hidden"
           animate="visible"
         >
-          <NavSecondary items={data.navSecondary} className="mt-auto" />
+          <TrafficManagerCTA />
+          <NavSecondary items={data.navSecondary} />
           {/* <NavUser /> */}
         </motion.div>
       </SidebarFooter>
