@@ -9,25 +9,25 @@ export interface TopPartner {
   name: string;
   email: string;
   image: string | null;
-  totalSubmissions: number;
+  totalClients: number;
 }
 
 export async function getTopPartners(): Promise<TopPartner[]> {
   try {
-    // Query para buscar os top 3 usuários com mais envios pagos
+    // Query para buscar os top 3 usuários com maior quantidade de clientes pagos
     const topPartners = await db
       .select({
         id: user.id,
         name: user.name,
         email: user.email,
         image: user.image,
-        totalSubmissions: sql<number>`cast(count(${serviceRequest.id}) as integer)`,
+        totalClients: sql<number>`cast(coalesce(sum(${serviceRequest.quantity}), 0) as integer)`,
       })
       .from(serviceRequest)
       .innerJoin(user, eq(serviceRequest.userId, user.id))
       .where(eq(serviceRequest.paid, true))
       .groupBy(user.id, user.name, user.email, user.image)
-      .orderBy(desc(sql`count(${serviceRequest.id})`))
+      .orderBy(desc(sql`sum(${serviceRequest.quantity})`))
       .limit(3);
 
     return topPartners;

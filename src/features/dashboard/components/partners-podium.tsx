@@ -111,7 +111,8 @@ export const PartnersPodium = ({ partners }: PartnersPodiumProps) => {
                   {partner.name.split(" ")[0]}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {partner.totalSubmissions} envios
+                  {partner.totalClients}{" "}
+                  {partner.totalClients === 1 ? "cliente" : "clientes"}
                 </p>
               </div>
             </div>
