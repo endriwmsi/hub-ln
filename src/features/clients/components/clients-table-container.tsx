@@ -21,10 +21,12 @@ import { DataTableSkeleton } from "./data-table-skeleton";
 
 type ClientsTableContainerProps = {
   services?: Array<{ id: string; title: string }>;
+  users?: Array<{ id: string; name: string; email: string }>;
 };
 
 export function ClientsTableContainer({
   services = [],
+  users = [],
 }: ClientsTableContainerProps) {
   const { filters } = useClientFilters();
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -101,7 +103,7 @@ export function ClientsTableContainer({
       <CardContent className="pt-6">
         <div className="space-y-4">
           {/* Filtros */}
-          <ClientsTableFilters services={services} />
+          <ClientsTableFilters services={services} users={users} />
 
           {/* Barra de ações em massa */}
           <ClientsActionsBar

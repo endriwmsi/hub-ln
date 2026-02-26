@@ -12,13 +12,16 @@ import {
 import { useClientFilters } from "../hooks";
 import type { ClientStatus } from "../types";
 import { TagInput } from "./tag-input";
+import { UserSearchInput } from "./user-search-input";
 
 type ClientsTableFiltersProps = {
   services?: Array<{ id: string; title: string }>;
+  users?: Array<{ id: string; name: string; email: string }>;
 };
 
 export function ClientsTableFilters({
   services = [],
+  users = [],
 }: ClientsTableFiltersProps) {
   const { filters, updateFilters, resetFilters } = useClientFilters();
 
@@ -26,6 +29,7 @@ export function ClientsTableFilters({
     (filters.search?.length ?? 0) > 0 ||
     filters.status !== "all" ||
     filters.serviceId ||
+    filters.userId ||
     filters.paid !== "all";
 
   return (
@@ -98,6 +102,23 @@ export function ClientsTableFilters({
               ))}
             </SelectContent>
           </Select>
+        )}
+
+        {/* Filtro de Parceiro */}
+        {users.length > 0 && (
+          <div className="w-full md:w-45">
+            <UserSearchInput
+              users={users}
+              value={filters.userId}
+              onValueChange={(userId) =>
+                updateFilters({
+                  userId,
+                  page: 1,
+                })
+              }
+              placeholder="Buscar parceiro..."
+            />
+          </div>
         )}
 
         {/* Filtro de Pagamento */}

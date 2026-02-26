@@ -93,7 +93,7 @@ export const columns: ColumnDef<Client>[] = [
   },
   {
     accessorKey: "userName",
-    header: "Usuário",
+    header: "Parceiro",
     cell: ({ row }) => (
       <div>
         <p className="max-w-37.5 truncate font-medium">
