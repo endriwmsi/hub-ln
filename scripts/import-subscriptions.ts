@@ -70,7 +70,10 @@ async function importSubscriptions() {
 
   try {
     // Ler arquivo JSON
-    const filePath = resolve(process.cwd(), "subscription.json");
+    const filePath = resolve(
+      process.cwd(),
+      "./scripts/tables/subscription.json",
+    );
     const fileContent = readFileSync(filePath, "utf-8");
     const oldSubscriptions: OldSubscriptionFormat[] = JSON.parse(fileContent);
 

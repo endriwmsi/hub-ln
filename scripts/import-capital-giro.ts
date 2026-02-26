@@ -159,7 +159,10 @@ async function importCapitalGiro() {
 
   try {
     // Ler arquivo JSON
-    const dataPath = resolve(process.cwd(), "capital_giro.json");
+    const dataPath = resolve(
+      process.cwd(),
+      "./scripts/tables/capital_giro.json",
+    );
 
     console.log("📂 Lendo arquivo capital_giro.json...");
     const data: CapitalGiroData[] = JSON.parse(readFileSync(dataPath, "utf-8"));

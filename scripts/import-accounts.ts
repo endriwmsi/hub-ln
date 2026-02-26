@@ -72,7 +72,7 @@ async function importAccounts() {
 
   try {
     // Ler arquivo JSON
-    const filePath = resolve(process.cwd(), "accounts.json");
+    const filePath = resolve(process.cwd(), "./scripts/tables/accounts.json");
     const fileContent = readFileSync(filePath, "utf-8");
     const oldAccounts: OldAccountFormat[] = JSON.parse(fileContent);
 

@@ -64,7 +64,7 @@ async function importUsers() {
 
   try {
     // Ler arquivo JSON
-    const filePath = resolve(process.cwd(), "user.json");
+    const filePath = resolve(process.cwd(), "./scripts/tables/user.json");
     const fileContent = readFileSync(filePath, "utf-8");
     const oldUsers: OldUserFormat[] = JSON.parse(fileContent);
 
