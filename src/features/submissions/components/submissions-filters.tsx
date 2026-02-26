@@ -61,6 +61,7 @@ export function SubmissionsFilters({ services = [] }: SubmissionsFiltersProps) {
   const hasActiveFilters =
     filters.search ||
     (filters.status && filters.status !== "all") ||
+    (filters.paid && filters.paid !== "all") ||
     filters.serviceId;
 
   return (
@@ -86,7 +87,7 @@ export function SubmissionsFilters({ services = [] }: SubmissionsFiltersProps) {
             })
           }
         >
-          <SelectTrigger className="w-full md:w-[180px]">
+          <SelectTrigger className="w-full md:w-45">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -96,6 +97,25 @@ export function SubmissionsFilters({ services = [] }: SubmissionsFiltersProps) {
                 {serviceRequestStatusLabels[status]}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+
+        {/* Filtro de Pagamento */}
+        <Select
+          value={filters.paid || "all"}
+          onValueChange={(value) =>
+            updateFilters({
+              paid: value as typeof filters.paid,
+            })
+          }
+        >
+          <SelectTrigger className="w-full md:w-45">
+            <SelectValue placeholder="Pagamento" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="paid">Pagos</SelectItem>
+            <SelectItem value="unpaid">Não pagos</SelectItem>
           </SelectContent>
         </Select>
 
@@ -109,7 +129,7 @@ export function SubmissionsFilters({ services = [] }: SubmissionsFiltersProps) {
               })
             }
           >
-            <SelectTrigger className="w-full md:w-[180px]">
+            <SelectTrigger className="w-full md:w-45">
               <SelectValue placeholder="Serviço" />
             </SelectTrigger>
             <SelectContent>

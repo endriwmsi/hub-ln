@@ -35,6 +35,7 @@ export type SubmissionFilters = {
   search?: string;
   status?: ServiceRequestStatus | "all";
   serviceId?: string;
+  paid?: "all" | "paid" | "unpaid";
   page: number;
   pageSize: number;
 };

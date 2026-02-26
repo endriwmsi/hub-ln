@@ -12,7 +12,14 @@ export async function getSubmissions(
 ): Promise<ActionResponse<SubmissionsResponse>> {
   try {
     const session = await verifySession();
-    const { search, status, serviceId, page = 1, pageSize = 10 } = filters;
+    const {
+      search,
+      status,
+      serviceId,
+      paid,
+      page = 1,
+      pageSize = 10,
+    } = filters;
 
     // Condições base
     const conditions = [];
@@ -40,6 +47,11 @@ export async function getSubmissions(
     // Filtro de serviço
     if (serviceId) {
       conditions.push(eq(serviceRequest.serviceId, serviceId));
+    }
+
+    // Filtro de pagamento
+    if (paid && paid !== "all") {
+      conditions.push(eq(serviceRequest.paid, paid === "paid"));
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;

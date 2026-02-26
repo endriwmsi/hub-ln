@@ -17,6 +17,7 @@ export function useSubmissionFilters() {
       status:
         (searchParams.get("status") as SubmissionFilters["status"]) || "all",
       serviceId: searchParams.get("serviceId") || undefined,
+      paid: (searchParams.get("paid") as SubmissionFilters["paid"]) || "all",
       page: Number(searchParams.get("page")) || 1,
       pageSize: Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE,
     }),
