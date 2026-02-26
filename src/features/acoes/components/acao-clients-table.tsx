@@ -68,6 +68,7 @@ export function AcaoClientsTable({
   const [extractedFilter, setExtractedFilter] = useState<"all" | "yes" | "no">(
     "all",
   );
+  const [paidFilter, setPaidFilter] = useState<"all" | "yes" | "no">("all");
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [pageSize, setPageSize] = useState(initialPageSize);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -83,6 +84,7 @@ export function AcaoClientsTable({
       status:
         currentStatus === "all" ? undefined : (currentStatus as StatusType),
       extracted: extractedFilter === "all" ? undefined : extractedFilter,
+      paid: paidFilter === "all" ? undefined : paidFilter,
       page: currentPage,
       pageSize,
     },
@@ -350,6 +352,22 @@ export function AcaoClientsTable({
               <SelectItem value="all">Todos</SelectItem>
               <SelectItem value="yes">Extraídos</SelectItem>
               <SelectItem value="no">Não Extraídos</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={paidFilter}
+            onValueChange={(value: "all" | "yes" | "no") => {
+              setPaidFilter(value);
+              setCurrentPage(1);
+            }}
+          >
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Pagamento" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="yes">Pagos</SelectItem>
+              <SelectItem value="no">Pendentes</SelectItem>
             </SelectContent>
           </Select>
         </div>

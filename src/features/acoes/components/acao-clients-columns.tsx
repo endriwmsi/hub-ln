@@ -142,6 +142,31 @@ export function createAcaoClientsColumns(
       ),
     },
     {
+      id: "paid",
+      header: "Pagamento",
+      cell: ({ row }) => {
+        const { requestPaid } = row.original;
+        if (requestPaid) {
+          return (
+            <Badge
+              variant="secondary"
+              className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+            >
+              Pago
+            </Badge>
+          );
+        }
+        return (
+          <Badge
+            variant="secondary"
+            className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400"
+          >
+            Pendente
+          </Badge>
+        );
+      },
+    },
+    {
       id: "extracted",
       header: "Extraído",
       cell: ({ row }) => {

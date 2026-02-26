@@ -29,6 +29,7 @@ export type GetAcaoClientsFilters = {
   search?: string;
   status?: "all" | "aguardando" | "baixas_completas" | "baixas_negadas";
   extracted?: "all" | "yes" | "no";
+  paid?: "all" | "yes" | "no";
   page?: number;
   pageSize?: number;
 };
@@ -186,6 +187,15 @@ export async function getAcaoClients(
           return item.extracted === true;
         }
         return !item.extracted;
+      });
+    }
+
+    if (paid && paid !== "all") {
+      filteredItems = filteredItems.filter((item) => {
+        if (paid === "yes") {
+          return item.requestPaid === true;
+        }
+        return item.requestPaid === false;
       });
     }
 
