@@ -106,25 +106,25 @@ export function LoginForm() {
               )}
             />
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                {/* <Checkbox
+            <div className="flex items-center justify-end">
+              {/* <div className="flex items-center space-x-2">
+                <Checkbox
                   id="keepSignedIn"
                   checked={keepSignedIn}
                   onCheckedChange={(checked) =>
                     setKeepSignedIn(checked === true)
                   }
-                /> */}
+                />
                 <label
                   htmlFor="keepSignedIn"
                   className="cursor-pointer text-sm text-primary"
                 >
                   Mantenha-me conectado
                 </label>
-              </div>
+              </div> */}
               <Link
                 href="/forgot-password"
-                className="inline-block text-sm text-primary underline-offset-4 hover:text-primary/50 hover:underline"
+                className="inline-block text-sm text-primary underline-offset-4 hover:text-primary/50 underline transition-all"
               >
                 Esqueceu sua senha?
               </Link>

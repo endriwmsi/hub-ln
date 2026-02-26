@@ -58,13 +58,13 @@ export function DateTimePicker({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
+      <PopoverContent className="p-0">
         <Calendar
           mode="single"
           selected={date}
           onSelect={(d) => handleSelect(d)}
-          initialFocus
           locale={ptBR}
+          className="w-full"
         />
         <div className="p-3 border-t border-border">
           <TimePicker setDate={setDate} date={date} />
