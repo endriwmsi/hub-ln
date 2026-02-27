@@ -15,6 +15,7 @@ type PendingWithdrawal = {
     id: string;
     name: string;
     email: string;
+    pixKey: string | null;
   };
 };
 
@@ -50,6 +51,7 @@ export async function getPendingWithdrawals(): Promise<
           id: user.id,
           name: user.name,
           email: user.email,
+          pixKey: user.pixKey,
         },
       })
       .from(withdrawal)
@@ -62,7 +64,12 @@ export async function getPendingWithdrawals(): Promise<
       data: {
         withdrawals: withdrawals.map((w) => ({
           ...w,
-          user: w.user as { id: string; name: string; email: string },
+          user: w.user as {
+            id: string;
+            name: string;
+            email: string;
+            pixKey: string | null;
+          },
         })),
       },
     };

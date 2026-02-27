@@ -45,6 +45,7 @@ type PendingWithdrawal = {
     id: string;
     name: string;
     email: string;
+    pixKey: string | null;
   };
 };
 
@@ -120,6 +121,7 @@ export function PendingWithdrawals() {
           <TableHeader>
             <TableRow>
               <TableHead>Usuário</TableHead>
+              <TableHead>Chave PIX</TableHead>
               <TableHead>Valor</TableHead>
               <TableHead>Solicitado</TableHead>
               <TableHead className="text-right">Ação</TableHead>
@@ -135,6 +137,11 @@ export function PendingWithdrawals() {
                       {withdrawal.user.email}
                     </p>
                   </div>
+                </TableCell>
+                <TableCell>
+                  <code className="text-sm font-mono bg-muted px-2 py-1 rounded">
+                    {withdrawal.user.pixKey || "Não informada"}
+                  </code>
                 </TableCell>
                 <TableCell className="font-medium text-green-600">
                   {formatCurrency(withdrawal.amount)}
