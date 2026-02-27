@@ -80,15 +80,17 @@ export async function getUserServicePrices(): Promise<
 
     // Montar resultado
     const result: ServiceWithPrice[] = allServices.map((service) => {
-      // Preço do indicador (ou preço base se não tiver indicador)
-      const referrerPrice = referrerPrices.find(
-        (p) => p.serviceId === service.id,
-      );
-      const costPrice = referrerPrice?.resalePrice ?? service.basePrice;
-
       // Preço de revenda do usuário
       const userPrice = userPrices.find((p) => p.serviceId === service.id);
       const resalePrice = userPrice?.resalePrice ?? null;
+
+      // Preço de custo do usuário (já está salvo no banco)
+      // Se não tiver registro ainda, calcula do indicador ou preço base
+      const referrerPrice = referrerPrices.find(
+        (p) => p.serviceId === service.id,
+      );
+      const costPrice =
+        userPrice?.costPrice ?? referrerPrice?.resalePrice ?? service.basePrice;
 
       // Verifica se o preço está válido
       const isValid = resalePrice !== null;
