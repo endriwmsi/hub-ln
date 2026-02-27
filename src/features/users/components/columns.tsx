@@ -135,6 +135,27 @@ export const createColumns = ({
     },
   },
   {
+    accessorKey: "referrer",
+    header: "Indicado por",
+    cell: ({ row }) => {
+      const referrer = row.original.referrer;
+      return (
+        <div className="text-left">
+          {referrer ? (
+            <div className="flex flex-col">
+              <span className="font-medium">{referrer.name}</span>
+              <span className="text-xs text-muted-foreground">
+                {referrer.email}
+              </span>
+            </div>
+          ) : (
+            <span className="text-muted-foreground">-</span>
+          )}
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: "role",
     header: () => <div className="text-center">Tipo</div>,
     cell: ({ row }) => {
@@ -343,7 +364,7 @@ export const createColumns = ({
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href={`/usuarios/${user.id}`}>Ver detalhes</Link>
+              <Link href={`/gerenciar-usuarios/${user.id}`}>Ver detalhes</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

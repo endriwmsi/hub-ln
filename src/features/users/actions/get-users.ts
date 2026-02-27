@@ -62,14 +62,46 @@ export async function getUsers(filters: UserFilters) {
     const orderDirection = sortOrder === "asc" ? asc : desc;
 
     // Buscar usuários com paginação
+    // Fazendo left join manual para buscar o referrer (quem indicou)
+    const referrerAlias = sql`referrer`;
 
-    const allUsers = await db.query.user.findMany({
-      where: whereClause,
-      orderBy: orderDirection(orderColumn),
-      with: {
-        subscription: true,
-      },
-    });
+    const allUsersRaw = await db
+      .select({
+        user: user,
+        referrer: {
+          id: sql`${referrerAlias}.id`.as("referrer_id"),
+          name: sql`${referrerAlias}.name`.as("referrer_name"),
+          email: sql`${referrerAlias}.email`.as("referrer_email"),
+        },
+      })
+      .from(user)
+      .leftJoin(
+        sql`${user} as ${referrerAlias}`,
+        sql`${referrerAlias}.referral_code = ${user.referredBy}`,
+      )
+      .where(whereClause)
+      .orderBy(orderDirection(orderColumn));
+
+    // Buscar subscriptions separadamente e combinar
+    const allUsers = await Promise.all(
+      allUsersRaw.map(async (row) => {
+        const userSubscription = await db.query.subscription.findFirst({
+          where: (subscription, { eq }) => eq(subscription.userId, row.user.id),
+        });
+
+        return {
+          ...row.user,
+          subscription: userSubscription || null,
+          referrer: row.referrer.name
+            ? {
+                id: row.referrer.id as string,
+                name: row.referrer.name as string,
+                email: row.referrer.email as string,
+              }
+            : null,
+        };
+      }),
+    );
 
     // Filtrar por status ativo (baseado na subscription)
     let filteredUsers = allUsers;
