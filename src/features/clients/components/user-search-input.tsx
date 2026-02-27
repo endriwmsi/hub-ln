@@ -58,7 +58,9 @@ export function UserSearchInput({
     setSearchQuery("");
   };
 
-  const handleClear = () => {
+  const handleClear = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     onValueChange(undefined);
     setSearchQuery("");
   };

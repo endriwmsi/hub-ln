@@ -5,6 +5,7 @@ import { verifySession } from "@/core/auth/dal";
 import { db } from "@/core/db";
 import { acao, serviceRequest, services, user } from "@/core/db/schema";
 import type { ActionResponse } from "@/shared/lib/server-actions";
+import { normalizeForSearch } from "@/shared/lib/string-utils";
 import type { ClientFilters, ClientsResponse } from "../types";
 
 /**
@@ -127,14 +128,19 @@ export async function getClients(
       );
     }
 
-    // Filtro de busca (múltiplos nomes/documentos)
+    // Filtro de busca (múltiplos nomes/documentos) - normalizado
     if (search.length > 0) {
       filteredClients = filteredClients.filter((client) =>
-        search.some(
-          (term) =>
-            client.nome.toLowerCase().includes(term.toLowerCase()) ||
-            client.documento.includes(term),
-        ),
+        search.some((term) => {
+          const normalizedTerm = normalizeForSearch(term);
+          const normalizedName = normalizeForSearch(client.nome);
+          const normalizedDoc = normalizeForSearch(client.documento);
+
+          return (
+            normalizedName.includes(normalizedTerm) ||
+            normalizedDoc.includes(normalizedTerm)
+          );
+        }),
       );
     }
 

@@ -28,15 +28,15 @@ export function ClientsTableContainer({
   services = [],
   users = [],
 }: ClientsTableContainerProps) {
-  const { filters } = useClientFilters();
+  const { filters, isPending: isFiltersPending } = useClientFilters();
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   // React Query com filtros como queryKey
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["clients", filters],
     queryFn: () => getClients(filters),
-    staleTime: 1000 * 30, // 30 seconds
-    refetchInterval: 1000 * 30, // Refetch a cada 30s
+    staleTime: 1000 * 60, // 60 seconds (aumentado para reduzir refetches)
+    placeholderData: (previousData) => previousData, // Mantém dados anteriores durante loading
   });
 
   // Mutation para atualizar status
@@ -79,7 +79,7 @@ export function ClientsTableContainer({
     setRowSelection({});
   }, []);
 
-  if (isLoading) {
+  if (isLoading && !data) {
     return <DataTableSkeleton />;
   }
 
@@ -104,6 +104,14 @@ export function ClientsTableContainer({
         <div className="space-y-4">
           {/* Filtros */}
           <ClientsTableFilters services={services} users={users} />
+
+          {/* Indicador de loading não-intrusivo */}
+          {(isLoading || isFiltersPending) && data && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              Atualizando...
+            </div>
+          )}
 
           {/* Barra de ações em massa */}
           <ClientsActionsBar

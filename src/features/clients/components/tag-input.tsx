@@ -57,7 +57,11 @@ export function TagInput({
           <span>{tag}</span>
           <button
             type="button"
-            onClick={() => removeTag(tag)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              removeTag(tag);
+            }}
             className="rounded-full hover:bg-secondary-foreground/20"
           >
             <X className="h-3 w-3" />
