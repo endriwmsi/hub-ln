@@ -61,47 +61,45 @@ export async function getUsers(filters: UserFilters) {
 
     const orderDirection = sortOrder === "asc" ? asc : desc;
 
-    // Buscar usuários com paginação
-    // Fazendo left join manual para buscar o referrer (quem indicou)
-    const referrerAlias = sql`referrer`;
+    // Buscar usuários com subscription usando query relational do Drizzle
+    // Isso evita N+1 queries e é muito mais eficiente
+    const allUsersQuery = await db.query.user.findMany({
+      where: whereClause,
+      with: {
+        subscription: true,
+      },
+      orderBy: orderDirection(orderColumn),
+    });
 
-    const allUsersRaw = await db
-      .select({
-        user: user,
-        referrer: {
-          id: sql`${referrerAlias}.id`.as("referrer_id"),
-          name: sql`${referrerAlias}.name`.as("referrer_name"),
-          email: sql`${referrerAlias}.email`.as("referrer_email"),
-        },
-      })
-      .from(user)
-      .leftJoin(
-        sql`${user} as ${referrerAlias}`,
-        sql`${referrerAlias}.referral_code = ${user.referredBy}`,
-      )
-      .where(whereClause)
-      .orderBy(orderDirection(orderColumn));
+    // Buscar referrers em uma única query
+    const referralCodes = allUsersQuery
+      .map((u) => u.referredBy)
+      .filter((code): code is string => !!code);
 
-    // Buscar subscriptions separadamente e combinar
-    const allUsers = await Promise.all(
-      allUsersRaw.map(async (row) => {
-        const userSubscription = await db.query.subscription.findFirst({
-          where: (subscription, { eq }) => eq(subscription.userId, row.user.id),
-        });
+    const referrers =
+      referralCodes.length > 0
+        ? await db.query.user.findMany({
+            where: sql`${user.referralCode} IN (${sql.join(
+              referralCodes.map((code) => sql`${code}`),
+              sql`, `,
+            )})`,
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+              referralCode: true,
+            },
+          })
+        : [];
 
-        return {
-          ...row.user,
-          subscription: userSubscription || null,
-          referrer: row.referrer.name
-            ? {
-                id: row.referrer.id as string,
-                name: row.referrer.name as string,
-                email: row.referrer.email as string,
-              }
-            : null,
-        };
-      }),
-    );
+    // Criar mapa de referrers para acesso O(1)
+    const referrerMap = new Map(referrers.map((r) => [r.referralCode, r]));
+
+    // Combinar dados
+    const allUsers = allUsersQuery.map((u) => ({
+      ...u,
+      referrer: u.referredBy ? referrerMap.get(u.referredBy) || null : null,
+    }));
 
     // Filtrar por status ativo (baseado na subscription)
     let filteredUsers = allUsers;
