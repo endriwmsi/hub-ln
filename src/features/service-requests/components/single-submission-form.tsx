@@ -42,9 +42,13 @@ const singleSubmissionSchema = z.object({
   nome: z.string().min(3, "Nome completo é obrigatório"),
   documento: z
     .string()
-    .min(11, "CPF/CNPJ inválido")
-    .max(14, "CPF/CNPJ inválido")
-    .transform((val) => val.replace(/\D/g, "")),
+    .min(1, "CPF/CNPJ é obrigatório")
+    .transform((val) => val.replace(/\D/g, ""))
+    .pipe(
+      z.string().refine((val) => val.length === 11 || val.length === 14, {
+        message: "CPF/CNPJ inválido",
+      }),
+    ),
 });
 
 type SingleSubmissionFormData = z.infer<typeof singleSubmissionSchema>;
