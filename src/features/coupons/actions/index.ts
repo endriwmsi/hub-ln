@@ -208,7 +208,7 @@ export async function validateCoupon(
       };
     }
 
-    // Verificar hierarquia: cupom só pode ser usado por usuários referidos pelo criador
+    // Verificar hierarquia: cupom só pode ser usado por usuários na rede do criador
     const currentUser = await db.query.user.findFirst({
       where: eq(user.id, session.userId),
     });
@@ -232,12 +232,46 @@ export async function validateCoupon(
       };
     }
 
-    // Verificar se o usuário atual foi referido pelo criador do cupom
-    // ou se é o User 01 (admin) que não tem referredBy
-    const isReferredByCreator = currentUser.referredBy === creator.referralCode;
+    // Verificar se o usuário pode usar este cupom
     const isAdmin = currentUser.role === "admin";
+    const isCreator = currentUser.id === creator.id;
 
-    if (!isReferredByCreator && !isAdmin) {
+    // Criador não pode usar o próprio cupom
+    if (isCreator) {
+      return {
+        success: true,
+        data: {
+          valid: false,
+          error: "Você não pode usar seu próprio cupom",
+        },
+      };
+    }
+
+    // Verificar se está na hierarquia do criador (subir na árvore até encontrar o criador)
+    let isInHierarchy = false;
+    if (!isAdmin) {
+      let checkUser = currentUser;
+      const maxDepth = 50; // Prevenir loops infinitos
+      let depth = 0;
+
+      while (checkUser.referredBy && depth < maxDepth) {
+        if (checkUser.referredBy === creator.referralCode) {
+          isInHierarchy = true;
+          break;
+        }
+
+        // Subir um nível na hierarquia
+        const parentUser = await db.query.user.findFirst({
+          where: eq(user.referralCode, checkUser.referredBy),
+        });
+
+        if (!parentUser) break;
+        checkUser = parentUser;
+        depth++;
+      }
+    }
+
+    if (!isAdmin && !isInHierarchy) {
       return {
         success: true,
         data: {
