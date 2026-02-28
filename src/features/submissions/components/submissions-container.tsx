@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { CreatePixPaymentResult } from "@/features/service-requests/actions";
 import { PaymentModal } from "@/features/service-requests/components/payment-modal";
+import { formatCurrency } from "@/shared";
 import {
   Alert,
   AlertDescription,
@@ -131,19 +132,31 @@ export function SubmissionsContainer({
 
       {/* Barra de ações quando há seleção */}
       {selectedSubmissions.length > 0 && (
-        <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border">
-          <span className="text-sm font-medium">
-            {selectedSubmissions.length} envio(s) selecionado(s)
-          </span>
-          <div className="flex items-center gap-2">
-            <DeleteActionsBar
-              selectedSubmissions={selectedSubmissions}
-              onDeleted={handleDeleted}
-            />
-            <PaymentActionsBar
-              selectedSubmissions={selectedSubmissions}
-              onPaymentCreated={handlePaymentCreated}
-            />
+        <div className="flex flex-col gap-3 p-4 rounded-lg bg-muted/50 border">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="flex flex-col gap-1">
+              <span className="text-sm font-medium">
+                {selectedSubmissions.length} envio(s) selecionado(s)
+              </span>
+              <span className="text-lg font-bold">
+                Total:{" "}
+                {formatCurrency(
+                  selectedSubmissions
+                    .reduce((acc, s) => acc + parseFloat(s.totalPrice), 0)
+                    .toFixed(2),
+                )}
+              </span>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <DeleteActionsBar
+                selectedSubmissions={selectedSubmissions}
+                onDeleted={handleDeleted}
+              />
+              <PaymentActionsBar
+                selectedSubmissions={selectedSubmissions}
+                onPaymentCreated={handlePaymentCreated}
+              />
+            </div>
           </div>
         </div>
       )}

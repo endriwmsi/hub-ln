@@ -130,7 +130,7 @@ export function PaymentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-105">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader className="text-center">
           <DialogTitle className="flex items-center justify-center gap-2">
             <QrCode className="h-5 w-5 text-primary" />
@@ -184,8 +184,8 @@ export function PaymentModal({
                 <p className="text-sm text-muted-foreground text-center">
                   Ou copie o código Pix:
                 </p>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-muted px-3 py-2.5 rounded-lg overflow-hidden">
+                <div className="flex items-stretch gap-2">
+                  <div className="flex-1 bg-muted px-3 py-2.5 rounded-lg overflow-hidden min-w-0">
                     <code className="text-xs text-muted-foreground block truncate">
                       {paymentData.qrCodePayload.slice(0, 40)}...
                     </code>
@@ -195,7 +195,8 @@ export function PaymentModal({
                     size="icon"
                     onClick={copyToClipboard}
                     disabled={copied}
-                    className="shrink-0 h-10 w-10"
+                    type="button"
+                    className="shrink-0 h-auto w-10 self-stretch"
                   >
                     {copied ? (
                       <CheckCircle2 className="h-4 w-4 text-green-500" />

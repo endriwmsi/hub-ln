@@ -63,8 +63,8 @@ export function DeleteActionsBar({
       <AlertDialogTrigger asChild>
         <Button
           variant="destructive"
-          size="sm"
           disabled={isPending || deletableSubmissions.length === 0}
+          className="w-full sm:w-auto"
         >
           {isPending ? (
             <>
