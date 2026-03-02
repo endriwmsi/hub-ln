@@ -6,8 +6,8 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/core/auth/dal";
 import { getAcaoById } from "@/features/acoes/actions/get-acao-by-id";
 import { AcaoClientsTable } from "@/features/acoes/components/acao-clients-table";
-import { ExportOverdueClientsButton } from "@/features/acoes/components/export-overdue-clients-button";
 import { ExportPaidClientsButton } from "@/features/acoes/components/export-paid-clients-button";
+import { ExportPendingClientsButton } from "@/features/acoes/components/export-pending-clients-button";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -115,7 +115,7 @@ export default async function AcaoDetalhesPage({
               </CardDescription>
             </div>
             <div className="flex gap-2">
-              <ExportOverdueClientsButton acaoId={id} />
+              <ExportPendingClientsButton acaoId={id} />
               <ExportPaidClientsButton acaoId={id} />
             </div>
           </div>

@@ -287,7 +287,7 @@ export async function exportPaidClients(acaoId: string) {
     XLSX.utils.book_append_sheet(
       workbook,
       worksheet,
-      `${acaoData[0].nome.substring(0, 30)}`,
+      acaoData[0].nome.replace(/[:\\/?*[\]]/g, "_").substring(0, 30),
     );
 
     // Gerar buffer
@@ -312,7 +312,10 @@ export async function exportPaidClients(acaoId: string) {
     console.error("Erro ao exportar clientes pagos:", error);
     return {
       success: false,
-      error: "Erro ao exportar clientes pagos",
+      error:
+        error instanceof Error
+          ? `Erro ao exportar clientes pagos: ${error.message}`
+          : "Erro ao exportar clientes pagos",
     };
   }
 }

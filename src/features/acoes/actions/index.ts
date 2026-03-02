@@ -8,6 +8,10 @@ export {
   type ExportPaidClientsResponse,
   exportPaidClients,
 } from "./export-paid-clients";
+export {
+  type ExportPendingClientsResponse,
+  exportPendingClients,
+} from "./export-pending-clients";
 export { type GetAcaoByIdResponse, getAcaoById } from "./get-acao-by-id";
 export {
   type AcaoClientItem,

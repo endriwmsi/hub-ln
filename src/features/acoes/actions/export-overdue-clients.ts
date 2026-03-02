@@ -273,7 +273,7 @@ export async function exportOverdueClients(acaoId: string) {
     XLSX.utils.book_append_sheet(
       workbook,
       worksheet,
-      `${acaoData[0].nome.substring(0, 30)}`,
+      acaoData[0].nome.replace(/[:\\/?*[\]]/g, "_").substring(0, 30),
     );
 
     // Gerar buffer
@@ -298,7 +298,10 @@ export async function exportOverdueClients(acaoId: string) {
     console.error("Erro ao exportar clientes atrasados:", error);
     return {
       success: false,
-      error: "Erro ao exportar clientes atrasados",
+      error:
+        error instanceof Error
+          ? `Erro ao exportar clientes atrasados: ${error.message}`
+          : "Erro ao exportar clientes atrasados",
     };
   }
 }
