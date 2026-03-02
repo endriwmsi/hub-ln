@@ -175,8 +175,16 @@ export async function createPixPaymentForRequests(
     });
 
     // Criar a cobrança Pix
-    // External reference: IDs das solicitações separados por vírgula
-    const externalReference = requestIds.join(",");
+    // External reference: IDs das solicitações separados por vírgula (limite de 100 chars da Asaas)
+    // O webhook usa asaasPaymentId como estratégia primária, então o fallback via externalReference
+    // só precisa conter quantos IDs couberem dentro do limite.
+    const MAX_EXT_REF_LENGTH = 100;
+    let externalReference = requestIds[0];
+    for (let i = 1; i < requestIds.length; i++) {
+      const candidate = `${externalReference},${requestIds[i]}`;
+      if (candidate.length > MAX_EXT_REF_LENGTH) break;
+      externalReference = candidate;
+    }
 
     const payment = await asaas.createPixPayment({
       customerId: customer.id,
