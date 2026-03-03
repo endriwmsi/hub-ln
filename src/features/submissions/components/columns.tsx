@@ -37,12 +37,13 @@ import type { GlobalStatus, Submission } from "../types";
 
 type ColumnsOptions = {
   onDelete?: (id: string) => void;
+  isAdmin?: boolean;
 };
 
 export function createColumns(
   options?: ColumnsOptions,
 ): ColumnDef<Submission>[] {
-  const { onDelete } = options || {};
+  const { onDelete, isAdmin } = options || {};
   return [
     {
       id: "select",
@@ -70,6 +71,21 @@ export function createColumns(
       enableSorting: false,
       enableHiding: false,
     },
+    ...(isAdmin
+      ? [
+          {
+            accessorKey: "user.name",
+            header: "Parceiro",
+            cell: ({ row }: { row: { original: Submission } }) => (
+              <span className="text-sm">
+                {row.original.user?.name || (
+                  <span className="text-muted-foreground">-</span>
+                )}
+              </span>
+            ),
+          } satisfies ColumnDef<Submission>,
+        ]
+      : []),
     {
       accessorKey: "service.title",
       header: "Serviço",

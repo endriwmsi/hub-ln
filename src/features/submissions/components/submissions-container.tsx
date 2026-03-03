@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { RowSelectionState } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSession } from "@/core/auth/auth-client";
 import type { CreatePixPaymentResult } from "@/features/service-requests/actions";
 import { PaymentModal } from "@/features/service-requests/components/payment-modal";
 import { formatCurrency } from "@/shared";
@@ -36,6 +37,8 @@ export function SubmissionsContainer({
 }: SubmissionsContainerProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "admin";
   const { filters } = useSubmissionFilters();
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -58,8 +61,8 @@ export function SubmissionsContainer({
   );
 
   const columns = useMemo(
-    () => createColumns({ onDelete: handleSingleDelete }),
-    [handleSingleDelete],
+    () => createColumns({ onDelete: handleSingleDelete, isAdmin }),
+    [handleSingleDelete, isAdmin],
   );
 
   // React Query com filtros como queryKey
