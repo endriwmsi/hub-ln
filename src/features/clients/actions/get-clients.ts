@@ -57,6 +57,8 @@ export async function getClients(
       .select({
         id: serviceRequest.id,
         itemsStatus: serviceRequest.itemsStatus,
+        formData: serviceRequest.formData,
+        status: serviceRequest.status,
         totalPrice: serviceRequest.totalPrice,
         paid: serviceRequest.paid,
         paidAt: serviceRequest.paidAt,
@@ -82,7 +84,7 @@ export async function getClients(
       .where(whereClause)
       .orderBy(desc(serviceRequest.createdAt));
 
-    // Extrair todos os clientes dos itemsStatus
+    // Extrair todos os clientes dos itemsStatus ou do formData (para serviços sem itemsStatus)
     const allClients = requests.flatMap((request) => {
       const itemsStatus = (request.itemsStatus || []) as Array<{
         nome: string;
@@ -94,28 +96,75 @@ export async function getClients(
         extractedAt?: string;
       }>;
 
-      return itemsStatus.map((item, itemIndex) => ({
-        nome: item.nome,
-        documento: item.documento,
-        status: item.status,
-        observacao: item.observacao,
-        processedAt: item.processedAt,
-        extracted: item.extracted,
-        extractedAt: item.extractedAt,
-        serviceRequestId: request.id,
-        itemIndex, // Adicionar índice do item
-        serviceTitle: request.service?.title || "",
-        serviceId: request.service?.id || "",
-        acaoNome: request.acao?.nome,
-        acaoId: request.acao?.id,
-        userName: request.user?.name || "",
-        userId: request.user?.id || "",
-        userEmail: request.user?.email || "",
-        paid: request.paid,
-        paidAt: request.paidAt,
-        createdAt: request.createdAt,
-        totalPrice: request.totalPrice,
-      }));
+      // Se há itens em itemsStatus, usar o comportamento padrão
+      if (itemsStatus.length > 0) {
+        return itemsStatus.map((item, itemIndex) => ({
+          nome: item.nome,
+          documento: item.documento,
+          status: item.status,
+          observacao: item.observacao,
+          processedAt: item.processedAt,
+          extracted: item.extracted,
+          extractedAt: item.extractedAt,
+          serviceRequestId: request.id,
+          itemIndex,
+          serviceTitle: request.service?.title || "",
+          serviceId: request.service?.id || "",
+          acaoNome: request.acao?.nome,
+          acaoId: request.acao?.id,
+          userName: request.user?.name || "",
+          userId: request.user?.id || "",
+          userEmail: request.user?.email || "",
+          paid: request.paid,
+          paidAt: request.paidAt,
+          createdAt: request.createdAt,
+          totalPrice: request.totalPrice,
+        }));
+      }
+
+      // Fallback: extrair cliente do formData (ex: capital de giro e outros serviços de formulário)
+      const fd = (request.formData || {}) as Record<string, unknown>;
+      const nome = String(fd.nome_completo ?? fd.nome ?? fd.name ?? "").trim();
+      const documento = String(fd.cpf ?? fd.cnpj ?? fd.documento ?? "").trim();
+
+      if (!nome && !documento) {
+        return [];
+      }
+
+      const statusMap: Record<
+        string,
+        "aguardando" | "baixas_completas" | "baixas_negadas"
+      > = {
+        completed: "baixas_completas",
+        rejected: "baixas_negadas",
+        cancelled: "baixas_negadas",
+      };
+      const clientStatus = statusMap[request.status] ?? "aguardando";
+
+      return [
+        {
+          nome,
+          documento,
+          status: clientStatus,
+          observacao: undefined,
+          processedAt: undefined,
+          extracted: undefined,
+          extractedAt: undefined,
+          serviceRequestId: request.id,
+          itemIndex: 0,
+          serviceTitle: request.service?.title || "",
+          serviceId: request.service?.id || "",
+          acaoNome: request.acao?.nome,
+          acaoId: request.acao?.id,
+          userName: request.user?.name || "",
+          userId: request.user?.id || "",
+          userEmail: request.user?.email || "",
+          paid: request.paid,
+          paidAt: request.paidAt,
+          createdAt: request.createdAt,
+          totalPrice: request.totalPrice,
+        },
+      ];
     });
 
     // Aplicar filtros adicionais nos clientes extraídos

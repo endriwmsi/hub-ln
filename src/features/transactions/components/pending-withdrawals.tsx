@@ -117,12 +117,19 @@ export function PendingWithdrawals() {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="mb-4 flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300">
+          <span className="font-semibold">Taxa administrativa:</span> uma taxa
+          de <span className="font-bold">4%</span> é cobrada sobre cada saque
+          para cobrir custos administrativos.
+        </div>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Usuário</TableHead>
               <TableHead>Chave PIX</TableHead>
-              <TableHead>Valor</TableHead>
+              <TableHead>Valor Bruto</TableHead>
+              <TableHead>Taxa (4%)</TableHead>
+              <TableHead>Valor Líquido</TableHead>
               <TableHead>Solicitado</TableHead>
               <TableHead className="text-right">Ação</TableHead>
             </TableRow>
@@ -143,8 +150,14 @@ export function PendingWithdrawals() {
                     {withdrawal.user.pixKey || "Não informada"}
                   </code>
                 </TableCell>
-                <TableCell className="font-medium text-green-600">
+                <TableCell className="font-medium">
                   {formatCurrency(withdrawal.amount)}
+                </TableCell>
+                <TableCell className="text-red-500 text-sm">
+                  -{formatCurrency(String(Number(withdrawal.amount) * 0.04))}
+                </TableCell>
+                <TableCell className="font-medium text-green-600">
+                  {formatCurrency(String(Number(withdrawal.amount) * 0.96))}
                 </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
                   {formatDistanceToNow(new Date(withdrawal.requestedAt), {
