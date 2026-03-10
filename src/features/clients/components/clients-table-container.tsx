@@ -18,6 +18,7 @@ import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableSkeleton } from "./data-table-skeleton";
+import { ExportClientsButton } from "./export-clients-button";
 
 type ClientsTableContainerProps = {
   services?: Array<{ id: string; title: string }>;
@@ -103,7 +104,12 @@ export function ClientsTableContainer({
       <CardContent className="pt-6">
         <div className="space-y-4">
           {/* Filtros */}
-          <ClientsTableFilters services={services} users={users} />
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex-1">
+              <ClientsTableFilters services={services} users={users} />
+            </div>
+            <ExportClientsButton />
+          </div>
 
           {/* Indicador de loading não-intrusivo */}
           {(isLoading || isFiltersPending) && data && (

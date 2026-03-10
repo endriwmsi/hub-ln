@@ -5,4 +5,5 @@ export { columns } from "./columns";
 export { DataTable } from "./data-table";
 export { DataTablePagination } from "./data-table-pagination";
 export { DataTableSkeleton } from "./data-table-skeleton";
+export { ExportClientsButton } from "./export-clients-button";
 export { TagInput } from "./tag-input";
