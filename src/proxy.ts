@@ -1,5 +1,8 @@
+import { eq } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { db } from "@/core/db";
+import { user } from "@/core/db/schema";
 import { auth } from "@/lib/auth";
 
 export default async function proxy(request: NextRequest) {
@@ -51,6 +54,22 @@ export default async function proxy(request: NextRequest) {
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route),
   );
+
+  // Se usuário está logado, verificar se a conta foi aprovada
+  if (isAuthenticated && session?.user?.email) {
+    const userData = await db.query.user.findFirst({
+      where: eq(user.email, session.user.email),
+    });
+
+    // Se usuário não foi aprovado, fazer logout
+    if (userData && !userData.approved) {
+      const response = NextResponse.redirect(new URL("/login", request.url));
+      // Limpar cookies de sessão
+      response.cookies.delete("better-auth.session_token");
+      response.cookies.delete("better-auth.session");
+      return response;
+    }
+  }
 
   // Se usuário NÃO está logado e tenta acessar rotas protegidas → redirecionar para login
   if (!isAuthenticated && isProtectedRoute) {
