@@ -124,10 +124,38 @@ export async function getClients(
 
       // Fallback: extrair cliente do formData (ex: capital de giro e outros serviços de formulário)
       const fd = (request.formData || {}) as Record<string, unknown>;
-      const nome = String(fd.nome_completo ?? fd.nome ?? fd.name ?? "").trim();
-      const documento = String(fd.cpf ?? fd.cnpj ?? fd.documento ?? "").trim();
 
-      if (!nome && !documento) {
+      // Tenta encontrar nome em diversos campos possíveis
+      const nome = String(
+        fd.nome_completo ??
+          fd.nome ??
+          fd.name ??
+          fd.fullName ??
+          fd.full_name ??
+          fd.nome_cliente ??
+          fd.cliente_nome ??
+          fd.nomeCompleto ??
+          "",
+      ).trim();
+
+      // Tenta encontrar documento em diversos campos possíveis
+      const documento = String(
+        fd.cpf ??
+          fd.cnpj ??
+          fd.documento ??
+          fd.cpf_cnpj ??
+          fd.cpf_cliente ??
+          fd.document ??
+          fd.doc ??
+          "",
+      ).trim();
+
+      // Se não encontrou nome nos campos padrão, usa "-"
+      const nomeExibicao = nome || "-";
+      const documentoExibicao = documento;
+
+      // Só ignora se realmente não há formData
+      if (Object.keys(fd).length === 0) {
         return [];
       }
 
@@ -143,8 +171,8 @@ export async function getClients(
 
       return [
         {
-          nome,
-          documento,
+          nome: nomeExibicao,
+          documento: documentoExibicao,
           status: clientStatus,
           observacao: undefined,
           processedAt: undefined,

@@ -255,10 +255,25 @@ export async function exportClients(
 
         // Fallback nome/documento para garantir identificação mínima
         const nome = String(
-          formData.nome_completo ?? formData.nome ?? formData.name ?? "",
+          formData.nome_completo ??
+            formData.nome ??
+            formData.name ??
+            formData.fullName ??
+            formData.full_name ??
+            formData.nome_cliente ??
+            formData.cliente_nome ??
+            formData.nomeCompleto ??
+            "",
         ).trim();
         const documento = String(
-          formData.cpf ?? formData.cnpj ?? formData.documento ?? "",
+          formData.cpf ??
+            formData.cnpj ??
+            formData.documento ??
+            formData.cpf_cnpj ??
+            formData.cpf_cliente ??
+            formData.document ??
+            formData.doc ??
+            "",
         ).trim();
 
         if (nome || documento || Object.keys(dynamicFields).length > 0) {
