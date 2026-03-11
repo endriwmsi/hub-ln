@@ -16,6 +16,7 @@ export async function getClients(
   filters: ClientFilters,
 ): Promise<ActionResponse<ClientsResponse>> {
   try {
+    console.log("[getClients] Fetching with filters:", filters);
     const session = await verifySession();
     const {
       search = [],
@@ -98,28 +99,36 @@ export async function getClients(
 
       // Se há itens em itemsStatus, usar o comportamento padrão
       if (itemsStatus.length > 0) {
-        return itemsStatus.map((item, itemIndex) => ({
-          nome: item.nome,
-          documento: item.documento,
-          status: item.status,
-          observacao: item.observacao,
-          processedAt: item.processedAt,
-          extracted: item.extracted,
-          extractedAt: item.extractedAt,
-          serviceRequestId: request.id,
-          itemIndex,
-          serviceTitle: request.service?.title || "",
-          serviceId: request.service?.id || "",
-          acaoNome: request.acao?.nome,
-          acaoId: request.acao?.id,
-          userName: request.user?.name || "",
-          userId: request.user?.id || "",
-          userEmail: request.user?.email || "",
-          paid: request.paid,
-          paidAt: request.paidAt,
-          createdAt: request.createdAt,
-          totalPrice: request.totalPrice,
-        }));
+        console.log(
+          `[getClients] Processing request ${request.id} with ${itemsStatus.length} items`,
+        );
+        return itemsStatus.map((item, itemIndex) => {
+          console.log(
+            `[getClients] Item ${itemIndex}: extracted=${item.extracted}, extractedAt=${item.extractedAt}`,
+          );
+          return {
+            nome: item.nome,
+            documento: item.documento,
+            status: item.status,
+            observacao: item.observacao,
+            processedAt: item.processedAt,
+            extracted: item.extracted,
+            extractedAt: item.extractedAt,
+            serviceRequestId: request.id,
+            itemIndex,
+            serviceTitle: request.service?.title || "",
+            serviceId: request.service?.id || "",
+            acaoNome: request.acao?.nome,
+            acaoId: request.acao?.id,
+            userName: request.user?.name || "",
+            userId: request.user?.id || "",
+            userEmail: request.user?.email || "",
+            paid: request.paid,
+            paidAt: request.paidAt,
+            createdAt: request.createdAt,
+            totalPrice: request.totalPrice,
+          };
+        });
       }
 
       // Fallback: extrair cliente do formData (ex: capital de giro e outros serviços de formulário)

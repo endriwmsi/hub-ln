@@ -3,7 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Check, Hourglass, XCircle } from "lucide-react";
+import { Check, Download, Hourglass, XCircle } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/shared/components/ui/badge";
 import { Checkbox } from "@/shared/components/ui/checkbox";
@@ -139,6 +139,30 @@ export const columns: ColumnDef<Client>[] = [
         })
       ) : (
         <span className="text-muted-foreground text-sm">-</span>
+      ),
+  },
+  {
+    accessorKey: "extracted",
+    header: "Exportado",
+    cell: ({ row }) =>
+      row.original.extracted ? (
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
+            <Download className="h-4 w-4" />
+            <span className="text-sm font-medium">Sim</span>
+          </div>
+          {row.original.extractedAt && (
+            <span className="text-xs text-muted-foreground">
+              {format(new Date(row.original.extractedAt), "dd/MM/yyyy HH:mm", {
+                locale: ptBR,
+              })}
+            </span>
+          )}
+        </div>
+      ) : (
+        <div className="flex items-center gap-1.5 text-muted-foreground">
+          <span className="text-sm">Não</span>
+        </div>
       ),
   },
   {

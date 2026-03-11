@@ -11,10 +11,11 @@ import {
   TooltipTrigger,
 } from "@/shared/components/ui/tooltip";
 import { exportClients } from "../actions";
-import { useClientFilters } from "../hooks";
+import { useClientFilters, useInvalidateClients } from "../hooks";
 
 export function ExportClientsButton() {
   const { filters } = useClientFilters();
+  const { invalidateClients } = useInvalidateClients();
   const [isExporting, setIsExporting] = useState(false);
 
   const { serviceId, userId } = filters;
@@ -25,6 +26,12 @@ export function ExportClientsButton() {
 
     try {
       setIsExporting(true);
+      console.log(
+        "[ExportClientsButton] Starting export with serviceId:",
+        serviceId,
+        "userId:",
+        userId,
+      );
       toast.info("Exportando clientes...", {
         description: "Por favor, aguarde.",
       });
@@ -57,8 +64,21 @@ export function ExportClientsButton() {
       toast.success("Exportação concluída!", {
         description: `${result.data.totalRecords} cliente(s) exportado(s).`,
       });
+
+      console.log(
+        "[ExportClientsButton] Export successful, invalidating cache with filters:",
+        filters,
+      );
+      // Invalidate clients cache to refresh the table with updated "extracted" status
+      invalidateClients(filters);
+
+      // Fallback: reload page after a short delay to ensure DB writes are persisted
+      setTimeout(() => {
+        console.log("[ExportClientsButton] Fallback: reloading page");
+        window.location.reload();
+      }, 1500);
     } catch (error) {
-      console.error("Erro ao exportar:", error);
+      console.error("[ExportClientsButton] Error during export:", error);
       toast.error("Erro ao exportar", {
         description:
           error instanceof Error

@@ -102,7 +102,7 @@ export async function exportClients(
 
     const requestsToUpdate: Array<{
       id: string;
-      itemsStatus: Array<{
+      itemsStatus?: Array<{
         nome: string;
         documento: string;
         status: "aguardando" | "baixas_completas" | "baixas_negadas";
@@ -111,7 +111,13 @@ export async function exportClients(
         extracted?: boolean;
         extractedAt?: string;
       }>;
+      needsUpdate: boolean;
     }> = [];
+
+    console.log("[exportClients] Starting export with filters:", {
+      serviceId,
+      userId,
+    });
 
     const formatDate = (date: Date | string | null | undefined) => {
       if (!date) return "";
@@ -176,6 +182,9 @@ export async function exportClients(
             : "Pendente";
 
       let hasNewExtracts = false;
+      console.log(
+        `[exportClients] Processing request ${request.id}, isBulkUpload: ${isBulkUpload}, itemsStatus length: ${itemsStatus.length}`,
+      );
 
       if (isBulkUpload && itemsStatus.length > 0) {
         // Bulk upload: cliente por item no itemsStatus; formData só tem os campos de upload
@@ -290,11 +299,36 @@ export async function exportClients(
             Status: statusMap[request.status] ?? "Aguardando",
             ...buildMeta(request, statusPagamento, precoUnitario),
           });
+
+          // Mark as extracted for simple form services (no itemsStatus)
+          // Create or update itemsStatus array
+          if (itemsStatus.length === 0) {
+            itemsStatus.push({
+              nome,
+              documento,
+              status:
+                (statusMap[request.status]
+                  ?.toLowerCase()
+                  .replace(/\s/g, "_") as
+                  | "aguardando"
+                  | "baixas_completas"
+                  | "baixas_negadas") || "aguardando",
+              extracted: true,
+              extractedAt: now,
+            });
+          }
         }
       }
 
       if (hasNewExtracts) {
-        requestsToUpdate.push({ id: request.id, itemsStatus });
+        console.log(
+          `[exportClients] Marking request ${request.id} as extracted with ${itemsStatus.length} items`,
+        );
+        requestsToUpdate.push({
+          id: request.id,
+          itemsStatus,
+          needsUpdate: true,
+        });
       }
     }
 
@@ -306,11 +340,20 @@ export async function exportClients(
     }
 
     // Atualizar itens como extraídos
+    console.log(
+      `[exportClients] Updating ${requestsToUpdate.length} requests in database`,
+    );
     for (const req of requestsToUpdate) {
-      await db
-        .update(serviceRequest)
-        .set({ itemsStatus: req.itemsStatus, updatedAt: new Date() })
-        .where(eq(serviceRequest.id, req.id));
+      if (req.needsUpdate && req.itemsStatus) {
+        console.log(
+          `[exportClients] Updating request ${req.id} with ${req.itemsStatus.length} items`,
+        );
+        const result = await db
+          .update(serviceRequest)
+          .set({ itemsStatus: req.itemsStatus, updatedAt: new Date() })
+          .where(eq(serviceRequest.id, req.id));
+        console.log(`[exportClients] Update result for ${req.id}:`, result);
+      }
     }
 
     // Gerar Excel
@@ -341,6 +384,9 @@ export async function exportClients(
     const dateStr = new Date().toLocaleDateString("pt-BR").replace(/\//g, "-");
     const filename = `clientes_${safeTitle}_${dateStr}.xlsx`;
 
+    console.log(
+      `[exportClients] Export completed successfully with ${exportData.length} records`,
+    );
     return {
       success: true,
       data: {
