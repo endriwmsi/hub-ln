@@ -1,9 +1,12 @@
 "use server";
 
 import { APIError } from "better-auth/api";
+import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { z } from "zod";
+import { db } from "@/core/db";
+import { user } from "@/core/db/schema";
 import { auth, type ErrorCode } from "@/lib/auth";
 import type { loginSchema } from "../schemas/login-schema";
 
@@ -28,6 +31,15 @@ export async function signInEmailAction(data: formData) {
 
     if (!response.ok) {
       return { error: "E-mail ou senha inválidos." };
+    }
+
+    // Verificar se a conta foi aprovada
+    const userData = await db.query.user.findFirst({
+      where: eq(user.email, data.email),
+    });
+
+    if (userData && !userData.approved) {
+      return { error: "Sua conta ainda não foi aprovada. Aguarde a análise." };
     }
 
     return { error: null };
