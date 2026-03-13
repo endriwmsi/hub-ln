@@ -65,29 +65,32 @@ function getGreeting(name: string) {
     return {
       text: `Bom dia, ${firstName}!`,
       emoji: "☀️",
-      gradient: "from-amber-50 to-orange-50",
-      border: "border-amber-200",
-      textColor: "text-amber-700",
-      subColor: "text-amber-600/80",
+      gradient:
+        "from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40",
+      border: "border-amber-200 dark:border-amber-900/50",
+      textColor: "text-amber-700 dark:text-amber-400",
+      subColor: "text-amber-600/80 dark:text-amber-500/80",
     };
   }
   if (hour >= 12 && hour < 18) {
     return {
       text: `Boa tarde, ${firstName}!`,
       emoji: "🌤️",
-      gradient: "from-sky-50 to-cyan-50",
-      border: "border-sky-200",
-      textColor: "text-sky-700",
-      subColor: "text-sky-600/80",
+      gradient:
+        "from-sky-50 to-cyan-50 dark:from-sky-950/40 dark:to-cyan-950/40",
+      border: "border-sky-200 dark:border-sky-900/50",
+      textColor: "text-sky-700 dark:text-sky-400",
+      subColor: "text-sky-600/80 dark:text-sky-500/80",
     };
   }
   return {
     text: `Boa noite, ${firstName}!`,
     emoji: "🌙",
-    gradient: "from-indigo-50 to-blue-50",
-    border: "border-indigo-200",
-    textColor: "text-indigo-700",
-    subColor: "text-indigo-600/80",
+    gradient:
+      "from-indigo-50 to-blue-50 dark:from-indigo-950/40 dark:to-blue-950/40",
+    border: "border-indigo-200 dark:border-indigo-900/50",
+    textColor: "text-indigo-700 dark:text-indigo-400",
+    subColor: "text-indigo-600/80 dark:text-indigo-500/80",
   };
 }
 
@@ -99,17 +102,20 @@ const orgaoStatusConfig: Record<
 > = {
   aguardando_baixas: {
     label: "Aguardando",
-    colorClass: "text-amber-700 bg-amber-50 border-amber-200",
+    colorClass:
+      "text-amber-700 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/50 dark:border-amber-900/50",
     icon: <Clock className="h-3 w-3" />,
   },
   baixas_iniciadas: {
     label: "Em andamento",
-    colorClass: "text-blue-700 bg-blue-50 border-blue-200",
+    colorClass:
+      "text-blue-700 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950/50 dark:border-blue-900/50",
     icon: <Loader2 className="h-3 w-3 animate-spin" />,
   },
   baixas_completas: {
     label: "Concluída",
-    colorClass: "text-emerald-700 bg-emerald-50 border-emerald-200",
+    colorClass:
+      "text-emerald-700 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-950/50 dark:border-emerald-900/50",
     icon: <CheckCircle2 className="h-3 w-3" />,
   },
 };
@@ -124,17 +130,20 @@ const itemStatusConfig: Record<
 > = {
   aguardando: {
     label: "Aguardando",
-    badgeClass: "border-slate-200 bg-slate-100 text-slate-600",
+    badgeClass:
+      "border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400",
     icon: <Clock className="h-3 w-3" />,
   },
   baixas_completas: {
     label: "Concluído",
-    badgeClass: "border-emerald-200 bg-emerald-100 text-emerald-700",
+    badgeClass:
+      "border-emerald-200 bg-emerald-100 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/50 dark:text-emerald-400",
     icon: <CheckCircle2 className="h-3 w-3" />,
   },
   baixas_negadas: {
     label: "Negado",
-    badgeClass: "border-red-200 bg-red-100 text-red-700",
+    badgeClass:
+      "border-red-200 bg-red-100 text-red-700 dark:border-red-900/50 dark:bg-red-950/50 dark:text-red-400",
     icon: <XCircle className="h-3 w-3" />,
   },
 };
@@ -146,10 +155,10 @@ function OrgaoStatusBadge({ orgao }: { orgao: OrgaoResult }) {
 
   const rowBg =
     orgao.status === "baixas_completas"
-      ? "bg-emerald-50/60 border-emerald-100"
+      ? "bg-emerald-50/60 border-emerald-100 dark:bg-emerald-950/20 dark:border-emerald-900/50"
       : orgao.status === "baixas_iniciadas"
-        ? "bg-blue-50/60 border-blue-100"
-        : "bg-slate-50/60 border-slate-100";
+        ? "bg-blue-50/60 border-blue-100 dark:bg-blue-950/20 dark:border-blue-900/50"
+        : "bg-slate-50/60 border-slate-100 dark:bg-slate-800/40 dark:border-slate-800";
 
   return (
     <div
@@ -174,28 +183,28 @@ function AcaoCard({ acao }: { acao: AcaoResult }) {
       ? "bg-linear-to-r from-emerald-500 to-green-500"
       : acao.percentage > 0
         ? "bg-linear-to-r from-blue-500 to-cyan-500"
-        : "bg-linear-to-r from-slate-300 to-slate-400";
+        : "bg-linear-to-r from-slate-300 to-slate-400 dark:from-slate-600 dark:to-slate-700";
 
   const borderAccent =
     acao.percentage === 100
       ? "border-l-emerald-500"
       : acao.percentage > 0
         ? "border-l-blue-500"
-        : "border-l-slate-300";
+        : "border-l-slate-300 dark:border-l-slate-600";
 
   const progressTrack =
     acao.percentage === 100
-      ? "bg-emerald-100/60"
+      ? "bg-emerald-100/60 dark:bg-emerald-950/40"
       : acao.percentage > 0
-        ? "bg-blue-100/60"
-        : "bg-slate-100/60";
+        ? "bg-blue-100/60 dark:bg-blue-950/40"
+        : "bg-slate-100/60 dark:bg-slate-800/60";
 
   const bgGradient =
     acao.percentage === 100
-      ? "from-emerald-50/40 to-green-50/40"
+      ? "from-emerald-50/40 to-green-50/40 dark:from-emerald-950/10 dark:to-green-950/10"
       : acao.percentage > 0
-        ? "from-blue-50/40 to-cyan-50/40"
-        : "from-slate-50/40 to-slate-50/40";
+        ? "from-blue-50/40 to-cyan-50/40 dark:from-blue-950/10 dark:to-cyan-950/10"
+        : "from-slate-50/40 to-slate-50/40 dark:from-slate-900/40 dark:to-slate-900/40";
 
   const formattedDate = acao.enviadoEm
     ? format(new Date(acao.enviadoEm), "d 'de' MMMM 'de' yyyy", {
@@ -205,17 +214,17 @@ function AcaoCard({ acao }: { acao: AcaoResult }) {
 
   return (
     <Card
-      className={`overflow-hidden border border-l-4 bg-linear-to-br to-white shadow-md transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${borderAccent} ${bgGradient}`}
+      className={`overflow-hidden border border-l-4 bg-linear-to-br to-white dark:to-slate-900 shadow-md transition-all duration-300 hover:shadow-lg hover:scale-[1.02] dark:border-slate-800 ${borderAccent} ${bgGradient}`}
     >
       <CardHeader className="pb-4 pt-5">
         <div className="flex flex-col gap-3.5 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 flex-1 space-y-1.5">
-            <CardTitle className="text-base sm:text-lg font-semibold leading-snug text-slate-900">
+            <CardTitle className="text-base sm:text-lg font-semibold leading-snug text-slate-900 dark:text-slate-100">
               {acao.acaoNome}
             </CardTitle>
             {formattedDate && (
-              <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                <Calendar className="h-3.5 w-3.5 shrink-0 text-slate-500" />
+              <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400">
+                <Calendar className="h-3.5 w-3.5 shrink-0 text-slate-500 dark:text-slate-400" />
                 <span>Enviado em {formattedDate}</span>
               </div>
             )}
@@ -233,15 +242,15 @@ function AcaoCard({ acao }: { acao: AcaoResult }) {
         {/* Progress */}
         <div className="space-y-2.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-700">
+            <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
               Progresso das baixas
             </span>
-            <span className="text-xs font-bold tabular-nums text-slate-900">
+            <span className="text-xs font-bold tabular-nums text-slate-900 dark:text-slate-100">
               {acao.baixasCompletas}
-              <span className="font-normal text-slate-600">
+              <span className="font-normal text-slate-600 dark:text-slate-400">
                 /{acao.totalOrgaos}
               </span>
-              <span className="ml-2 font-normal text-slate-600">
+              <span className="ml-2 font-normal text-slate-600 dark:text-slate-400">
                 ({acao.percentage}%)
               </span>
             </span>
@@ -257,7 +266,7 @@ function AcaoCard({ acao }: { acao: AcaoResult }) {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-slate-200/60" />
+        <div className="border-t border-slate-200/60 dark:border-slate-800/60" />
 
         {/* Órgãos grid */}
         <div className="grid gap-2.5 sm:grid-cols-2">
@@ -295,7 +304,7 @@ function GreetingBanner({ data }: { data: SearchByDocumentoResult }) {
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <Badge
               variant="outline"
-              className="border-current/30 bg-white/70 font-mono text-xs font-semibold px-3 py-1.5 shadow-sm"
+              className="border-current/30 bg-white/70 dark:bg-slate-950/70 font-mono text-xs font-semibold px-3 py-1.5 shadow-sm"
             >
               {data.documentoFormatado}
             </Badge>
@@ -335,22 +344,22 @@ function ResultsSection({ data }: { data: SearchByDocumentoResult }) {
 
 function EmptyState({ documento }: { documento: string }) {
   return (
-    <div className="flex w-full flex-col items-center gap-4 rounded-2xl border border-amber-200/50 bg-linear-to-br from-amber-50 to-yellow-50/50 px-6 py-12 text-center animate-in fade-in slide-in-from-bottom-3 duration-500 shadow-lg shadow-amber-200/20">
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-amber-100 to-yellow-100 shadow-md">
-        <FileSearch className="h-8 w-8 text-amber-600" />
+    <div className="flex w-full flex-col items-center gap-4 rounded-2xl border border-amber-200/50 dark:border-amber-900/50 bg-linear-to-br from-amber-50 to-yellow-50/50 dark:from-amber-950/40 dark:to-yellow-950/20 px-6 py-12 text-center animate-in fade-in slide-in-from-bottom-3 duration-500 shadow-lg shadow-amber-200/20 dark:shadow-none">
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-amber-100 to-yellow-100 dark:from-amber-900/40 dark:to-yellow-900/40 shadow-md dark:shadow-black/20">
+        <FileSearch className="h-8 w-8 text-amber-600 dark:text-amber-500" />
       </div>
       <div className="space-y-2">
-        <p className="text-lg font-semibold text-amber-900">
+        <p className="text-lg font-semibold text-amber-900 dark:text-amber-300">
           Nenhum processo encontrado
         </p>
-        <p className="text-sm text-amber-800/80">
+        <p className="text-sm text-amber-800/80 dark:text-amber-400/80">
           Não encontramos nenhum processo vinculado ao documento{" "}
-          <span className="font-mono font-semibold text-amber-900 bg-white/60 px-2 py-1 rounded-md">
+          <span className="font-mono font-semibold text-amber-900 dark:text-amber-300 bg-white/60 dark:bg-amber-950/60 px-2 py-1 rounded-md">
             {documento}
           </span>
           .
         </p>
-        <p className="text-xs text-amber-700/70 pt-1">
+        <p className="text-xs text-amber-700/70 dark:text-amber-500/70 pt-1">
           Verifique se o documento está correto ou entre em contato com o
           responsável pelo seu processo.
         </p>
@@ -432,7 +441,7 @@ export function ConsultaForm() {
             value={inputValue}
             onChange={handleInputChange}
             placeholder="Digite seu CPF ou CNPJ"
-            className="h-12 w-full rounded-xl bg-linear-to-br from-slate-50 to-slate-100 px-5 pr-4 font-mono text-base tracking-widest shadow-sm border border-slate-200/60 focus:border-blue-400 focus:shadow-md focus:shadow-blue-200/30 transition-all duration-200 placeholder:font-sans placeholder:tracking-normal placeholder:text-slate-400"
+            className="h-12 w-full rounded-xl bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800/50 px-5 pr-4 font-mono text-base tracking-widest shadow-sm border border-slate-200/60 dark:border-slate-700 focus:border-blue-400 dark:focus:border-blue-500 focus:shadow-md focus:shadow-blue-200/30 dark:focus:shadow-blue-900/20 transition-all duration-200 placeholder:font-sans placeholder:tracking-normal placeholder:text-slate-400 dark:placeholder:text-slate-500 text-slate-900 dark:text-slate-100"
             inputMode="numeric"
             maxLength={18}
             disabled={isLoading}
@@ -442,7 +451,7 @@ export function ConsultaForm() {
         <Button
           type="submit"
           disabled={isLoading || !isValidLength}
-          className="h-12 gap-2 bg-linear-to-r from-blue-600 to-indigo-600 px-8 text-sm font-semibold shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl"
+          className="h-12 gap-2 bg-linear-to-r from-blue-600 to-indigo-600 px-8 text-sm font-semibold shadow-lg shadow-blue-500/30 dark:shadow-blue-900/30 hover:shadow-xl hover:shadow-blue-500/40 dark:hover:shadow-blue-900/40 hover:from-blue-700 hover:to-indigo-700 dark:hover:from-blue-500 dark:hover:to-indigo-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-white"
         >
           {isLoading ? (
             <>
@@ -461,14 +470,14 @@ export function ConsultaForm() {
       {/* Loading skeleton */}
       {isLoading && (
         <div className="flex w-full flex-col gap-4 animate-in fade-in duration-300">
-          <div className="h-32 w-full animate-pulse rounded-2xl bg-linear-to-r from-slate-100 to-slate-50" />
-          <div className="h-56 w-full animate-pulse rounded-2xl bg-linear-to-r from-slate-100 to-slate-50" />
+          <div className="h-32 w-full animate-pulse rounded-2xl bg-linear-to-r from-slate-100 to-slate-50 dark:from-slate-800/80 dark:to-slate-800/40" />
+          <div className="h-56 w-full animate-pulse rounded-2xl bg-linear-to-r from-slate-100 to-slate-50 dark:from-slate-800/80 dark:to-slate-800/40" />
         </div>
       )}
 
       {/* Error */}
       {error && (
-        <div className="flex w-full items-start gap-3 rounded-2xl border border-red-200/60 bg-linear-to-br from-red-50 to-red-50/50 px-5 py-4 text-sm text-red-700 animate-in fade-in slide-in-from-bottom-2 duration-300 shadow-lg shadow-red-200/20 backdrop-blur-sm">
+        <div className="flex w-full items-start gap-3 rounded-2xl border border-red-200/60 dark:border-red-900/50 bg-linear-to-br from-red-50 to-red-50/50 dark:from-red-950/40 dark:to-red-900/20 px-5 py-4 text-sm text-red-700 dark:text-red-400 animate-in fade-in slide-in-from-bottom-2 duration-300 shadow-lg shadow-red-200/20 dark:shadow-none backdrop-blur-sm">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
           <span className="font-medium">{error}</span>
         </div>
