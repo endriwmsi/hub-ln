@@ -138,7 +138,7 @@ export async function signUpEmailAction(data: formData) {
 
     // Criar subscription com trial period
     const trialExpiresAt = new Date();
-    trialExpiresAt.setDate(trialExpiresAt.getDate() + 5);
+    trialExpiresAt.setDate(trialExpiresAt.getDate() + 1);
 
     await db.insert(subscription).values({
       userId: authResult.user.id,

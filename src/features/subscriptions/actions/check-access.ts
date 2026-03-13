@@ -43,8 +43,8 @@ export async function checkAccess() {
         return { hasAccess: false, reason: "trial_expired" };
       }
 
-      // Trial ainda válido
-      return { hasAccess: true, status: "trial" };
+      // Trial ainda válido mas não permitindo acesso
+      return { hasAccess: false, reason: "trial_no_access" };
     }
 
     // Verificar se está ativo

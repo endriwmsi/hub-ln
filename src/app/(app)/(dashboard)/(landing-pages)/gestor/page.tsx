@@ -16,6 +16,7 @@ import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { SubscriptionGuard } from "@/features/subscriptions";
 import { Avatar, AvatarImage } from "@/shared/components/ui/avatar";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
@@ -261,338 +262,353 @@ export default function GestaoDeTrafegoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* ============ HERO ============ */}
-      <section ref={heroRef} className="relative overflow-hidden">
-        {/* Background linears */}
-        <div className="absolute inset-0 bg-linear-to-br from-chart-1/10 via-background to-chart-4/10" />
-        <motion.div
-          className="absolute -left-64 -top-64 h-125 w-125 rounded-full bg-chart-1/20 blur-3xl"
-          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY }}
-        />
-        <motion.div
-          className="absolute -bottom-32 -right-32 h-100 w-100 rounded-full bg-chart-4/20 blur-3xl"
-          animate={{ scale: [1.2, 1, 1.2], opacity: [0.5, 0.3, 0.5] }}
-          transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY }}
-        />
+    <SubscriptionGuard>
+      <div className="min-h-screen bg-background">
+        {/* ============ HERO ============ */}
+        <section ref={heroRef} className="relative overflow-hidden">
+          {/* Background linears */}
+          <div className="absolute inset-0 bg-linear-to-br from-chart-1/10 via-background to-chart-4/10" />
+          <motion.div
+            className="absolute -left-64 -top-64 h-125 w-125 rounded-full bg-chart-1/20 blur-3xl"
+            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+            transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY }}
+          />
+          <motion.div
+            className="absolute -bottom-32 -right-32 h-100 w-100 rounded-full bg-chart-4/20 blur-3xl"
+            animate={{ scale: [1.2, 1, 1.2], opacity: [0.5, 0.3, 0.5] }}
+            transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY }}
+          />
 
-        <motion.div style={{ y, opacity }} className="relative z-10">
-          <div className="container mx-auto px-4 py-20 lg:py-32">
-            <div className="grid items-center gap-12 lg:grid-cols-2">
-              {/* Coluna da Esquerda - Conteúdo */}
-              <motion.div
-                initial="hidden"
-                animate="visible"
-                variants={containerVariants}
-                className="space-y-8"
-              >
-                <motion.div variants={itemVariants}>
-                  <Badge variant="secondary" className="mb-4 px-4 py-2 text-sm">
-                    🔥 Vagas Limitadas
-                  </Badge>
+          <motion.div style={{ y, opacity }} className="relative z-10">
+            <div className="container mx-auto px-4 py-20 lg:py-32">
+              <div className="grid items-center gap-12 lg:grid-cols-2">
+                {/* Coluna da Esquerda - Conteúdo */}
+                <motion.div
+                  initial="hidden"
+                  animate="visible"
+                  variants={containerVariants}
+                  className="space-y-8"
+                >
+                  <motion.div variants={itemVariants}>
+                    <Badge
+                      variant="secondary"
+                      className="mb-4 px-4 py-2 text-sm"
+                    >
+                      🔥 Vagas Limitadas
+                    </Badge>
+                  </motion.div>
+
+                  <motion.h1
+                    variants={itemVariants}
+                    className="text-4xl font-bold leading-tight tracking-tight md:text-5xl lg:text-6xl"
+                  >
+                    Transforme cliques em{" "}
+                    <span className="bg-linear-to-r from-chart-1 to-chart-4 bg-clip-text text-transparent">
+                      clientes
+                    </span>
+                  </motion.h1>
+
+                  <motion.p
+                    variants={itemVariants}
+                    className="text-lg text-muted-foreground md:text-xl"
+                  >
+                    Multiplique seus resultados e aumente suas vendas com um
+                    profissional especializado em anúncios online.
+                  </motion.p>
+
+                  <motion.div
+                    variants={itemVariants}
+                    className="flex flex-wrap gap-4"
+                  >
+                    <Button
+                      size="lg"
+                      asChild
+                      className="gap-2 text-lg h-14 px-8 bg-green-500 hover:bg-green-400 text-white shadow-[0_0_20px_rgba(34,197,94,0.5)] hover:shadow-[0_0_30px_rgba(34,197,94,0.7)] hover:scale-105 transition-all duration-300"
+                    >
+                      <a
+                        href={EXTERNAL_LINK}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Quero Escalar Minhas Vendas
+                        <IconArrowRight className="h-5 w-5" />
+                      </a>
+                    </Button>
+
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      asChild
+                      className="gap-2 text-lg h-14 px-8 hover:scale-105 transition-all duration-300"
+                    >
+                      <Link
+                        href="#saiba-mais"
+                        onClick={(e) => handleScrollToSection(e, "saiba-mais")}
+                        rel="noopener noreferrer"
+                      >
+                        Saiba mais
+                        <IconArrowRight className="h-5 w-5" />
+                      </Link>
+                    </Button>
+                  </motion.div>
+
+                  <motion.div
+                    variants={itemVariants}
+                    className="flex items-center gap-6 pt-4"
+                  >
+                    <div className="flex -space-x-3">
+                      {clientLogos.map((logo, idx) => (
+                        <Avatar key={idx}>
+                          <AvatarImage
+                            src={logo.src}
+                            alt={logo.alt}
+                            width={40}
+                            height={40}
+                          />
+                        </Avatar>
+                      ))}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      <span className="font-semibold text-foreground">
+                        +150
+                      </span>{" "}
+                      empresas já escalaram suas vendas
+                    </p>
+                  </motion.div>
                 </motion.div>
 
-                <motion.h1
-                  variants={itemVariants}
-                  className="text-4xl font-bold leading-tight tracking-tight md:text-5xl lg:text-6xl"
-                >
-                  Transforme cliques em{" "}
-                  <span className="bg-linear-to-r from-chart-1 to-chart-4 bg-clip-text text-transparent">
-                    clientes
-                  </span>
-                </motion.h1>
-
-                <motion.p
-                  variants={itemVariants}
-                  className="text-lg text-muted-foreground md:text-xl"
-                >
-                  Multiplique seus resultados e aumente suas vendas com um
-                  profissional especializado em anúncios online.
-                </motion.p>
-
+                {/* Coluna da Direita - Imagem/Ilustração */}
                 <motion.div
-                  variants={itemVariants}
-                  className="flex flex-wrap gap-4"
+                  initial={{ opacity: 0, scale: 0.8, rotateY: 20 }}
+                  animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                  className="relative hidden lg:block"
                 >
-                  <Button
-                    size="lg"
-                    asChild
-                    className="gap-2 text-lg h-14 px-8 bg-green-500 hover:bg-green-400 text-white shadow-[0_0_20px_rgba(34,197,94,0.5)] hover:shadow-[0_0_30px_rgba(34,197,94,0.7)] hover:scale-105 transition-all duration-300"
-                  >
-                    <a
-                      href={EXTERNAL_LINK}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                  <div className="relative mx-auto aspect-square max-w-lg">
+                    {/* Card flutuante principal */}
+                    <motion.div
+                      animate={{ y: [0, -10, 0] }}
+                      transition={{
+                        duration: 4,
+                        repeat: Number.POSITIVE_INFINITY,
+                      }}
+                      className="absolute inset-0 rounded-3xl overflow-hidden"
                     >
-                      Quero Escalar Minhas Vendas
-                      <IconArrowRight className="h-5 w-5" />
-                    </a>
-                  </Button>
+                      <Image
+                        src="/assets/images/lp/lp2.png"
+                        alt="Gestão de Tráfego"
+                        fill
+                        className="object-contain"
+                      />
+                    </motion.div>
 
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    asChild
-                    className="gap-2 text-lg h-14 px-8 hover:scale-105 transition-all duration-300"
-                  >
-                    <Link
-                      href="#saiba-mais"
-                      onClick={(e) => handleScrollToSection(e, "saiba-mais")}
-                      rel="noopener noreferrer"
+                    <motion.div
+                      animate={{ y: [0, -8, 0], x: [0, -5, 0] }}
+                      transition={{
+                        duration: 4.5,
+                        repeat: Number.POSITIVE_INFINITY,
+                        delay: 1,
+                      }}
+                      className="absolute right-4 top-5 rounded-2xl bg-card p-4 shadow-xl border"
                     >
-                      Saiba mais
-                      <IconArrowRight className="h-5 w-5" />
-                    </Link>
-                  </Button>
-                </motion.div>
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-full bg-chart-1/20 p-2">
+                          <IconUsers className="h-5 w-5 text-chart-1" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">
+                            Leads/mês
+                          </p>
+                          <p className="text-lg font-bold">+1.2K</p>
+                        </div>
+                      </div>
+                    </motion.div>
 
-                <motion.div
-                  variants={itemVariants}
-                  className="flex items-center gap-6 pt-4"
-                >
-                  <div className="flex -space-x-3">
-                    {clientLogos.map((logo, idx) => (
-                      <Avatar key={idx}>
-                        <AvatarImage
-                          src={logo.src}
-                          alt={logo.alt}
-                          width={40}
-                          height={40}
-                        />
-                      </Avatar>
-                    ))}
+                    <motion.div
+                      animate={{ y: [0, 8, 0], x: [0, 5, 0] }}
+                      transition={{
+                        duration: 4.5,
+                        repeat: Number.POSITIVE_INFINITY,
+                        delay: 1,
+                      }}
+                      className="absolute right-100 top-90 rounded-2xl bg-card p-4 shadow-xl border"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-full bg-green-500/20 p-2">
+                          <IconCoin className="h-5 w-5 text-green-500" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">
+                            Mais faturamento
+                          </p>
+                          <p className="text-lg font-bold">20%</p>
+                        </div>
+                      </div>
+                    </motion.div>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    <span className="font-semibold text-foreground">+150</span>{" "}
-                    empresas já escalaram suas vendas
-                  </p>
                 </motion.div>
-              </motion.div>
-
-              {/* Coluna da Direita - Imagem/Ilustração */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8, rotateY: 20 }}
-                animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="relative hidden lg:block"
-              >
-                <div className="relative mx-auto aspect-square max-w-lg">
-                  {/* Card flutuante principal */}
-                  <motion.div
-                    animate={{ y: [0, -10, 0] }}
-                    transition={{
-                      duration: 4,
-                      repeat: Number.POSITIVE_INFINITY,
-                    }}
-                    className="absolute inset-0 rounded-3xl overflow-hidden"
-                  >
-                    <Image
-                      src="/assets/images/lp/lp2.png"
-                      alt="Gestão de Tráfego"
-                      fill
-                      className="object-contain"
-                    />
-                  </motion.div>
-
-                  <motion.div
-                    animate={{ y: [0, -8, 0], x: [0, -5, 0] }}
-                    transition={{
-                      duration: 4.5,
-                      repeat: Number.POSITIVE_INFINITY,
-                      delay: 1,
-                    }}
-                    className="absolute right-4 top-5 rounded-2xl bg-card p-4 shadow-xl border"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="rounded-full bg-chart-1/20 p-2">
-                        <IconUsers className="h-5 w-5 text-chart-1" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">
-                          Leads/mês
-                        </p>
-                        <p className="text-lg font-bold">+1.2K</p>
-                      </div>
-                    </div>
-                  </motion.div>
-
-                  <motion.div
-                    animate={{ y: [0, 8, 0], x: [0, 5, 0] }}
-                    transition={{
-                      duration: 4.5,
-                      repeat: Number.POSITIVE_INFINITY,
-                      delay: 1,
-                    }}
-                    className="absolute right-100 top-90 rounded-2xl bg-card p-4 shadow-xl border"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="rounded-full bg-green-500/20 p-2">
-                        <IconCoin className="h-5 w-5 text-green-500" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">
-                          Mais faturamento
-                        </p>
-                        <p className="text-lg font-bold">20%</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                </div>
-              </motion.div>
+              </div>
             </div>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* ============ MARQUEE STRIP ============ */}
-      <MarqueeStrip>{MARQUEE_ITEMS}</MarqueeStrip>
-
-      {/* ============ RESULTADOS ============ */}
-      <section className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={containerVariants}
-            className="grid gap-8 md:grid-cols-2 lg:grid-cols-4"
-          >
-            {RESULTS.map((result, index) => (
-              <motion.div
-                key={index}
-                variants={itemVariants}
-                className="text-center"
-              >
-                <div className="text-4xl font-bold text-chart-1 md:text-5xl">
-                  <AnimatedCounter end={result.number} suffix={result.suffix} />
-                </div>
-                <p className="mt-2 text-muted-foreground">{result.label}</p>
-              </motion.div>
-            ))}
           </motion.div>
-        </div>
-      </section>
+        </section>
 
-      {/* ============ CARROSSEL INFINITO ============ */}
-      <section className="border-y bg-background py-8">
-        <InfiniteCarousel items={CAROUSEL_ITEMS} />
-      </section>
+        {/* ============ MARQUEE STRIP ============ */}
+        <MarqueeStrip>{MARQUEE_ITEMS}</MarqueeStrip>
 
-      {/* ============ SOBRE / O QUE ESTÁ INCLUSO ============ */}
-      <section id="sobre" className="py-20 lg:py-32">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={containerVariants}
-            className="mx-auto max-w-3xl text-center"
-          >
-            <motion.div variants={itemVariants}>
-              <Badge variant="outline" className="mb-4">
-                O que você recebe
-              </Badge>
-            </motion.div>
-            <motion.h2
-              variants={itemVariants}
-              className="text-3xl font-bold md:text-4xl lg:text-5xl"
-            >
-              Tudo que você precisa para{" "}
-              <span className="bg-linear-to-r from-chart-1 to-[#4D0DA2] bg-clip-text text-transparent">
-                escalar suas vendas
-              </span>
-            </motion.h2>
-            <motion.p
-              variants={itemVariants}
-              className="mt-4 text-lg text-muted-foreground"
-            >
-              Uma solução completa de gestão de tráfego que cuida de tudo para
-              você focar no que realmente importa: seu negócio.
-            </motion.p>
-          </motion.div>
-
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={containerVariants}
-            className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3"
-          >
-            {FEATURES.map((feature, index) => (
-              <motion.div key={index} variants={itemVariants}>
-                <Card className="h-full transition-all duration-300 hover:shadow-lg hover:border-chart-1/50 group">
-                  <CardHeader>
-                    <div className="mb-2 inline-flex rounded-xl bg-chart-1/10 p-3 w-fit group-hover:bg-chart-1/20 transition-colors">
-                      <feature.icon className="h-6 w-6 text-chart-1" />
-                    </div>
-                    <CardTitle className="text-xl">{feature.title}</CardTitle>
-                    <CardDescription className="text-base">
-                      {feature.description}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          <div className="container relative mx-auto px-4" id="saiba-mais">
+        {/* ============ RESULTADOS ============ */}
+        <section className="py-20 bg-muted/30">
+          <div className="container mx-auto px-4">
             <motion.div
-              variants={itemVariants}
-              className="flex flex-wrap gap-4 mt-10 justify-center"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={containerVariants}
+              className="grid gap-8 md:grid-cols-2 lg:grid-cols-4"
             >
+              {RESULTS.map((result, index) => (
+                <motion.div
+                  key={index}
+                  variants={itemVariants}
+                  className="text-center"
+                >
+                  <div className="text-4xl font-bold text-chart-1 md:text-5xl">
+                    <AnimatedCounter
+                      end={result.number}
+                      suffix={result.suffix}
+                    />
+                  </div>
+                  <p className="mt-2 text-muted-foreground">{result.label}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ============ CARROSSEL INFINITO ============ */}
+        <section className="border-y bg-background py-8">
+          <InfiniteCarousel items={CAROUSEL_ITEMS} />
+        </section>
+
+        {/* ============ SOBRE / O QUE ESTÁ INCLUSO ============ */}
+        <section id="sobre" className="py-20 lg:py-32">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={containerVariants}
+              className="mx-auto max-w-3xl text-center"
+            >
+              <motion.div variants={itemVariants}>
+                <Badge variant="outline" className="mb-4">
+                  O que você recebe
+                </Badge>
+              </motion.div>
               <motion.h2
                 variants={itemVariants}
                 className="text-3xl font-bold md:text-4xl lg:text-5xl"
               >
-                Pronto para escalar seu negócio?
+                Tudo que você precisa para{" "}
+                <span className="bg-linear-to-r from-chart-1 to-[#4D0DA2] bg-clip-text text-transparent">
+                  escalar suas vendas
+                </span>
               </motion.h2>
               <motion.p
                 variants={itemVariants}
-                className="mt-4 text-lg text-white/80"
+                className="mt-4 text-lg text-muted-foreground"
               >
-                Não perca mais tempo. Fale com um especialista agora e comece a
-                transformar cliques em clientes pagantes.
+                Uma solução completa de gestão de tráfego que cuida de tudo para
+                você focar no que realmente importa: seu negócio.
               </motion.p>
             </motion.div>
-          </div>
 
-          <motion.div
-            variants={itemVariants}
-            className="mx-auto max-w-3xl text-center text-white mt-10"
-          >
-            <Button
-              size="lg"
-              asChild
-              className="gap-2 text-lg h-14 px-8 bg-green-500 hover:bg-green-400 text-white shadow-[0_0_20px_rgba(34,197,94,0.5)] hover:shadow-[0_0_30px_rgba(34,197,94,0.7)] hover:scale-105 transition-all duration-300"
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={containerVariants}
+              className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3"
             >
-              <a href={EXTERNAL_LINK} target="_blank" rel="noopener noreferrer">
-                Quero Escalar Minhas Vendas
-                <IconArrowRight className="h-5 w-5" />
-              </a>
-            </Button>
-          </motion.div>
-        </div>
-      </section>
+              {FEATURES.map((feature, index) => (
+                <motion.div key={index} variants={itemVariants}>
+                  <Card className="h-full transition-all duration-300 hover:shadow-lg hover:border-chart-1/50 group">
+                    <CardHeader>
+                      <div className="mb-2 inline-flex rounded-xl bg-chart-1/10 p-3 w-fit group-hover:bg-chart-1/20 transition-colors">
+                        <feature.icon className="h-6 w-6 text-chart-1" />
+                      </div>
+                      <CardTitle className="text-xl">{feature.title}</CardTitle>
+                      <CardDescription className="text-base">
+                        {feature.description}
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                </motion.div>
+              ))}
+            </motion.div>
 
-      {/* ============ FOOTER ============ */}
-      <footer className="border-t py-8">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Hub LN. Todos os direitos reservados.
-            </p>
-            <div className="flex gap-4">
-              <a
-                href="/termos-e-condicoes"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            <div className="container relative mx-auto px-4" id="saiba-mais">
+              <motion.div
+                variants={itemVariants}
+                className="flex flex-wrap gap-4 mt-10 justify-center"
               >
-                Termos e Condições
-              </a>
+                <motion.h2
+                  variants={itemVariants}
+                  className="text-3xl font-bold md:text-4xl lg:text-5xl"
+                >
+                  Pronto para escalar seu negócio?
+                </motion.h2>
+                <motion.p
+                  variants={itemVariants}
+                  className="mt-4 text-lg text-white/80"
+                >
+                  Não perca mais tempo. Fale com um especialista agora e comece
+                  a transformar cliques em clientes pagantes.
+                </motion.p>
+              </motion.div>
+            </div>
+
+            <motion.div
+              variants={itemVariants}
+              className="mx-auto max-w-3xl text-center text-white mt-10"
+            >
+              <Button
+                size="lg"
+                asChild
+                className="gap-2 text-lg h-14 px-8 bg-green-500 hover:bg-green-400 text-white shadow-[0_0_20px_rgba(34,197,94,0.5)] hover:shadow-[0_0_30px_rgba(34,197,94,0.7)] hover:scale-105 transition-all duration-300"
+              >
+                <a
+                  href={EXTERNAL_LINK}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Quero Escalar Minhas Vendas
+                  <IconArrowRight className="h-5 w-5" />
+                </a>
+              </Button>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ============ FOOTER ============ */}
+        <footer className="border-t py-8">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+              <p className="text-sm text-muted-foreground">
+                © {new Date().getFullYear()} Hub LN. Todos os direitos
+                reservados.
+              </p>
+              <div className="flex gap-4">
+                <a
+                  href="/termos-e-condicoes"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Termos e Condições
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-      </footer>
-    </div>
+        </footer>
+      </div>
+    </SubscriptionGuard>
   );
 }

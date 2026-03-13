@@ -9,6 +9,7 @@ import {
   PropertiesPanel,
   useEditor,
 } from "@/features/editor";
+import { SubscriptionGuard } from "@/features/subscriptions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -60,152 +61,157 @@ export default function EditorPage() {
   };
 
   return (
-    <div className="h-screen flex bg-linear-to-br from-background via-muted/20 to-background relative overflow-hidden p-8">
-      {/* Dot Pattern Background */}
-      <div
-        className="absolute inset-0 opacity-20"
-        style={{
-          backgroundImage: `radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)`,
-          backgroundSize: "24px 24px",
-        }}
-      />
-
-      {/* Content */}
-      <div className="relative z-10 flex w-full h-[calc(100vh-120px)]">
-        {/* Sidebar */}
-        <EditorSidebar
-          format={editor.canvasFormat}
-          backgroundColor={editor.backgroundColor}
-          canUndo={editor.canUndo}
-          canRedo={editor.canRedo}
-          onFormatChange={editor.changeFormat}
-          onBackgroundColorChange={editor.changeBackgroundColor}
-          onAddText={editor.addText}
-          onAddShape={editor.addShape}
-          onAddImage={() => {
-            document.getElementById("image-upload-trigger")?.click();
+    <SubscriptionGuard>
+      <div className="h-screen flex bg-linear-to-br from-background via-muted/20 to-background relative overflow-hidden p-8">
+        {/* Dot Pattern Background */}
+        <div
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: `radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)`,
+            backgroundSize: "24px 24px",
           }}
-          onUndo={editor.undo}
-          onRedo={editor.redo}
-          onSave={() => setSaveDialogOpen(true)}
-          onExport={handleExport}
         />
 
-        {/* Canvas Area */}
-        <div className="flex-1 flex items-center justify-center p-8 h-[calc(100vh-120px)]">
-          <div>
-            <Canvas
-              dimensions={editor.canvasDimensions}
-              elements={editor.elements}
-              selectedId={editor.selectedElement?.id || null}
-              backgroundColor={editor.backgroundColor}
-              zoom={editor.zoom}
-              snapGuides={editor.snapGuides}
-              onSelect={editor.selectElement}
-              onElementChange={editor.updateElement}
-              onDragEnd={editor.finishUpdateElement}
-              onSnapCalculate={editor.calculateSnap}
+        {/* Content */}
+        <div className="relative z-10 flex w-full h-[calc(100vh-120px)]">
+          {/* Sidebar */}
+          <EditorSidebar
+            format={editor.canvasFormat}
+            backgroundColor={editor.backgroundColor}
+            canUndo={editor.canUndo}
+            canRedo={editor.canRedo}
+            onFormatChange={editor.changeFormat}
+            onBackgroundColorChange={editor.changeBackgroundColor}
+            onAddText={editor.addText}
+            onAddShape={editor.addShape}
+            onAddImage={() => {
+              document.getElementById("image-upload-trigger")?.click();
+            }}
+            onUndo={editor.undo}
+            onRedo={editor.redo}
+            onSave={() => setSaveDialogOpen(true)}
+            onExport={handleExport}
+          />
+
+          {/* Canvas Area */}
+          <div className="flex-1 flex items-center justify-center p-8 h-[calc(100vh-120px)]">
+            <div>
+              <Canvas
+                dimensions={editor.canvasDimensions}
+                elements={editor.elements}
+                selectedId={editor.selectedElement?.id || null}
+                backgroundColor={editor.backgroundColor}
+                zoom={editor.zoom}
+                snapGuides={editor.snapGuides}
+                onSelect={editor.selectElement}
+                onElementChange={editor.updateElement}
+                onDragEnd={editor.finishUpdateElement}
+                onSnapCalculate={editor.calculateSnap}
+                onDelete={editor.deleteElement}
+                onExportReady={(exportFn) => setExportCanvas(() => exportFn)}
+              />
+            </div>
+          </div>
+
+          {/* Properties Panel */}
+          <div className="bg-transparent h-[calc(100vh-120px)]">
+            <PropertiesPanel
+              selectedElement={editor.selectedElement || null}
+              canvasDimensions={editor.canvasDimensions}
+              onUpdate={(attrs) => {
+                if (editor.selectedElement) {
+                  editor.updateElement(editor.selectedElement.id, attrs);
+                }
+              }}
               onDelete={editor.deleteElement}
-              onExportReady={(exportFn) => setExportCanvas(() => exportFn)}
+              onAlignLeft={editor.alignLeft}
+              onAlignCenter={editor.alignCenter}
+              onAlignRight={editor.alignRight}
+              onAlignTop={editor.alignTop}
+              onAlignMiddle={editor.alignMiddle}
+              onAlignBottom={editor.alignBottom}
+              onBringToFront={editor.bringToFront}
+              onSendToBack={editor.sendToBack}
+              onBringForward={editor.bringForward}
+              onSendBackward={editor.sendBackward}
             />
           </div>
         </div>
 
-        {/* Properties Panel */}
-        <div className="bg-transparent h-[calc(100vh-120px)]">
-          <PropertiesPanel
-            selectedElement={editor.selectedElement || null}
-            canvasDimensions={editor.canvasDimensions}
-            onUpdate={(attrs) => {
-              if (editor.selectedElement) {
-                editor.updateElement(editor.selectedElement.id, attrs);
-              }
-            }}
-            onDelete={editor.deleteElement}
-            onAlignLeft={editor.alignLeft}
-            onAlignCenter={editor.alignCenter}
-            onAlignRight={editor.alignRight}
-            onAlignTop={editor.alignTop}
-            onAlignMiddle={editor.alignMiddle}
-            onAlignBottom={editor.alignBottom}
-            onBringToFront={editor.bringToFront}
-            onSendToBack={editor.sendToBack}
-            onBringForward={editor.bringForward}
-            onSendBackward={editor.sendBackward}
+        {/* Hidden Image Upload Trigger */}
+        <div className="hidden">
+          <ImageUpload
+            onUpload={editor.addImage}
+            trigger={
+              <button type="button" id="image-upload-trigger">
+                Upload
+              </button>
+            }
           />
         </div>
-      </div>
 
-      {/* Hidden Image Upload Trigger */}
-      <div className="hidden">
-        <ImageUpload
-          onUpload={editor.addImage}
-          trigger={
-            <button type="button" id="image-upload-trigger">
-              Upload
-            </button>
-          }
-        />
-      </div>
+        {/* Mobile Warning Dialog */}
+        <AlertDialog
+          open={isMobile && showMobileWarning}
+          onOpenChange={setShowMobileWarning}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-xl">
+                ⚠️ Dispositivo Móvel Detectado
+              </AlertDialogTitle>
+              <AlertDialogDescription className="space-y-3 text-base">
+                <p>
+                  A experiência do editor em dispositivos móveis é limitada e
+                  pode não funcionar adequadamente.
+                </p>
+                <p className="font-semibold text-foreground">
+                  Para utilizar todas as funcionalidades e ter a melhor
+                  experiência possível, recomendamos fortemente acessar via
+                  computador.
+                </p>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={() => setShowMobileWarning(false)}>
+                Entendi, continuar mesmo assim
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
-      {/* Mobile Warning Dialog */}
-      <AlertDialog
-        open={isMobile && showMobileWarning}
-        onOpenChange={setShowMobileWarning}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl">
-              ⚠️ Dispositivo Móvel Detectado
-            </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-3 text-base">
-              <p>
-                A experiência do editor em dispositivos móveis é limitada e pode
-                não funcionar adequadamente.
-              </p>
-              <p className="font-semibold text-foreground">
-                Para utilizar todas as funcionalidades e ter a melhor
-                experiência possível, recomendamos fortemente acessar via
-                computador.
-              </p>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setShowMobileWarning(false)}>
-              Entendi, continuar mesmo assim
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Save Dialog */}
-      <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Salvar Criativo</DialogTitle>
-            <DialogDescription>
-              Digite um nome para o seu criativo
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div>
-              <Label htmlFor="name">Nome do Criativo</Label>
-              <Input
-                id="name"
-                value={creativeName}
-                onChange={(e) => setCreativeName(e.target.value)}
-                placeholder="Ex: Post Instagram - Promoção"
-              />
+        {/* Save Dialog */}
+        <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Salvar Criativo</DialogTitle>
+              <DialogDescription>
+                Digite um nome para o seu criativo
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="name">Nome do Criativo</Label>
+                <Input
+                  id="name"
+                  value={creativeName}
+                  onChange={(e) => setCreativeName(e.target.value)}
+                  placeholder="Ex: Post Instagram - Promoção"
+                />
+              </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSaveDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSave}>Salvar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setSaveDialogOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button onClick={handleSave}>Salvar</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </SubscriptionGuard>
   );
 }

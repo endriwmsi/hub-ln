@@ -1,4 +1,11 @@
 export { type CreateAcaoResponse, createAcao } from "./create-acao";
+export {
+  type AcaoResult,
+  type OrgaoResult,
+  type OrgaoStatus,
+  type SearchByDocumentoResult,
+  searchByDocumento,
+} from "./search-by-documento";
 export { type DeleteAcaoResponse, deleteAcao } from "./delete-acao";
 export {
   type ExportOverdueClientsResponse,

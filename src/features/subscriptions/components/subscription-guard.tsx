@@ -54,6 +54,11 @@ export function SubscriptionGuard({
         description:
           "Você precisa de uma assinatura ativa para acessar este recurso.",
       },
+      trial_no_access: {
+        title: "Assinatura ativa necessária",
+        description:
+          "Este recurso não está disponível durante o período de trial. Contratar assinatura para acessar.",
+      },
       trial_expired: {
         title: "Período de trial expirado",
         description:
