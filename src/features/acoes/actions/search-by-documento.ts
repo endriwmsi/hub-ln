@@ -1,11 +1,11 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 import { db } from "@/core/db";
 import { acao, serviceRequest } from "@/core/db/schema";
 
 function normalizeDocument(doc: string): string {
-  return doc.replace(/[\.\-\/\s]/g, "").trim();
+  return doc.replace(/[.\-/\s]/g, "").trim();
 }
 
 function formatDocument(doc: string): string {
@@ -103,7 +103,15 @@ export async function searchByDocumento(
       })
       .from(serviceRequest)
       .innerJoin(acao, eq(serviceRequest.acaoId, acao.id))
-      .where(eq(acao.visivel, true));
+      .where(
+        and(
+          eq(acao.visivel, true),
+          or(
+            eq(serviceRequest.paid, true),
+            eq(serviceRequest.paymentStatus, "confirmed"),
+          ),
+        ),
+      );
 
     type MatchedEntry = {
       nome: string;
@@ -125,32 +133,64 @@ export async function searchByDocumento(
     for (const request of requests) {
       if (!request.acaoId) continue;
 
-      const formData = request.formData as Record<string, unknown>;
-      const isBulkUpload = formData?.uploadType === "bulk";
-
       const itemsStatus = (request.itemsStatus || []) as Array<{
-        nome: string;
-        documento: string;
-        status: "aguardando" | "baixas_completas" | "baixas_negadas";
+        nome?: string;
+        documento?: string;
+        status?: "aguardando" | "baixas_completas" | "baixas_negadas";
         observacao?: string;
         processedAt?: string;
         extracted?: boolean;
         extractedAt?: string;
       }>;
 
+      // Primeiro procuramos no array de itemsStatus, já que ele é populado em importações e envios antigos de lote
+      const foundInStatus = itemsStatus.find(
+        (item) => normalizeDocument(item.documento || "") === normalizedDoc,
+      );
+
+      if (foundInStatus) {
+        matched.push({
+          nome: foundInStatus.nome || "Cliente",
+          documento: foundInStatus.documento || normalizedDoc,
+          acaoId: request.acaoId,
+          acaoNome: request.acaoNome,
+          itemStatus: foundInStatus.status || "aguardando",
+          requestCreatedAt: request.requestCreatedAt,
+          acaoStatusSpc: request.acaoStatusSpc,
+          acaoStatusBoaVista: request.acaoStatusBoaVista,
+          acaoStatusSerasa: request.acaoStatusSerasa,
+          acaoStatusCenprotNacional: request.acaoStatusCenprotNacional,
+          acaoStatusCenprotSp: request.acaoStatusCenprotSp,
+          acaoStatusOutros: request.acaoStatusOutros,
+        });
+        continue;
+      }
+
+      // Fallback para procurar no formData caso o itemsStatus ainda não tenha sido gerado (pedidos muito novos ou formatos variados)
+      const formData = request.formData as Record<string, unknown>;
+      const isBulkUpload = formData?.uploadType === "bulk";
+
       if (isBulkUpload) {
         const items =
-          (formData?.items as Array<{ nome: string; documento: string }>) || [];
+          (formData?.items as Array<{
+            nome?: string;
+            documento?: string;
+            cpf?: string;
+            cnpj?: string;
+          }>) || [];
 
         const idx = items.findIndex(
-          (item) => normalizeDocument(item.documento) === normalizedDoc,
+          (item) =>
+            normalizeDocument(item.documento || item.cpf || item.cnpj || "") ===
+            normalizedDoc,
         );
 
         if (idx !== -1) {
+          const item = items[idx];
           const itemStatusData = itemsStatus[idx];
           matched.push({
-            nome: items[idx].nome,
-            documento: items[idx].documento,
+            nome: item.nome || "Cliente",
+            documento: item.documento || item.cpf || item.cnpj || normalizedDoc,
             acaoId: request.acaoId,
             acaoNome: request.acaoNome,
             itemStatus: itemStatusData?.status || "aguardando",
@@ -164,9 +204,16 @@ export async function searchByDocumento(
           });
         }
       } else {
-        const docInForm = (formData?.documento as string) || "";
+        const docInForm =
+          (formData?.documento as string) ||
+          (formData?.cpf as string) ||
+          (formData?.cnpj as string) ||
+          (formData?.cpfCnpj as string) ||
+          (formData?.document as string) ||
+          "";
+
         if (normalizeDocument(docInForm) === normalizedDoc) {
-          const nome = (formData?.nome as string) || "";
+          const nome = (formData?.nome as string) || "Cliente";
           const itemStatusData = itemsStatus[0];
           matched.push({
             nome,
