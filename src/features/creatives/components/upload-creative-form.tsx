@@ -1,9 +1,9 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Upload, X } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
@@ -46,8 +46,8 @@ export function UploadCreativeForm({
   onSuccess,
 }: UploadCreativeFormProps = {}) {
   const [isUploading, setIsUploading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const queryClient = useQueryClient();
 
   const form = useForm<Omit<CreateCreativeInput, "imageUrl">>({
@@ -58,88 +58,132 @@ export function UploadCreativeForm({
     },
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Validar tipo
-    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-    if (!validTypes.includes(file.type)) {
-      toast.error("Formato inválido. Use JPEG, PNG ou WebP");
-      return;
-    }
-
-    // Validar tamanho (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Arquivo muito grande. Máximo 5MB");
-      return;
-    }
-
-    setSelectedFile(file);
-
-    // Criar preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreviewUrl(reader.result as string);
+  // Limpar previews quando desmontar ou trocar arquivos
+  useEffect(() => {
+    return () => {
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
     };
-    reader.readAsDataURL(file);
+  }, [previewUrls]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    const validFiles = files.filter((file) => {
+      if (!validTypes.includes(file.type)) {
+        toast.error(`Formato inválido: ${file.name}`);
+        return false;
+      }
+      if (file.size > maxSize) {
+        toast.error(`Arquivo muito grande: ${file.name}`);
+        return false;
+      }
+      return true;
+    });
+
+    if (!validFiles.length) return;
+
+    setSelectedFiles((prev) => [...prev, ...validFiles]);
+
+    // Criar previews
+    const newPreviewUrls = validFiles.map((file) => URL.createObjectURL(file));
+    setPreviewUrls((prev) => [...prev, ...newPreviewUrls]);
+    
+    // Reseta o input para permitir selecionar o mesmo arquivo novamente se tiver sido removido
+    e.target.value = "";
   };
 
+  const removeFile = useCallback((index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setPreviewUrls((prev) => {
+      const urls = [...prev];
+      URL.revokeObjectURL(urls[index]); // Limpa a memória
+      urls.splice(index, 1);
+      return urls;
+    });
+  }, []);
+
   const onSubmit = async (data: Omit<CreateCreativeInput, "imageUrl">) => {
-    if (!selectedFile) {
-      toast.error("Selecione uma imagem");
+    if (!selectedFiles.length) {
+      toast.error("Selecione pelo menos uma imagem");
       return;
     }
 
     setIsUploading(true);
+    let successCount = 0;
+    let errorCount = 0;
 
     try {
-      // Upload para API route que vai usar S3
-      const formData = new FormData();
-      formData.append("file", selectedFile);
-      formData.append("folder", "creatives");
+      // Usar Promise.all para upload e criação em paralelo ou sequencial?
+      // Usaremos sequencial para evitar problemas de limite de upload caso sejam muitos arquivos.
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        try {
+          // Upload para API route
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("folder", "creatives");
 
-      const uploadResponse = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+          const uploadResponse = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          });
 
-      if (!uploadResponse.ok) {
-        const error = await uploadResponse.json();
-        throw new Error(error.error || "Erro ao fazer upload");
+          if (!uploadResponse.ok) {
+            const error = await uploadResponse.json();
+            throw new Error(error.error || `Erro ao fazer upload: ${file.name}`);
+          }
+
+          const { url } = await uploadResponse.json();
+
+          // Criar criativo
+          // Sufixo o título se for mais de um arquivo
+          const titleToUse = selectedFiles.length > 1 ? `${data.title} ${i + 1}` : data.title;
+
+          const result = await createCreative({
+            title: titleToUse,
+            description: data.description,
+            category: data.category,
+            imageUrl: url,
+          });
+
+          if (!result.success) {
+            throw new Error(`Erro ao criar registro: ${file.name}`);
+          }
+          successCount++;
+        } catch (error) {
+           console.error(`Erro processando ${file.name}:`, error);
+           errorCount++;
+        }
       }
 
-      const { url } = await uploadResponse.json();
-
-      // Criar criativo com a URL do S3
-      const result = await createCreative({
-        title: data.title,
-        description: data.description,
-        category: data.category,
-        imageUrl: url,
-      });
-
-      if (!result.success) {
-        throw new Error("Erro ao criar criativo");
+      if (successCount > 0) {
+        toast.success(`${successCount} criativo(s) criado(s) com sucesso!`);
+      }
+      if (errorCount > 0) {
+        toast.error(`Falha em ${errorCount} criativo(s). Verifique o console.`);
       }
 
-      toast.success("Criativo criado com sucesso!");
-
-      // Reset do formulário
-      form.reset();
-      setSelectedFile(null);
-      setPreviewUrl(null);
+      if (successCount === selectedFiles.length) {
+        // Reset do formulário apenas se tudo deu certo
+        form.reset();
+        setSelectedFiles([]);
+        setPreviewUrls([]);
+        onSuccess?.();
+      } else if (successCount > 0) {
+          // Remover arquivos que deram certo do estado - simplificação: fechar form se algum sucesso?
+          // Aqui optamos por não limpar o form se houver erros, e deixar a UX prosseguir.
+          onSuccess?.();
+      }
 
       // Atualizar lista
       queryClient.invalidateQueries({ queryKey: ["creatives"] });
-
-      // Callback de sucesso (fecha o dialog)
-      onSuccess?.();
     } catch (error) {
-      console.error("Erro:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Erro ao criar criativo",
-      );
+      console.error("Erro geral no envio:", error);
+      toast.error("Ocorreu um erro no processo de envio.");
     } finally {
       setIsUploading(false);
     }
@@ -158,15 +202,30 @@ export function UploadCreativeForm({
                 accept="image/jpeg,image/jpg,image/png,image/webp"
                 onChange={handleFileChange}
                 disabled={isUploading}
+                multiple
               />
-              {previewUrl && (
-                <div className="relative aspect-video w-full max-w-md overflow-hidden rounded-lg border">
-                  <Image
-                    src={previewUrl}
-                    alt="Preview"
-                    fill
-                    className="object-cover"
-                  />
+              {previewUrls.length > 0 && (
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                  {previewUrls.map((url, index) => (
+                    <div key={url} className="group relative aspect-video overflow-hidden rounded-lg border">
+                      <Image
+                        src={url}
+                        alt={`Preview ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute right-1 top-1 h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
+                        onClick={() => removeFile(index)}
+                        disabled={isUploading}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -244,7 +303,7 @@ export function UploadCreativeForm({
           )}
         />
 
-        <Button type="submit" disabled={isUploading || !selectedFile}>
+        <Button type="submit" disabled={isUploading || selectedFiles.length === 0}>
           {isUploading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -253,7 +312,7 @@ export function UploadCreativeForm({
           ) : (
             <>
               <Upload className="mr-2 h-4 w-4" />
-              Fazer Upload
+              Fazer Upload {selectedFiles.length > 0 && `(${selectedFiles.length})`}
             </>
           )}
         </Button>
