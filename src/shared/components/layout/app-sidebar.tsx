@@ -96,7 +96,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           animate="visible"
         >
           {/*<TrafficManagerCTA />*/}
-          <NavSecondary />
+          <NavSecondary className="-ml-2" />
           <NavUser />
         </motion.div>
       </SidebarFooter>

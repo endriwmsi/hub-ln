@@ -8,6 +8,7 @@ import {
   IconNetwork,
   IconPackage,
   IconPencil,
+  IconSearch,
   IconSend,
   IconSmartHome,
 } from "@tabler/icons-react";
@@ -80,9 +81,9 @@ const NavMainItems: NavItem[] = [
     icon: IconPencil,
   },
   {
-    title: "Consulta nome",
+    title: "Consulta status",
     url: "/consulta-publica",
-    icon: IconPencil,
+    icon: IconSearch,
   },
 ];
 
