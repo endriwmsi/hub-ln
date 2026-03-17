@@ -1,6 +1,16 @@
 "use client";
 
-import { type Icon, IconChevronRight } from "@tabler/icons-react";
+import {
+  type Icon,
+  IconChevronRight,
+  IconCreditCard,
+  IconImageInPicture,
+  IconNetwork,
+  IconPackage,
+  IconPencil,
+  IconSend,
+  IconSmartHome,
+} from "@tabler/icons-react";
 import { motion, type Variants } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -14,7 +24,6 @@ import {
 import {
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -22,6 +31,55 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/shared/components/ui/sidebar";
+import { SidebarItemGlow } from "./sidebar-item-glow";
+
+type NavItem = {
+  title: string;
+  url: string;
+  icon?: Icon;
+  items?: {
+    title: string;
+    url: string;
+  }[];
+};
+
+const NavMainItems: NavItem[] = [
+  {
+    title: "Home",
+    url: "/dashboard",
+    icon: IconSmartHome,
+  },
+  {
+    title: "Serviços",
+    url: "/servicos",
+    icon: IconPackage,
+  },
+  {
+    title: "Envios",
+    url: "/envios",
+    icon: IconSend,
+  },
+  {
+    title: "Financeiro",
+    url: "/transacoes",
+    icon: IconCreditCard,
+  },
+  {
+    title: "Indicações",
+    url: "/indicacoes",
+    icon: IconNetwork,
+  },
+  {
+    title: "Criativos",
+    url: "/criativos",
+    icon: IconImageInPicture,
+  },
+  {
+    title: "Editor",
+    url: "/editor",
+    icon: IconPencil,
+  },
+];
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -64,21 +122,11 @@ const hoverVariants: Variants = {
   },
 };
 
-export function NavMain({
-  items,
-}: {
-  items: {
-    title: string;
-    url: string;
-    icon?: Icon;
-    items?: {
-      title: string;
-      url: string;
-    }[];
-  }[];
-}) {
+export function NavMain() {
   const pathname = usePathname();
   const [openItems, setOpenItems] = useState<string[]>([]);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [hoveredSubItem, setHoveredSubItem] = useState<string | null>(null);
 
   const toggleItem = (title: string) => {
     setOpenItems((prev) =>
@@ -100,9 +148,9 @@ export function NavMain({
           initial="hidden"
           animate="visible"
         >
-          <SidebarGroupLabel>Geral</SidebarGroupLabel>
+          {/*<SidebarGroupLabel>Geral</SidebarGroupLabel>*/}
           <SidebarMenu>
-            {items.map((item, index) => (
+            {NavMainItems.map((item, index) => (
               <motion.div
                 key={item.title}
                 variants={itemVariants}
@@ -119,6 +167,9 @@ export function NavMain({
                           variants={hoverVariants}
                           initial="initial"
                           whileHover="hover"
+                          onHoverStart={() => setHoveredItem(item.title)}
+                          onHoverEnd={() => setHoveredItem(null)}
+                          className="relative overflow-hidden rounded-md"
                         >
                           <SidebarMenuButton
                             tooltip={item.title}
@@ -130,6 +181,11 @@ export function NavMain({
                               className={`ml-auto transition-transform ${openItems.includes(item.title) ? "rotate-90" : ""}`}
                             />
                           </SidebarMenuButton>
+                          <SidebarItemGlow
+                            visible={
+                              hoveredItem === item.title || isActive(item.url)
+                            }
+                          />
                         </motion.div>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
@@ -157,14 +213,26 @@ export function NavMain({
                                   >
                                     <Link
                                       href={subItem.url}
+                                      onMouseEnter={() =>
+                                        setHoveredSubItem(subItem.title)
+                                      }
+                                      onMouseLeave={() =>
+                                        setHoveredSubItem(null)
+                                      }
                                       className={cn(
-                                        "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-all",
-                                        pathname === item.url
+                                        "relative overflow-hidden w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-all",
+                                        isActive(subItem.url)
                                           ? "text-sidebar-foreground bg-sidebar-accent shadow-sm border border-sidebar-border"
                                           : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50 border border-transparent",
                                       )}
                                     >
                                       <span>{subItem.title}</span>
+                                      <SidebarItemGlow
+                                        visible={
+                                          hoveredSubItem === subItem.title ||
+                                          isActive(subItem.url)
+                                        }
+                                      />
                                     </Link>
                                   </SidebarMenuSubButton>
                                 </motion.div>
@@ -187,15 +255,22 @@ export function NavMain({
                       >
                         <Link
                           href={item.url}
+                          onMouseEnter={() => setHoveredItem(item.title)}
+                          onMouseLeave={() => setHoveredItem(null)}
                           className={cn(
-                            "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-all",
-                            pathname === item.url
+                            "relative overflow-hidden w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-all",
+                            isActive(item.url)
                               ? "text-sidebar-foreground bg-sidebar-accent shadow-sm border border-sidebar-border"
                               : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50 border border-transparent",
                           )}
                         >
                           {item.icon && <item.icon />}
                           <span>{item.title}</span>
+                          <SidebarItemGlow
+                            visible={
+                              hoveredItem === item.title || isActive(item.url)
+                            }
+                          />
                         </Link>
                       </SidebarMenuButton>
                     </motion.div>

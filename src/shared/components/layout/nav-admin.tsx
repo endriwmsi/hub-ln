@@ -1,9 +1,18 @@
 "use client";
 
-import type { Icon } from "@tabler/icons-react";
+import {
+  type Icon,
+  IconAlertCircle,
+  IconImageInPicture,
+  IconPackage,
+  IconTicket,
+  IconUsers,
+} from "@tabler/icons-react";
 import { motion, type Variants } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -12,6 +21,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/shared/components/ui/sidebar";
+import { SidebarItemGlow } from "./sidebar-item-glow";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -52,16 +62,53 @@ const hoverVariants: Variants = {
   },
 };
 
-interface NavAdminProps {
-  items: {
-    name: string;
-    url: string;
-    icon: Icon;
-  }[];
-}
+type AdminNavItem = {
+  name: string;
+  url: string;
+  icon: Icon;
+};
 
-const NavAdmin = ({ items }: NavAdminProps) => {
+const AdminItems: AdminNavItem[] = [
+  {
+    name: "Gerenciar Ações",
+    url: "/gerenciar-acoes",
+    icon: IconTicket,
+  },
+  {
+    name: "Gerenciar Usuários",
+    url: "/gerenciar-usuarios",
+    icon: IconUsers,
+  },
+  {
+    name: "Gerenciar Avisos",
+    url: "/gerenciar-avisos",
+    icon: IconAlertCircle,
+  },
+  {
+    name: "Gerenciar Serviços",
+    url: "/gerenciar-servicos",
+    icon: IconPackage,
+  },
+  {
+    name: "Gerenciar Criativos",
+    url: "/gerenciar-criativos",
+    icon: IconImageInPicture,
+  },
+  {
+    name: "Gerenciar Clientes",
+    url: "/gerenciar-clientes",
+    icon: IconUsers,
+  },
+  {
+    name: "Gerenciar Cupons",
+    url: "/gerenciar-cupons",
+    icon: IconTicket,
+  },
+];
+
+const NavAdmin = () => {
   const pathname = usePathname();
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   // const [openItems, setOpenItems] = useState<string[]>([]);
 
@@ -87,7 +134,7 @@ const NavAdmin = ({ items }: NavAdminProps) => {
         >
           <SidebarGroupLabel>Admin</SidebarGroupLabel>
           <SidebarMenu>
-            {items.map((item, index) => (
+            {AdminItems.map((item, index) => (
               <motion.div
                 key={item.name}
                 variants={itemVariants}
@@ -104,9 +151,24 @@ const NavAdmin = ({ items }: NavAdminProps) => {
                       tooltip={item.name}
                       isActive={isActive(item.url)}
                     >
-                      <Link href={item.url}>
+                      <Link
+                        href={item.url}
+                        onMouseEnter={() => setHoveredItem(item.name)}
+                        onMouseLeave={() => setHoveredItem(null)}
+                        className={cn(
+                          "relative overflow-hidden w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-all",
+                          isActive(item.url)
+                            ? "text-sidebar-foreground bg-sidebar-accent shadow-sm border border-sidebar-border"
+                            : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50 border border-transparent",
+                        )}
+                      >
                         <item.icon />
                         <span>{item.name}</span>
+                        <SidebarItemGlow
+                          visible={
+                            hoveredItem === item.name || isActive(item.url)
+                          }
+                        />
                       </Link>
                     </SidebarMenuButton>
                   </motion.div>

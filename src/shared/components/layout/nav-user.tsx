@@ -1,10 +1,7 @@
-import {
-  IconCreditCard,
-  IconDotsVertical,
-  IconLogout,
-  IconNotification,
-  IconUserCircle,
-} from "@tabler/icons-react";
+import { IconDotsVertical, IconLogout } from "@tabler/icons-react";
+import { Settings, User } from "lucide-react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import { authClient, useSession } from "@/core";
 import {
   Avatar,
@@ -27,14 +24,13 @@ import {
   useSidebar,
 } from "@/shared/components/ui/sidebar";
 import { getUserInitials } from "@/shared/lib/utils";
-import { Button } from "../ui/button";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { data: session } = useSession();
 
   return (
-    <SidebarMenu>
+    <SidebarMenu className="bg-primary/10 rounded-lg border border-primary/10 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:border-transparent">
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -53,7 +49,7 @@ export function NavUser() {
                   {session?.user.name.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                 <span className="truncate font-medium">
                   {session?.user.name || "SN"}
                 </span>
@@ -61,7 +57,7 @@ export function NavUser() {
                   {session?.user.email}
                 </span>
               </div>
-              <IconDotsVertical className="ml-auto size-4" />
+              <IconDotsVertical className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -95,29 +91,37 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <IconUserCircle />
-                Account
+              <DropdownMenuItem asChild>
+                <Link href="/configuracoes/perfil">
+                  <User className="h-4 w-4" />
+                  Minha Conta
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconCreditCard />
-                Billing
+              <DropdownMenuItem asChild>
+                <Link href="/configuracoes">
+                  <Settings className="h-4 w-4" />
+                  Configurações
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              {/*<DropdownMenuItem>
                 <IconNotification />
                 Notifications
-              </DropdownMenuItem>
+              </DropdownMenuItem>*/}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Button
-                onClick={() => authClient.signOut()}
-                variant="ghost"
-                className="w-full"
-              >
-                <IconLogout />
-                Log out
-              </Button>
+            <DropdownMenuItem
+              onClick={async () => {
+                await authClient.signOut({
+                  fetchOptions: {
+                    onSuccess: () => {
+                      redirect("/login");
+                    },
+                  },
+                });
+              }}
+            >
+              <IconLogout />
+              Sair
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

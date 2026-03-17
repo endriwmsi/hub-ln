@@ -1,32 +1,9 @@
-import { IconLogout } from "@tabler/icons-react";
 import { motion } from "framer-motion";
-import { Settings, User } from "lucide-react";
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { authClient, useSession } from "@/core";
 import { NotificationsDropdown } from "@/features/notifications";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/shared/components/ui/avatar";
-import { Button } from "@/shared/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu";
-import { getUserInitials } from "@/shared/lib/utils";
 import { SidebarTrigger } from "../ui/sidebar";
-import { Skeleton } from "../ui/skeleton";
 import { ModeToggle } from "./mode-toggle";
 
 export function SiteHeader() {
-  const { data: session, isPending } = useSession();
-
   return (
     <motion.header
       initial={{ opacity: 0, y: -10 }}
@@ -37,15 +14,14 @@ export function SiteHeader() {
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
         <SidebarTrigger className="-ml-1" />
         <div className="ml-auto flex items-center gap-2">
+          {/* Notifications Dropdown */}
+          <NotificationsDropdown />
           <div className="flex items-center gap-2">
             <ModeToggle />
           </div>
 
-          {/* Notifications Dropdown */}
-          <NotificationsDropdown />
-
           {/*  Added user info dropdown */}
-          <DropdownMenu>
+          {/*<DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2 px-2">
                 <Avatar className="h-8 w-8">
@@ -116,7 +92,7 @@ export function SiteHeader() {
                 Sair
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu>*/}
         </div>
       </div>
     </motion.header>
