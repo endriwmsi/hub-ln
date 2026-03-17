@@ -54,7 +54,7 @@ export function UploadCreativeForm({
     defaultValues: {
       title: "",
       description: "",
-      category: "other",
+      category: "instagram_post",
     },
   });
 
