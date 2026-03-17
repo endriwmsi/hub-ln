@@ -95,7 +95,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           initial="hidden"
           animate="visible"
         >
-          <TrafficManagerCTA />
+          {/*<TrafficManagerCTA />*/}
           <NavSecondary />
           <NavUser />
         </motion.div>

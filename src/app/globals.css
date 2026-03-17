@@ -1,6 +1,19 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@keyframes banner-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.banner-progress {
+  animation: banner-progress var(--banner-duration, 5500ms) linear forwards;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

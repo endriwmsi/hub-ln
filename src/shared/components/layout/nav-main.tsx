@@ -79,6 +79,11 @@ const NavMainItems: NavItem[] = [
     url: "/editor",
     icon: IconPencil,
   },
+  {
+    title: "Consulta nome",
+    url: "/consulta-publica",
+    icon: IconPencil,
+  },
 ];
 
 const containerVariants: Variants = {

@@ -12,7 +12,7 @@ import {
   IconTrendingUp,
   IconUsers,
 } from "@tabler/icons-react";
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -229,14 +229,6 @@ const EXTERNAL_LINK = "https://www.gsrocket.com.br/forms-gt-ln/";
 // ============ COMPONENTE PRINCIPAL ============
 
 export default function GestaoDeTrafegoPage() {
-  const heroRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
-  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
-
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -265,7 +257,7 @@ export default function GestaoDeTrafegoPage() {
     <SubscriptionGuard>
       <div className="min-h-screen bg-background">
         {/* ============ HERO ============ */}
-        <section ref={heroRef} className="relative overflow-hidden">
+        <section className="relative overflow-hidden">
           {/* Background linears */}
           <div className="absolute inset-0 bg-linear-to-br from-chart-1/10 via-background to-chart-4/10" />
           <motion.div
@@ -279,7 +271,7 @@ export default function GestaoDeTrafegoPage() {
             transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY }}
           />
 
-          <motion.div style={{ y, opacity }} className="relative z-10">
+          <div className="relative z-10">
             <div className="container mx-auto px-4 py-20 lg:py-32">
               <div className="grid items-center gap-12 lg:grid-cols-2">
                 {/* Coluna da Esquerda - Conteúdo */}
@@ -449,7 +441,7 @@ export default function GestaoDeTrafegoPage() {
                 </motion.div>
               </div>
             </div>
-          </motion.div>
+          </div>
         </section>
 
         {/* ============ MARQUEE STRIP ============ */}
