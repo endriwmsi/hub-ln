@@ -6,7 +6,7 @@ applyTo: "**"
 
 ## 📋 Visão Geral do Projeto
 
-Plataforma SaaS multi-tenant para agência de serviços financeiros (limpa nome, recuperação de rating bancário, etc.) com sistema de comissionamento em pirâmide, gestão de créditos compartilhados, assinaturas e múltiplos gateways de pagamento.
+Plataforma SaaS para agência de serviços financeiros (limpa nome, recuperação de rating bancário, etc.) com sistema de comissionamento em pirâmide, gestão de créditos compartilhados, assinaturas e múltiplos gateways de pagamento.
 
 ### Características Principais
 
