@@ -49,7 +49,6 @@ function getStatusSummary(acao: Acao): StatusSummary {
     acao.statusSerasa,
     acao.statusCenprotNacional,
     acao.statusCenprotSp,
-    acao.statusOutros,
   ];
 
   return {

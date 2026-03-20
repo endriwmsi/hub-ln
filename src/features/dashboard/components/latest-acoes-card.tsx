@@ -113,7 +113,6 @@ function AcaoCard({ acao }: AcaoCardProps) {
                 orgao="Cenprot Nac"
               />
               <StatusItem status={acao.statusCenprotSp} orgao="Cenprot SP" />
-              <StatusItem status={acao.statusOutros} orgao="Outros" />
             </div>
           </div>
         </CollapsibleContent>

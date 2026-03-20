@@ -21,7 +21,6 @@ export interface LatestAcao {
     | "aguardando_baixas"
     | "baixas_iniciadas"
     | "baixas_completas";
-  statusOutros: "aguardando_baixas" | "baixas_iniciadas" | "baixas_completas";
   createdAt: Date;
 }
 
@@ -52,7 +51,6 @@ export async function getLatestAcoes(
         statusSerasa: true,
         statusCenprotNacional: true,
         statusCenprotSp: true,
-        statusOutros: true,
         createdAt: true,
       },
       orderBy: desc(acao.createdAt),
@@ -61,7 +59,7 @@ export async function getLatestAcoes(
 
     return {
       success: true,
-      data: acoes,
+      data: acoes as LatestAcao[],
     };
   } catch (error) {
     console.error("Erro ao buscar últimas ações:", error);

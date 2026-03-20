@@ -36,9 +36,6 @@ export const acao = pgTable("acao", {
   statusCenprotSp: statusOrgaoEnum("status_cenprot_sp")
     .default("aguardando_baixas")
     .notNull(),
-  statusOutros: statusOrgaoEnum("status_outros")
-    .default("aguardando_baixas")
-    .notNull(),
 
   // Configurações de visibilidade e envios
   visivel: boolean("visivel").default(true).notNull(),

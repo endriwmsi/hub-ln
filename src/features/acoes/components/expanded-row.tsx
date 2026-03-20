@@ -16,7 +16,6 @@ export function ExpandedRow({ acao }: ExpandedRowProps) {
     { name: "statusSerasa", label: orgaoLabels.statusSerasa },
     { name: "statusCenprotNacional", label: orgaoLabels.statusCenprotNacional },
     { name: "statusCenprotSp", label: orgaoLabels.statusCenprotSp },
-    { name: "statusOutros", label: orgaoLabels.statusOutros },
   ] as const;
 
   return (

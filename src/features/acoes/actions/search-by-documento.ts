@@ -56,7 +56,6 @@ const orgaoFields: { field: string; label: string }[] = [
   { field: "statusSerasa", label: "Serasa" },
   { field: "statusCenprotNacional", label: "Cenprot Nacional" },
   { field: "statusCenprotSp", label: "Cenprot SP" },
-  { field: "statusOutros", label: "Outros" },
 ];
 
 export async function searchByDocumento(
@@ -99,7 +98,6 @@ export async function searchByDocumento(
         acaoStatusSerasa: acao.statusSerasa,
         acaoStatusCenprotNacional: acao.statusCenprotNacional,
         acaoStatusCenprotSp: acao.statusCenprotSp,
-        acaoStatusOutros: acao.statusOutros,
       })
       .from(serviceRequest)
       .innerJoin(acao, eq(serviceRequest.acaoId, acao.id))
@@ -125,7 +123,6 @@ export async function searchByDocumento(
       acaoStatusSerasa: OrgaoStatus;
       acaoStatusCenprotNacional: OrgaoStatus;
       acaoStatusCenprotSp: OrgaoStatus;
-      acaoStatusOutros: OrgaoStatus;
     };
 
     const matched: MatchedEntry[] = [];
@@ -161,7 +158,6 @@ export async function searchByDocumento(
           acaoStatusSerasa: request.acaoStatusSerasa,
           acaoStatusCenprotNacional: request.acaoStatusCenprotNacional,
           acaoStatusCenprotSp: request.acaoStatusCenprotSp,
-          acaoStatusOutros: request.acaoStatusOutros,
         });
         continue;
       }
@@ -200,7 +196,6 @@ export async function searchByDocumento(
             acaoStatusSerasa: request.acaoStatusSerasa,
             acaoStatusCenprotNacional: request.acaoStatusCenprotNacional,
             acaoStatusCenprotSp: request.acaoStatusCenprotSp,
-            acaoStatusOutros: request.acaoStatusOutros,
           });
         }
       } else {
@@ -227,7 +222,6 @@ export async function searchByDocumento(
             acaoStatusSerasa: request.acaoStatusSerasa,
             acaoStatusCenprotNacional: request.acaoStatusCenprotNacional,
             acaoStatusCenprotSp: request.acaoStatusCenprotSp,
-            acaoStatusOutros: request.acaoStatusOutros,
           });
         }
       }
@@ -249,7 +243,6 @@ export async function searchByDocumento(
         statusSerasa: entry.acaoStatusSerasa,
         statusCenprotNacional: entry.acaoStatusCenprotNacional,
         statusCenprotSp: entry.acaoStatusCenprotSp,
-        statusOutros: entry.acaoStatusOutros,
       };
 
       const orgaos: OrgaoResult[] = orgaoFields.map(({ field, label }) => ({

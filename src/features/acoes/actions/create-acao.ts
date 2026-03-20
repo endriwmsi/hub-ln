@@ -26,7 +26,6 @@ export async function createAcao(input: CreateAcaoInput) {
         statusSerasa: validated.statusSerasa,
         statusCenprotNacional: validated.statusCenprotNacional,
         statusCenprotSp: validated.statusCenprotSp,
-        statusOutros: validated.statusOutros,
         visivel: validated.visivel,
         permiteEnvios: validated.permiteEnvios,
         // Campos admin

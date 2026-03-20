@@ -39,7 +39,6 @@ export const createAcaoBaseSchema = z.object({
   statusSerasa: statusOrgaoSchema,
   statusCenprotNacional: statusOrgaoSchema,
   statusCenprotSp: statusOrgaoSchema,
-  statusOutros: statusOrgaoSchema,
   visivel: z.boolean(),
   permiteEnvios: z.boolean(),
   // Campos admin-only
@@ -64,7 +63,6 @@ export const createAcaoSchema = z
     statusSerasa: statusOrgaoSchema.default("aguardando_baixas"),
     statusCenprotNacional: statusOrgaoSchema.default("aguardando_baixas"),
     statusCenprotSp: statusOrgaoSchema.default("aguardando_baixas"),
-    statusOutros: statusOrgaoSchema.default("aguardando_baixas"),
     visivel: z.boolean().default(true),
     permiteEnvios: z.boolean().default(true),
     // Campos admin-only
@@ -91,7 +89,6 @@ export const updateAcaoSchema = z.object({
   statusSerasa: statusOrgaoSchema.optional(),
   statusCenprotNacional: statusOrgaoSchema.optional(),
   statusCenprotSp: statusOrgaoSchema.optional(),
-  statusOutros: statusOrgaoSchema.optional(),
   visivel: z.boolean().optional(),
   permiteEnvios: z.boolean().optional(),
   // Campos admin-only
@@ -110,7 +107,6 @@ export const updateAcaoStatusSchema = z.object({
     "statusSerasa",
     "statusCenprotNacional",
     "statusCenprotSp",
-    "statusOutros",
   ]),
   value: statusOrgaoSchema,
 });
@@ -133,7 +129,6 @@ export const orgaoLabels = {
   statusSerasa: "Serasa",
   statusCenprotNacional: "Cenprot Nacional",
   statusCenprotSp: "Cenprot SP",
-  statusOutros: "Outros",
 } as const;
 
 export type OrgaoField = keyof typeof orgaoLabels;

@@ -72,7 +72,6 @@ export function AcaoFormDialog({
       statusSerasa: "aguardando_baixas",
       statusCenprotNacional: "aguardando_baixas",
       statusCenprotSp: "aguardando_baixas",
-      statusOutros: "aguardando_baixas",
       visivel: true,
       permiteEnvios: true,
       // Campos admin
@@ -93,7 +92,6 @@ export function AcaoFormDialog({
         statusSerasa: acao.statusSerasa as StatusOrgao,
         statusCenprotNacional: acao.statusCenprotNacional as StatusOrgao,
         statusCenprotSp: acao.statusCenprotSp as StatusOrgao,
-        statusOutros: acao.statusOutros as StatusOrgao,
         visivel: acao.visivel,
         permiteEnvios: acao.permiteEnvios,
         responsavel: acao.responsavel || null,
@@ -109,7 +107,6 @@ export function AcaoFormDialog({
         statusSerasa: "aguardando_baixas",
         statusCenprotNacional: "aguardando_baixas",
         statusCenprotSp: "aguardando_baixas",
-        statusOutros: "aguardando_baixas",
         visivel: true,
         permiteEnvios: true,
         responsavel: null,
@@ -147,7 +144,6 @@ export function AcaoFormDialog({
     { name: "statusSerasa", label: orgaoLabels.statusSerasa },
     { name: "statusCenprotNacional", label: orgaoLabels.statusCenprotNacional },
     { name: "statusCenprotSp", label: orgaoLabels.statusCenprotSp },
-    { name: "statusOutros", label: orgaoLabels.statusOutros },
   ] as const;
 
   return (
