@@ -1,9 +1,10 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Upload, X } from "lucide-react";
 import Image from "next/image";
-import { useState, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
@@ -26,7 +27,7 @@ import {
 } from "@/shared/components/ui/select";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { createCreative } from "../actions";
-import type { CreateCreativeInput } from "../schemas";
+import { type CreateCreativeInput, createCreativeSchema } from "../schemas";
 
 const categories = [
   { value: "instagram_post", label: "Post Instagram" },
@@ -51,6 +52,7 @@ export function UploadCreativeForm({
   const queryClient = useQueryClient();
 
   const form = useForm<Omit<CreateCreativeInput, "imageUrl">>({
+    resolver: zodResolver(createCreativeSchema.omit({ imageUrl: true })),
     defaultValues: {
       title: "",
       description: "",
@@ -61,7 +63,9 @@ export function UploadCreativeForm({
   // Limpar previews quando desmontar ou trocar arquivos
   useEffect(() => {
     return () => {
-      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+      previewUrls.forEach((url) => {
+        URL.revokeObjectURL(url);
+      });
     };
   }, [previewUrls]);
 
@@ -91,7 +95,7 @@ export function UploadCreativeForm({
     // Criar previews
     const newPreviewUrls = validFiles.map((file) => URL.createObjectURL(file));
     setPreviewUrls((prev) => [...prev, ...newPreviewUrls]);
-    
+
     // Reseta o input para permitir selecionar o mesmo arquivo novamente se tiver sido removido
     e.target.value = "";
   };
@@ -134,14 +138,17 @@ export function UploadCreativeForm({
 
           if (!uploadResponse.ok) {
             const error = await uploadResponse.json();
-            throw new Error(error.error || `Erro ao fazer upload: ${file.name}`);
+            throw new Error(
+              error.error || `Erro ao fazer upload: ${file.name}`,
+            );
           }
 
           const { url } = await uploadResponse.json();
 
           // Criar criativo
           // Sufixo o título se for mais de um arquivo
-          const titleToUse = selectedFiles.length > 1 ? `${data.title} ${i + 1}` : data.title;
+          const titleToUse =
+            selectedFiles.length > 1 ? `${data.title} ${i + 1}` : data.title;
 
           const result = await createCreative({
             title: titleToUse,
@@ -155,8 +162,8 @@ export function UploadCreativeForm({
           }
           successCount++;
         } catch (error) {
-           console.error(`Erro processando ${file.name}:`, error);
-           errorCount++;
+          console.error(`Erro processando ${file.name}:`, error);
+          errorCount++;
         }
       }
 
@@ -174,9 +181,9 @@ export function UploadCreativeForm({
         setPreviewUrls([]);
         onSuccess?.();
       } else if (successCount > 0) {
-          // Remover arquivos que deram certo do estado - simplificação: fechar form se algum sucesso?
-          // Aqui optamos por não limpar o form se houver erros, e deixar a UX prosseguir.
-          onSuccess?.();
+        // Remover arquivos que deram certo do estado - simplificação: fechar form se algum sucesso?
+        // Aqui optamos por não limpar o form se houver erros, e deixar a UX prosseguir.
+        onSuccess?.();
       }
 
       // Atualizar lista
@@ -207,7 +214,10 @@ export function UploadCreativeForm({
               {previewUrls.length > 0 && (
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                   {previewUrls.map((url, index) => (
-                    <div key={url} className="group relative aspect-video overflow-hidden rounded-lg border">
+                    <div
+                      key={url}
+                      className="group relative aspect-video overflow-hidden rounded-lg border"
+                    >
                       <Image
                         src={url}
                         alt={`Preview ${index + 1}`}
@@ -303,7 +313,10 @@ export function UploadCreativeForm({
           )}
         />
 
-        <Button type="submit" disabled={isUploading || selectedFiles.length === 0}>
+        <Button
+          type="submit"
+          disabled={isUploading || selectedFiles.length === 0}
+        >
           {isUploading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -312,7 +325,8 @@ export function UploadCreativeForm({
           ) : (
             <>
               <Upload className="mr-2 h-4 w-4" />
-              Fazer Upload {selectedFiles.length > 0 && `(${selectedFiles.length})`}
+              Fazer Upload{" "}
+              {selectedFiles.length > 0 && `(${selectedFiles.length})`}
             </>
           )}
         </Button>
