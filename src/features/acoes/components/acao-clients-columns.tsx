@@ -3,7 +3,13 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CheckCircle2, Hourglass, MoreHorizontal, XCircle } from "lucide-react";
+import {
+  CheckCircle2,
+  Hourglass,
+  MoreHorizontal,
+  Trash2,
+  XCircle,
+} from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Checkbox } from "@/shared/components/ui/checkbox";
@@ -50,13 +56,14 @@ type ColumnsOptions = {
     itemIndex: number,
     status: StatusType,
   ) => void;
+  onDeleteItem: (requestId: string, itemIndex: number) => void;
   isPending?: boolean;
 };
 
 export function createAcaoClientsColumns(
   options: ColumnsOptions,
 ): ColumnDef<AcaoClientItem>[] {
-  const { onStatusUpdate, isPending } = options;
+  const { onStatusUpdate, onDeleteItem, isPending } = options;
 
   return [
     {
@@ -243,6 +250,17 @@ export function createAcaoClientsColumns(
               <XCircle className="h-4 w-4 mr-2 text-red-600" />
               Baixas Negadas
             </DropdownMenuItem>
+            {!row.original.requestPaid && (
+              <DropdownMenuItem
+                onClick={() =>
+                  onDeleteItem(row.original.requestId, row.original.itemIndex)
+                }
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Excluir
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       ),

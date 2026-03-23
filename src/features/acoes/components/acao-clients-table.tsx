@@ -32,6 +32,7 @@ import { Skeleton } from "@/shared/components/ui/skeleton";
 import { useDebounce } from "@/shared/hooks/use-debounce";
 import {
   useAcaoClients,
+  useDeleteAcaoItem,
   useUpdateBulkItemsStatus,
   useUpdateSingleItemStatus,
 } from "../hooks";
@@ -93,6 +94,7 @@ export function AcaoClientsTable({
   // React Query - mutations
   const bulkUpdateMutation = useUpdateBulkItemsStatus(acaoId);
   const singleUpdateMutation = useUpdateSingleItemStatus(acaoId);
+  const deleteItemMutation = useDeleteAcaoItem(acaoId);
 
   const items = data?.success ? data.data?.items || [] : [];
   const pagination = data?.success
@@ -113,7 +115,9 @@ export function AcaoClientsTable({
   const totalItems = data?.success ? data.data?.totalItems || 0 : 0;
 
   const isPending =
-    bulkUpdateMutation.isPending || singleUpdateMutation.isPending;
+    bulkUpdateMutation.isPending ||
+    singleUpdateMutation.isPending ||
+    deleteItemMutation.isPending;
   const isSearching = isFetching && !isLoading;
 
   // Converter rowSelection para array de items selecionados
@@ -125,7 +129,7 @@ export function AcaoClientsTable({
       .map((key) => {
         const lastDashIndex = key.lastIndexOf("-");
         const requestId = key.substring(0, lastDashIndex);
-        const itemIndex = Number.parseInt(key.substring(lastDashIndex + 1));
+        const itemIndex = Number.parseInt(key.substring(lastDashIndex + 1), 10);
         return { requestId, itemIndex };
       });
   }, [rowSelection]);
@@ -137,9 +141,12 @@ export function AcaoClientsTable({
         onStatusUpdate: (requestId, itemIndex, status) => {
           singleUpdateMutation.mutate({ requestId, itemIndex, status });
         },
+        onDeleteItem: (requestId, itemIndex) => {
+          deleteItemMutation.mutate({ requestId, itemIndex });
+        },
         isPending,
       }),
-    [singleUpdateMutation, isPending],
+    [singleUpdateMutation, deleteItemMutation, isPending],
   );
 
   // Atualiza a URL quando os filtros mudam
@@ -213,7 +220,7 @@ export function AcaoClientsTable({
   };
 
   const handlePageSizeChange = (newPageSize: string) => {
-    const size = Number.parseInt(newPageSize);
+    const size = Number.parseInt(newPageSize, 10);
     setPageSize(size);
     setCurrentPage(1);
     setRowSelection({});

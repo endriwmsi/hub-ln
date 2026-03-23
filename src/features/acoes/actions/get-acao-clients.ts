@@ -21,6 +21,7 @@ export type AcaoClientItem = {
   userEmail: string;
   requestCreatedAt: Date;
   requestPaid: boolean;
+  uploadType: "bulk" | "single";
   // Valor unitário pago pelo parceiro
   precoUnitario: number;
 };
@@ -130,6 +131,7 @@ export async function getAcaoClients(
             userEmail: request.userEmail,
             requestCreatedAt: request.createdAt,
             requestPaid: request.paid,
+            uploadType: "bulk",
             precoUnitario,
           });
         });
@@ -165,6 +167,7 @@ export async function getAcaoClients(
             userEmail: request.userEmail,
             requestCreatedAt: request.createdAt,
             requestPaid: request.paid,
+            uploadType: "single",
             precoUnitario,
           });
         }

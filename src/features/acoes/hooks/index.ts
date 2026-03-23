@@ -2,6 +2,7 @@ export { useAcaoClients } from "./use-acao-clients";
 export { useAcaoFilters } from "./use-acao-filters";
 export { useCreateAcao } from "./use-create-acao";
 export { useDeleteAcao } from "./use-delete-acao";
+export { useDeleteAcaoItem } from "./use-delete-acao-item";
 export { useToggleAcaoField } from "./use-toggle-acao-field";
 export { useUpdateAcao } from "./use-update-acao";
 export {
