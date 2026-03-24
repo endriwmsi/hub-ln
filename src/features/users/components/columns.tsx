@@ -298,13 +298,13 @@ export const createColumns = ({
   },
   {
     accessorKey: "subscription",
-    id: "lastPayment",
-    header: () => <div className="text-center">Último Pagamento</div>,
+    id: "endDate",
+    header: () => <div className="text-center">Data de Término</div>,
     cell: ({ row }) => {
       const subscription = row.original.subscription;
       return (
         <div className="text-center">
-          {subscription?.updatedAt ? formatDate(subscription.updatedAt) : "-"}
+          {subscription?.endDate ? formatDate(subscription.endDate) : "-"}
         </div>
       );
     },
