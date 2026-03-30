@@ -64,6 +64,23 @@ const TERMS_SECTIONS = [
     content:
       "Se você tiver alguma dúvida sobre estes Termos, entre em contato conosco através dos canais de suporte disponíveis na plataforma.",
   },
+  {
+    id: "09",
+    title: "9. Sistema de Indicações e Comissões",
+    content:
+      "Para participar do programa de indicações e receber comissões, o usuário deverá cumprir os seguintes requisitos:\n\n" +
+      "9.1 Requisitos para Indicações\n" +
+      "- Para participar do programa de indicações e começar a receber comissões, o usuário deverá efetivar o pagamento da primeira mensalidade. Após isso, o usuário já estará habilitado a compartilhar seu link de indicação.\n" +
+      "- O usuário que permanecer inativo por 2 (dois) meses consecutivos (sem realizar o pagamento das mensalidades) perderá automaticamente o direito de indicar novos usuários e de receber comissões.\n" +
+      "- A regularização da conta (mediante o pagamento das mensalidades em atraso) restaurará o acesso ao programa de indicações e aos benefícios relacionados.\n\n" +
+      "9.2 Configuração de Preços de Revenda\n" +
+      "- Para que o sistema de comissões funcione corretamente, o usuário indicador deverá configurar o preço de revenda dos serviços destinados aos seus indicados. Este preço determinará o valor da comissão a ser recebida a cada novo parceiro cadastrado através do link de indicação.\n\n" +
+      "9.3 Inatividade Prolongada e Penalidades\n" +
+      "- Caso o usuário permaneça inativo por 3 (três) meses consecutivos (sem realizar o pagamento da mensalidade), as seguintes medidas serão automaticamente aplicadas:\n" +
+      "1. Perda dos Indicados: Todos os usuários indicados por meio do link de indicação do usuário inativo serão realocados como parceiros diretos da plataforma, perdendo qualquer vínculo com o indicador original.\n" +
+      "2. Perda de Comissões: O usuário inativo perderá o direito a qualquer comissão pendente ou futura relacionada aos usuários indicados.\n" +
+      "3. Remoção da Conta: A conta do usuário inativo será removida da plataforma, sendo necessário realizar um novo cadastro caso deseje utilizar os serviços novamente.",
+  },
 ];
 
 export default function TermsPage() {
@@ -85,7 +102,7 @@ export default function TermsPage() {
               Termos e Condições de Uso HUB-LN.
             </CardTitle>
             <p className="text-center text-muted-foreground text-sm mt-2">
-              Última atualização: 02 de Dezembro de 2025
+              Última atualização: 30 de Março de 2026
             </p>
           </CardHeader>
           <CardContent className="space-y-8 text-justify leading-relaxed text-foreground/90">
