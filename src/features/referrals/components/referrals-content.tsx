@@ -5,6 +5,7 @@ import { useState } from "react";
 import {
   ReferralLinkCard,
   ReferralStatsCard,
+  ReferralsTable,
   ReferralTreeView,
   UserSelector,
 } from "@/features/referrals/components";
@@ -96,6 +97,9 @@ export function ReferralsContent({
 
       {/* Estatísticas */}
       <ReferralStatsCard stats={stats} />
+
+      {/* Tabela de indicados diretos (Smart Data Table) */}
+      <ReferralsTable />
 
       {/* Árvore de indicações */}
       <ReferralTreeView tree={tree} />

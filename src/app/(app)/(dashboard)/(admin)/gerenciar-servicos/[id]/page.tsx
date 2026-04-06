@@ -1,8 +1,9 @@
-import { ArrowLeft, FileText, Settings } from "lucide-react";
+import { ArrowLeft, FileText, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FormBuilder, getFormFieldsByServiceId } from "@/features/form-fields";
 import { getServiceById } from "@/features/services";
+import { ServiceUsersTable } from "@/features/services/components/service-users-table";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -105,6 +106,10 @@ export default async function ServiceFormPage({
             <FileText className="h-4 w-4" />
             Campos do Formulário
           </TabsTrigger>
+          <TabsTrigger value="users" className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            Preços por Usuário
+          </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             Configurações
@@ -122,6 +127,14 @@ export default async function ServiceFormPage({
             </CardHeader>
             <CardContent>
               <FormBuilder serviceId={id} fields={formFields} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="users">
+          <Card>
+            <CardContent className="pt-6">
+              <ServiceUsersTable serviceId={service.id} basePrice={service.basePrice.toString()} />
             </CardContent>
           </Card>
         </TabsContent>

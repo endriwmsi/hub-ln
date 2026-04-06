@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { verifySession } from "@/core/auth/dal";
 import { db } from "@/core/db";
@@ -8,10 +8,9 @@ import type { ServiceRequest } from "@/core/db/schema";
 import {
   serviceRequest,
   services,
-  user,
-  userServicePrice,
 } from "@/core/db/schema";
 import { recordCouponUsage } from "@/features/coupons";
+import { getUserServicePrices } from "@/features/services/actions/get-user-service-prices";
 import type { ActionResponse } from "@/shared/lib/server-actions";
 import {
   type CreateServiceRequestInput,
@@ -36,32 +35,16 @@ export async function createServiceRequest(
       return { success: false, error: "Serviço não encontrado" };
     }
 
-    // Buscar usuário atual para obter o indicador
-    const currentUser = await db.query.user.findFirst({
-      where: eq(user.id, session.userId),
-    });
-
-    // Determinar preço a usar: preço do indicador (costPrice) > preço base
-    // O usuário sempre paga o preço do indicador, não o seu próprio resalePrice
+    // Determinar preço a usar via get-user-service-prices que resolve toda a cascata
     let unitPrice = Number(service[0].basePrice);
 
-    if (currentUser?.referredBy) {
-      // Buscar preço do indicador
-      const referrer = await db.query.user.findFirst({
-        where: eq(user.referralCode, currentUser.referredBy),
-      });
-
-      if (referrer) {
-        const referrerPrice = await db.query.userServicePrice.findFirst({
-          where: and(
-            eq(userServicePrice.userId, referrer.id),
-            eq(userServicePrice.serviceId, validatedInput.serviceId),
-          ),
-        });
-
-        if (referrerPrice) {
-          unitPrice = Number(referrerPrice.resalePrice);
-        }
+    const userPricesResult = await getUserServicePrices();
+    if (userPricesResult.success && userPricesResult.data) {
+      const resolvedService = userPricesResult.data.find(
+        (s) => s.id === validatedInput.serviceId,
+      );
+      if (resolvedService) {
+        unitPrice = Number(resolvedService.costPrice);
       }
     }
 

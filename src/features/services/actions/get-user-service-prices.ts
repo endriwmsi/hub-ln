@@ -14,23 +14,17 @@ export type ServiceWithPrice = {
   basePrice: string;
   type: string;
   requiresDocument: boolean;
-  // Preço que o usuário paga (do indicador ou base)
+  // Preço que o usuário paga (definido pelo indicador, ou herdado do custo do indicador, ou base)
   costPrice: string;
-  // Preço de revenda definido pelo usuário (null = invalidado)
-  resalePrice: string | null;
-  // Comissão estimada por nome
-  commissionPerItem: string;
-  // Indica se o preço está válido ou precisa ser reconfigurado
-  isValid: boolean;
 };
 
 /**
- * Busca todos os serviços com os preços de custo e revenda do usuário.
+ * Busca todos os serviços com o preço de custo para o usuário atual.
  *
  * A lógica é:
- * 1. Buscar o preço de revenda do indicador (referred_by) como costPrice
- * 2. Buscar o preço de revenda do próprio usuário
- * 3. Se o usuário não tiver preço definido, sugere o costPrice como mínimo
+ * 1. Verifica se tem um preço customizado definido
+ * 2. Se não, herda o preço de custo do referenciador
+ * 3. Se não houver referenciador, usa o preço base
  */
 export async function getUserServicePrices(): Promise<
   ActionResponse<ServiceWithPrice[]>
@@ -64,7 +58,7 @@ export async function getUserServicePrices(): Promise<
       });
     }
 
-    // Buscar preços de revenda do indicador (se existir)
+    // Buscar preços de custo do indicador (se existir)
     const referrerPrices = referrer
       ? await db
           .select()
@@ -80,25 +74,15 @@ export async function getUserServicePrices(): Promise<
 
     // Montar resultado
     const result: ServiceWithPrice[] = allServices.map((service) => {
-      // Preço de revenda do usuário
       const userPrice = userPrices.find((p) => p.serviceId === service.id);
-      const resalePrice = userPrice?.resalePrice ?? null;
 
-      // Preço de custo do usuário (já está salvo no banco)
-      // Se não tiver registro ainda, calcula do indicador ou preço base
+      // Preço de custo do usuário:
+      // Se não tiver registro ainda, herda do custo do indicador ou do preço base
       const referrerPrice = referrerPrices.find(
         (p) => p.serviceId === service.id,
       );
       const costPrice =
-        userPrice?.costPrice ?? referrerPrice?.resalePrice ?? service.basePrice;
-
-      // Verifica se o preço está válido
-      const isValid = resalePrice !== null;
-
-      // Comissão = resalePrice - costPrice (se tiver resalePrice)
-      const commission = resalePrice
-        ? (Number(resalePrice) - Number(costPrice)).toFixed(2)
-        : "0.00";
+        userPrice?.costPrice ?? referrerPrice?.costPrice ?? service.basePrice;
 
       return {
         id: service.id,
@@ -109,9 +93,6 @@ export async function getUserServicePrices(): Promise<
         type: service.type,
         requiresDocument: service.requiresDocument,
         costPrice,
-        resalePrice,
-        commissionPerItem: commission,
-        isValid,
       };
     });
 
