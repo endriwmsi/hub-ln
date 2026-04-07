@@ -1,15 +1,12 @@
 /** biome-ignore-all lint/suspicious/noArrayIndexKey: It's just a skeleton component */
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { getUserServicePrices } from "../actions";
 import { ServiceCardWithPrice } from "./service-card-with-price";
 
-export function ServicesGridWithPrice() {
-  const queryClient = useQueryClient();
-
-  const { data, isLoading, error } = useQuery({
+export function ServicesGridWithPrice() {  const { data, isLoading, error } = useQuery({
     queryKey: ["userServicePrices"],
     queryFn: async () => {
       const result = await getUserServicePrices();
@@ -17,11 +14,6 @@ export function ServicesGridWithPrice() {
       return result.data;
     },
   });
-
-  const handlePriceUpdated = () => {
-    queryClient.invalidateQueries({ queryKey: ["userServicePrices"] });
-  };
-
   if (isLoading) {
     return (
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -68,7 +60,6 @@ export function ServicesGridWithPrice() {
         <ServiceCardWithPrice
           key={service.id}
           service={service}
-          onPriceUpdated={handlePriceUpdated}
         />
       ))}
     </div>

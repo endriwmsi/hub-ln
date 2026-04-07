@@ -13,3 +13,7 @@ export {
   updateIndicatedUserPrices,
 } from "./update-indicated-user-prices";
 export { updateService } from "./update-service";
+export {
+  type UpdateUserServicePriceInput,
+  updateUserServicePrice,
+} from "./update-user-service-price";

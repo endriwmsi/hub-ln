@@ -233,7 +233,6 @@ export async function validateCoupon(
     }
 
     // Verificar se o usuário pode usar este cupom
-    const isAdmin = currentUser.role === "admin";
     const isCreator = currentUser.id === creator.id;
 
     // Criador não pode usar o próprio cupom
@@ -247,53 +246,37 @@ export async function validateCoupon(
       };
     }
 
-    // Verificar se está na hierarquia do criador (subir na árvore até encontrar o criador)
-    let isInHierarchy = false;
-    if (!isAdmin) {
-      let checkUser = currentUser;
-      const maxDepth = 50; // Prevenir loops infinitos
-      let depth = 0;
-
-      while (checkUser.referredBy && depth < maxDepth) {
-        if (checkUser.referredBy === creator.referralCode) {
-          isInHierarchy = true;
-          break;
-        }
-
-        // Subir um nível na hierarquia
-        const parentUser = await db.query.user.findFirst({
-          where: eq(user.referralCode, checkUser.referredBy),
-        });
-
-        if (!parentUser) break;
-        checkUser = parentUser;
-        depth++;
-      }
-    }
-
-    if (!isAdmin && !isInHierarchy) {
+    // Bloquear cupons do formato antigo (legados)
+    if (foundCoupon.singleUse) {
       return {
         success: true,
         data: {
           valid: false,
-          error: "Este cupom não pode ser usado por você",
+          error:
+            "Cupom em formato antigo. Solicite a criação de um novo cupom.",
         },
       };
     }
 
-    // Verificar se usuário já usou este cupom (se for singleUse)
-    if (foundCoupon.singleUse) {
-      const previousUse = await db.query.couponUsage.findFirst({
-        where: and(
-          eq(couponUsage.couponId, foundCoupon.id),
-          eq(couponUsage.userId, session.userId),
-        ),
-      });
+    // Verificar limite de uso por usuário (se configurado maxUsesPerUser)
+    if (foundCoupon.maxUsesPerUser) {
+      const previousUses = await db
+        .select({ id: couponUsage.id })
+        .from(couponUsage)
+        .where(
+          and(
+            eq(couponUsage.couponId, foundCoupon.id),
+            eq(couponUsage.userId, session.userId),
+          ),
+        );
 
-      if (previousUse) {
+      if (previousUses.length >= foundCoupon.maxUsesPerUser) {
         return {
           success: true,
-          data: { valid: false, error: "Você já usou este cupom" },
+          data: {
+            valid: false,
+            error: "Você atingiu o limite de uso deste cupom",
+          },
         };
       }
     }

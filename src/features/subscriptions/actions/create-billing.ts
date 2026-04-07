@@ -133,16 +133,37 @@ export async function createBilling() {
             }
 
             if (pixQrCode.status === "PAID") {
-              return {
-                success: false,
-                message: "Esta assinatura já foi paga",
-              };
-            }
+              const qrCodeAgeHours =
+                (now.getTime() -
+                  new Date(existingSubscription.pixQrCodeCreatedAt || 0).getTime()) /
+                (1000 * 60 * 60);
 
-            // Se chegou aqui, o QR Code está expirado ou cancelado
-            console.log(
-              `QR Code com status ${pixQrCode.status}, criando novo...`,
-            );
+              // Se foi pago nas últimas 12 horas, consideramos que a assinatura está ativa
+              // ou em processo de ativação pelo webhook.
+              if (qrCodeAgeHours < 12) {
+                return {
+                  success: false,
+                  message:
+                    "Esta assinatura já foi paga recentemente e está sendo ativada.",
+                };
+              }
+              
+              // Se foi pago há mais de 12 horas, trata-se de uma renovação.
+              // Portanto, ignoramos o status 'PAID' do QR Code antigo e
+              // permitimos a criação de um novo QR Code.
+              console.log(
+                `QR Code antigo está como PAID (Idade: ${qrCodeAgeHours.toFixed(1)}h), criando novo para renovação...`,
+              );
+            } else if (
+              pixQrCode.status !== "PENDING" ||
+              expiresAt <= now
+            ) {
+              // Se não for PAID (tratado acima) e também não for PENDING válido:
+              // Está expirado, cancelado ou é um PENDING já vencido
+              console.log(
+                `QR Code com status ${pixQrCode.status} (Expirado/Cancelado), criando novo...`,
+              );
+            }
           }
         }
       } catch (error) {

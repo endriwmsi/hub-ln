@@ -47,7 +47,7 @@ export function CreateCouponDialog() {
       code: "",
       discountType: "fixed" as const,
       discountValue: 0,
-      singleUse: false,
+      maxUsesPerUser: null,
       active: true,
       usageLimit: null,
       validFrom: undefined,
@@ -261,21 +261,28 @@ export function CreateCouponDialog() {
             <div className="space-y-4">
               <FormField
                 control={form.control}
-                name="singleUse"
+                name="maxUsesPerUser"
                 render={({ field }) => (
-                  <FormItem className="flex items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">Uso Único</FormLabel>
-                      <FormDescription>
-                        Cada usuário pode usar este cupom apenas uma vez
-                      </FormDescription>
-                    </div>
+                  <FormItem>
+                    <FormLabel>Limite por Usuário</FormLabel>
                     <FormControl>
-                      <Switch
-                        checked={field.value ?? false}
-                        onCheckedChange={field.onChange}
+                      <Input
+                        type="number"
+                        min="1"
+                        placeholder="Deixe vazio para ilimitado"
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value ? Number(e.target.value) : null,
+                          )
+                        }
                       />
                     </FormControl>
+                    <FormDescription>
+                      Número máximo de vezes que um mesmo usuário pode utilizar este cupom
+                    </FormDescription>
+                    <FormMessage />
                   </FormItem>
                 )}
               />

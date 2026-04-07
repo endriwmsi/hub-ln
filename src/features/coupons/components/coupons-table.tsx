@@ -110,8 +110,16 @@ export function CouponsTable({ coupons }: CouponsTableProps) {
                 <TableCell>
                   {coupon.usageCount}
                   {coupon.singleUse && (
-                    <Badge variant="outline" className="ml-2">
-                      Uso Único
+                    <Badge
+                      variant="secondary"
+                      className="ml-2 whitespace-nowrap"
+                    >
+                      Legado (Uso Único)
+                    </Badge>
+                  )}
+                  {coupon.maxUsesPerUser && (
+                    <Badge variant="outline" className="ml-2 whitespace-nowrap">
+                      Máx. {coupon.maxUsesPerUser} p/ usuário
                     </Badge>
                   )}
                 </TableCell>

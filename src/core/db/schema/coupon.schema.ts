@@ -36,7 +36,8 @@ export const coupon = pgTable("coupon", {
   // Controle de uso
   usageLimit: integer("usage_limit"), // null = ilimitado
   usageCount: integer("usage_count").default(0).notNull(),
-  singleUse: boolean("single_use").default(false).notNull(), // Uso único por usuário
+  singleUse: boolean("single_use").default(false).notNull(), // Legacy: não mais criado, apenas via maxUsesPerUser
+  maxUsesPerUser: integer("max_uses_per_user"), // Quantas vezes cada usuário pode usar o cupom (null = ilimitado)
 
   // Status
   active: boolean("active").default(true).notNull(),

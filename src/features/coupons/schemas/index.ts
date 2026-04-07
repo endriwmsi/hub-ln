@@ -39,7 +39,12 @@ export const createCouponSchema = z
       .optional()
       .nullable(),
 
-    singleUse: z.boolean().default(false),
+    maxUsesPerUser: z
+      .number()
+      .int("Deve ser um número inteiro")
+      .positive("Deve ser maior que zero")
+      .optional()
+      .nullable(),
 
     active: z.boolean().default(true),
 
