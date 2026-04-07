@@ -126,7 +126,7 @@ export function useRegisterForm(referralCode: string | null) {
         toast.success(
           "Usuário cadastrado com sucesso. Por favor, verifique seu e-mail para continuar.",
         );
-        router.push("/register/success");
+        router.push(`/register/success?email=${encodeURIComponent(values.email)}`);
       }
     } catch (error) {
       console.error("Erro não capturado:", error);
