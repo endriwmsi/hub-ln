@@ -224,7 +224,7 @@ const MARQUEE_ITEMS = (
   </>
 );
 
-const EXTERNAL_LINK = "https://www.gsrocket.com.br/forms-gt-ln/";
+const EXTERNAL_LINK = "https://typebot.co/aplicacao-hub-ln";
 
 // ============ COMPONENTE PRINCIPAL ============
 

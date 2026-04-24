@@ -18,7 +18,6 @@ import { NavMain } from "./nav-main";
 import { NavSecondary } from "./nav-secondary";
 import { NavUser } from "./nav-user";
 import { SidebarSearch } from "./sidebar-search";
-import { TrafficManagerCTA } from "./traffic-manager-cta";
 
 const headerVariants: Variants = {
   hidden: {
