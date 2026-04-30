@@ -127,19 +127,6 @@ export function SettingsSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </motion.div>
-
-              {/* <Link
-                href={item.href}
-                className={cn(
-                  "w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-all",
-                  pathname === item.href
-                    ? "text-sidebar-foreground bg-sidebar-accent shadow-sm border border-sidebar-border"
-                    : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50 border border-transparent",
-                )}
-              >
-                <item.icon className="w-4 h-4" />
-                {item.title}
-              </Link> */}
             </motion.div>
           ))}
         </SidebarMenu>

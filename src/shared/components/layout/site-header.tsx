@@ -1,9 +1,14 @@
 import { motion } from "framer-motion";
-import { NotificationsDropdown } from "@/features/notifications";
+import { Settings } from "lucide-react";
+import Link from "next/link";
+import { authClient } from "@/core";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { SidebarTrigger } from "../ui/sidebar";
-import { ModeToggle } from "./mode-toggle";
+import { SidebarSearch } from "./sidebar-search";
 
 export function SiteHeader() {
+  const { data: session } = authClient.useSession();
+
   return (
     <motion.header
       initial={{ opacity: 0, y: -10 }}
@@ -13,86 +18,28 @@ export function SiteHeader() {
     >
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
         <SidebarTrigger className="-ml-1" />
-        <div className="ml-auto flex items-center gap-2">
-          {/* Notifications Dropdown */}
-          <NotificationsDropdown />
-          <div className="flex items-center gap-2">
-            <ModeToggle />
-          </div>
 
-          {/*  Added user info dropdown */}
-          {/*<DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 px-2">
-                <Avatar className="h-8 w-8">
-                  {session?.user.image && (
-                    <AvatarImage
-                      src={session?.user.image || "/assets/placeholder.svg"}
-                      alt={session?.user.name || ""}
-                    />
-                  )}
-                  <AvatarFallback className="rounded-lg">
-                    {getUserInitials(session?.user.name || "")}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="hidden max-w-40 flex-col items-start md:flex">
-                  {isPending ? (
-                    <>
-                      <Skeleton className="h-4 w-24" />
-                      <Skeleton className="h-3 w-32 mt-1" />
-                    </>
-                  ) : (
-                    <>
-                      <span className="truncate font-medium">
-                        {session?.user.name || ""}
-                      </span>
-                      <span className="text-muted-foreground truncate text-xs">
-                        {session?.user.email}
-                      </span>
-                    </>
-                  )}
-                </div>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Minha conta</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link
-                  href="/configuracoes/perfil"
-                  className="flex w-full cursor-pointer"
-                >
-                  <User className="mr-2 h-4 w-4" />
-                  Perfil
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link
-                  href="/configuracoes"
-                  className="flex w-full cursor-pointer"
-                >
-                  <Settings className="mr-2 h-4 w-4" />
-                  Configurações
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={async () => {
-                  await authClient.signOut({
-                    fetchOptions: {
-                      onSuccess: () => {
-                        redirect("/login");
-                      },
-                    },
-                  });
-                }}
-                className="cursor-pointer"
-              >
-                <IconLogout />
-                Sair
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>*/}
+        <div className="max-w-64 w-full px-2 group-data-[collapsible=icon]:hidden">
+          <SidebarSearch isAdmin={session?.user.role === "admin"} />
+        </div>
+
+        <div className="ml-auto flex items-center gap-2">
+          {/* <NotificationsDropdown /> */}
+          <Link
+            href="/configuracoes"
+            className="inline-flex items-center justify-center rounded-md h-9 w-9 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+          >
+            <Settings className="w-4 h-4" />
+          </Link>
+          <Link href="/configuracoes/perfil" className="rounded-full">
+            <Avatar className="h-8 w-8 cursor-pointer hover:opacity-80 transition-opacity">
+              <AvatarImage
+                src={session?.user?.image ?? ""}
+                alt={session?.user?.name ?? ""}
+              />
+              <AvatarFallback>{session?.user?.name?.[0]}</AvatarFallback>
+            </Avatar>
+          </Link>
         </div>
       </div>
     </motion.header>

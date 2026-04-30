@@ -14,6 +14,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/shared/components/ui/sidebar";
+import { ModeToggle } from "./mode-toggle";
 import { SidebarItemGlow } from "./sidebar-item-glow";
 
 const hoverVariants: Variants = {
@@ -55,6 +56,10 @@ export function NavSecondary({
     <SidebarGroup {...props}>
       <SidebarGroupContent>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <ModeToggle />
+          </SidebarMenuItem>
+
           {NavSecondaryItems.map((item) => (
             <SidebarMenuItem key={item.title}>
               <motion.div
@@ -68,7 +73,7 @@ export function NavSecondary({
                     onMouseEnter={() => setHoveredItem(item.title)}
                     onMouseLeave={() => setHoveredItem(null)}
                     className={cn(
-                      "relative overflow-hidden w-full flex items-center gap-2 px-2 py-1.5 text-sm font-medium rounded-md transition-all",
+                      "relative overflow-hidden w-full flex items-center gap-2 py-1.5 text-sm font-medium rounded-md transition-all",
                       isActive(item.url)
                         ? "text-sidebar-foreground bg-sidebar-accent shadow-sm border border-sidebar-border"
                         : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50 border border-transparent",

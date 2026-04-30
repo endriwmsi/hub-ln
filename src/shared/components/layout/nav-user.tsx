@@ -1,5 +1,5 @@
-import { IconDotsVertical, IconLogout } from "@tabler/icons-react";
-import { Settings, User } from "lucide-react";
+import { IconLogout } from "@tabler/icons-react";
+import { ChevronUp, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { authClient, useSession } from "@/core";
@@ -30,22 +30,22 @@ export function NavUser() {
   const { data: session } = useSession();
 
   return (
-    <SidebarMenu className="bg-primary/10 rounded-lg border border-primary/10 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:border-transparent">
+    <SidebarMenu className="bg-primary/10 rounded-full border border-primary/10 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:border-transparent group-data-[collapsible=icon]:ml-2">
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-full"
             >
-              <Avatar className="h-8 w-8 rounded-lg grayscale">
+              <Avatar className="h-8 w-8">
                 {session?.user.image && (
                   <AvatarImage
                     src={session?.user.image}
                     alt={session?.user.name}
                   />
                 )}
-                <AvatarFallback className="rounded-lg">
+                <AvatarFallback>
                   {session?.user.name.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -57,9 +57,10 @@ export function NavUser() {
                   {session?.user.email}
                 </span>
               </div>
-              <IconDotsVertical className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
+              <ChevronUp className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
+
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}

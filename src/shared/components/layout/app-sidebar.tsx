@@ -11,13 +11,11 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/shared/components/ui/sidebar";
-import { Separator } from "../ui/separator";
 import { Logo } from "./logo";
 import NavAdmin from "./nav-admin";
 import { NavMain } from "./nav-main";
 import { NavSecondary } from "./nav-secondary";
 import { NavUser } from "./nav-user";
-import { SidebarSearch } from "./sidebar-search";
 
 const headerVariants: Variants = {
   hidden: {
@@ -61,7 +59,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           initial="hidden"
           animate="visible"
         >
-          {/* Row 1: Logo + Name + Trigger */}
           <div className="flex h-12 items-center gap-2 px-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
             <Link
               href="/dashboard"
@@ -76,26 +73,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <NotificationsDropdown />
             </div>
           </div>
-
-          {/* Row 2: Search — hidden when collapsed */}
-          <div className="px-2 pb-2 group-data-[collapsible=icon]:hidden">
-            <SidebarSearch isAdmin={session?.user.role === "admin"} />
-          </div>
         </motion.div>
       </SidebarHeader>
-      <Separator />
-      <SidebarContent>
+
+      <SidebarContent className="justify-between">
         <NavMain />
         {session?.user.role === "admin" && <NavAdmin />}
+        <NavSecondary className="" />
       </SidebarContent>
-      <SidebarFooter>
+
+      <SidebarFooter className="">
         <motion.div
           variants={footerVariants}
           initial="hidden"
           animate="visible"
         >
-          {/*<TrafficManagerCTA />*/}
-          <NavSecondary className="-ml-2" />
           <NavUser />
         </motion.div>
       </SidebarFooter>

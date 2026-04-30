@@ -5,12 +5,12 @@ import {
   IconChevronRight,
   IconCreditCard,
   IconImageInPicture,
+  IconLayoutDashboard,
   IconNetwork,
   IconPackage,
   IconPencil,
   IconSearch,
   IconSend,
-  IconSmartHome,
 } from "@tabler/icons-react";
 import { motion, type Variants } from "framer-motion";
 import Link from "next/link";
@@ -46,9 +46,9 @@ type NavItem = {
 
 const NavMainItems: NavItem[] = [
   {
-    title: "Home",
+    title: "Dashboard",
     url: "/dashboard",
-    icon: IconSmartHome,
+    icon: IconLayoutDashboard,
   },
   {
     title: "Serviços",
@@ -154,7 +154,7 @@ export function NavMain() {
           initial="hidden"
           animate="visible"
         >
-          {/*<SidebarGroupLabel>Geral</SidebarGroupLabel>*/}
+          {/* <SidebarGroupLabel>Geral</SidebarGroupLabel> */}
           <SidebarMenu>
             {NavMainItems.map((item, index) => (
               <motion.div

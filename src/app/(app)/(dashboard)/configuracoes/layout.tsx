@@ -16,12 +16,12 @@ export default function SettingsLayout({
   return (
     <div className="flex flex-1 h-full overflow-hidden bg-sidebar">
       <SettingsSidebar />
-      <div className="flex-1 flex flex-col md:py-2 md:pr-2 md:pl-0">
+      <div className="flex-1 flex flex-col">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
-          className="w-full h-full bg-background md:rounded-xl md:border md:border-sidebar-border md:shadow-sm flex flex-col overflow-hidden"
+          className="w-full h-full bg-background md:border md:border-sidebar-border md:shadow-sm flex flex-col overflow-hidden"
         >
           <SiteHeader />
           <div className="flex-1 p-4 pb-24 md:p-8">

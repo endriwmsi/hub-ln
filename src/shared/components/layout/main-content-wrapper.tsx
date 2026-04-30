@@ -34,12 +34,6 @@ export function MainContentWrapper({
       transition={{ duration: 0.8, ease: "easeInOut" }}
     >
       <SiteHeader />
-      {/* <div className="flex flex-col">
-        <AnnouncementBanner
-          type="info"
-          message="Próxima ação dia 11/12 até 15/12 as 20:00h - Prazo de baixas 30 a 45 dias úteis - Promoção 2 nomes por R$80,00!"
-        />
-      </div> */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -47,7 +41,7 @@ export function MainContentWrapper({
         className="flex-1 overflow-auto"
       >
         <div className="@container/main flex flex-1 flex-col gap-2 h-full">
-          <div className="flex flex-col">{children}</div>
+          <div className="flex flex-col xl:px-28 xl:py-12">{children}</div>
         </div>
       </motion.div>
     </motion.div>
