@@ -8,13 +8,6 @@ export default async function UsuariosPage() {
 
   return (
     <div className="container space-y-6 gap-6 py-4 md:gap-8 md:py-6 px-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Usuários</h1>
-        <p className="text-muted-foreground">
-          Gerencie todos os usuários da plataforma
-        </p>
-      </div>
-
       <Suspense
         fallback={
           <div className="flex items-center justify-center py-12">

@@ -2,14 +2,16 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
-import type { UserFilters } from "../schemas";
+import type { UserFilters, ViewMode } from "../schemas";
+
+const GRID_PAGE_SIZE = 18;
+const LIST_PAGE_SIZE = 10;
 
 export function useUserFilters() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Obter filtros atuais da URL
   const filters: UserFilters = useMemo(
     () => ({
       search: searchParams.get("search") || undefined,
@@ -19,17 +21,30 @@ export function useUserFilters() {
         "createdAt",
       sortOrder: (searchParams.get("sortOrder") as "asc" | "desc") || "desc",
       page: Number(searchParams.get("page")) || 1,
-      pageSize: Number(searchParams.get("pageSize")) || 10,
+      pageSize: Number(searchParams.get("pageSize")) || 0,
+      viewMode: (searchParams.get("viewMode") as ViewMode) || "list",
     }),
     [searchParams],
   );
 
-  // Atualizar filtros na URL
+  const viewMode = filters.viewMode || "list";
+  const effectivePageSize =
+    filters.pageSize || (viewMode === "grid" ? GRID_PAGE_SIZE : LIST_PAGE_SIZE);
+
   const updateFilters = useCallback(
     (newFilters: Partial<UserFilters>) => {
       const params = new URLSearchParams(searchParams.toString());
 
-      // Atualizar ou remover cada parâmetro
+      if (
+        newFilters.viewMode !== undefined &&
+        newFilters.pageSize === undefined
+      ) {
+        const newPageSize =
+          newFilters.viewMode === "grid" ? GRID_PAGE_SIZE : LIST_PAGE_SIZE;
+        params.set("pageSize", String(newPageSize));
+        params.set("page", "1");
+      }
+
       Object.entries(newFilters).forEach(([key, value]) => {
         if (value === undefined || value === "" || value === "all") {
           params.delete(key);
@@ -38,7 +53,6 @@ export function useUserFilters() {
         }
       });
 
-      // Se mudou qualquer filtro exceto página, resetar para página 1
       if (
         newFilters.search !== undefined ||
         newFilters.role !== undefined ||
@@ -56,13 +70,13 @@ export function useUserFilters() {
     [pathname, router, searchParams],
   );
 
-  // Limpar todos os filtros
   const clearFilters = useCallback(() => {
     router.push(pathname, { scroll: false });
   }, [pathname, router]);
 
   return {
-    filters,
+    filters: { ...filters, pageSize: effectivePageSize },
+    viewMode,
     updateFilters,
     clearFilters,
   };

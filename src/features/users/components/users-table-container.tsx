@@ -1,27 +1,29 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { User } from "@/core/db/schema";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
 } from "@/shared/components/ui/alert";
-import { Card, CardContent } from "@/shared/components/ui/card";
+import { Separator } from "@/shared/components/ui/separator";
 import { getUsers } from "../actions/get-users";
 import { useUserFilters } from "../hooks/use-user-filters";
 import { createColumns } from "./columns";
 import { DataTable } from "./data-table";
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableSkeleton } from "./data-table-skeleton";
+import { UserCard } from "./user-card";
 import { UsersTableFilters } from "./users-table-filters";
 
 export function UsersTableContainer() {
-  const { filters, updateFilters } = useUserFilters();
+  const { filters, viewMode, updateFilters } = useUserFilters();
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const handleSelectionChange = useCallback((selectedUsers: User[]) => {
-    console.log("Selected users:", selectedUsers);
+    setSelectedIds(new Set(selectedUsers.map((u) => u.id)));
   }, []);
 
   const columns = useMemo(
@@ -37,10 +39,22 @@ export function UsersTableContainer() {
   });
 
   if (isLoading) {
-    return <DataTableSkeleton />;
+    return <DataTableSkeleton viewMode={viewMode} />;
   }
 
-  const renderTableContent = () => {
+  const handleCardSelect = (userId: string, checked: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (checked) {
+        next.add(userId);
+      } else {
+        next.delete(userId);
+      }
+      return next;
+    });
+  };
+
+  const renderContent = () => {
     if (isError || !data?.success) {
       return (
         <Alert variant="destructive">
@@ -62,6 +76,37 @@ export function UsersTableContainer() {
     }
 
     const { users } = data.data;
+
+    if (viewMode === "grid") {
+      return (
+        <div>
+          {selectedIds.size > 0 && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+              {selectedIds.size} usuário(s) selecionado(s)
+            </div>
+          )}
+          {users.length === 0 ? (
+            <div className="flex items-center justify-center py-12 text-muted-foreground">
+              Nenhum usuário encontrado.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+              {users.map((user) => (
+                <UserCard
+                  key={user.id}
+                  user={user}
+                  isSelected={selectedIds.has(user.id)}
+                  onSelectChange={(checked) =>
+                    handleCardSelect(user.id, checked)
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
     return (
       <DataTable
         columns={columns}
@@ -77,15 +122,14 @@ export function UsersTableContainer() {
   };
 
   return (
-    <Card>
-      <CardContent className="space-y-4">
-        <UsersTableFilters />
-        {renderTableContent()}
-        <DataTablePagination
-          totalPages={pagination.totalPages}
-          total={pagination.total}
-        />
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <UsersTableFilters />
+      <Separator className="mt-8" />
+      <div className="mt-8">{renderContent()}</div>
+      <DataTablePagination
+        totalPages={pagination.totalPages}
+        total={pagination.total}
+      />
+    </div>
   );
 }

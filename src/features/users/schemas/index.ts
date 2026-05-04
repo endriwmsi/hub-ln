@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const userRoleFilterSchema = z.enum(["user", "admin", "all"]);
 export const activeStatusFilterSchema = z.enum(["active", "inactive", "all"]);
+export const viewModeSchema = z.enum(["grid", "list"]);
 
 export const userFiltersSchema = z.object({
   search: z.string().optional(),
@@ -11,8 +12,10 @@ export const userFiltersSchema = z.object({
   sortOrder: z.enum(["asc", "desc"]).optional(),
   page: z.coerce.number().int().positive().default(1),
   pageSize: z.coerce.number().int().positive().max(100).default(10),
+  viewMode: viewModeSchema.optional(),
 });
 
 export type UserFilters = z.infer<typeof userFiltersSchema>;
 export type UserRoleFilter = z.infer<typeof userRoleFilterSchema>;
 export type ActiveStatusFilter = z.infer<typeof activeStatusFilterSchema>;
+export type ViewMode = z.infer<typeof viewModeSchema>;
