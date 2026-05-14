@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls ~/.claude/skills/ 2>/dev/null; ls .claude/skills/ 2>/dev/null)",
+      "PowerShell(if \\(Test-Path \"$env:USERPROFILE\\\\.claude\\\\skills\"\\) { Get-ChildItem \"$env:USERPROFILE\\\\.claude\\\\skills\" } else { Write-Output \"no user skills dir\" }; if \\(Test-Path \".claude\\\\skills\"\\) { Get-ChildItem \".claude\\\\skills\" } else { Write-Output \"no project skills dir\" })"
+    ]
+  }
+}
