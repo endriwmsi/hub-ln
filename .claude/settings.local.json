@@ -2,7 +2,17 @@
   "permissions": {
     "allow": [
       "Bash(ls ~/.claude/skills/ 2>/dev/null; ls .claude/skills/ 2>/dev/null)",
-      "PowerShell(if \\(Test-Path \"$env:USERPROFILE\\\\.claude\\\\skills\"\\) { Get-ChildItem \"$env:USERPROFILE\\\\.claude\\\\skills\" } else { Write-Output \"no user skills dir\" }; if \\(Test-Path \".claude\\\\skills\"\\) { Get-ChildItem \".claude\\\\skills\" } else { Write-Output \"no project skills dir\" })"
+      "PowerShell(if \\(Test-Path \"$env:USERPROFILE\\\\.claude\\\\skills\"\\) { Get-ChildItem \"$env:USERPROFILE\\\\.claude\\\\skills\" } else { Write-Output \"no user skills dir\" }; if \\(Test-Path \".claude\\\\skills\"\\) { Get-ChildItem \".claude\\\\skills\" } else { Write-Output \"no project skills dir\" })",
+      "WebSearch",
+      "WebFetch(domain:abacatepay.readme.io)",
+      "WebFetch(domain:github.com)",
+      "Bash(curl -s 'https://api.github.com/repos/AbacatePay/documentation/contents')",
+      "Bash(curl -s 'https://api.github.com/repos/AbacatePay/documentation/git/trees/cbbdfca11d98f9e535ced17b9e33f17bf36278b6')",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); [print\\(t['path'], t['type']\\) for t in d['tree']]\")",
+      "Bash(curl -s 'https://api.github.com/repos/AbacatePay/documentation/git/trees/main?recursive=1')",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); [print\\(t['path']\\) for t in d['tree'] if 'subscription' in t['path'].lower\\(\\) or 'product' in t['path'].lower\\(\\) or 'webhook' in t['path'].lower\\(\\)]\")",
+      "Bash(curl -s 'https://raw.githubusercontent.com/AbacatePay/documentation/main/pages/products/reference.mdx')",
+      "Bash(curl -s 'https://raw.githubusercontent.com/AbacatePay/documentation/main/pages/subscriptions/reference.mdx')"
     ]
   }
 }
